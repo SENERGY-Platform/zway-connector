@@ -1,0 +1,6 @@
+{
+    "m_title": "SEPL Connector",
+    "m_descr": "Connects to the SEPL-Platform",
+    "l_sepl_url": "SEPL Connector URL",
+    "l_sepl_url_help": "Url to the sepl connector serverside e.g. localhost:8080"
+}

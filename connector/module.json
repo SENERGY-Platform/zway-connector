@@ -1,0 +1,56 @@
+{
+    "singleton" : true,
+    "dependencies": [],
+    "category": "basic_gateway_modules",
+    "author": "Ingo Rößner",
+    "homepage": "",
+    "icon": "icon.png",
+    "moduleName": "SeplConnector",
+    "version": "1.0.0",
+    "maturity": "beta",
+    "defaults" : {
+        "title" : "__m_title__",
+        "description" : "__m_descr__"
+    },
+    "schema": {
+        "type": "object",
+        "properties": {
+            "sepl_url": {
+                "type": "string",
+                "required": true
+            },
+            "topic": {
+                "type": "string",
+                "required": true
+            },
+            "user": {
+                "type": "string",
+                "required": true
+            },
+            "password": {
+                "type": "string",
+                "required": true
+            }
+        }
+    },
+    "options" : {
+        "fields": {
+            "sepl_url": {
+                "label": "__l_sepl_url__",
+                "helper": "__l_sepl_url_help__"
+            },
+            "topic": {
+                "label": "__l_topic__",
+                "helper": "__h_topic__"
+            },
+            "user": {
+                "label": "__l_user__",
+                "helper": "__h_user__"
+            },
+            "password": {
+                "label": "__l_pw__",
+                "helper": "__h_pw__"
+            }
+        }
+    }
+}
