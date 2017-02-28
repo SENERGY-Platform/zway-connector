@@ -10,7 +10,8 @@
     "maturity": "beta",
     "defaults" : {
         "title" : "__m_title__",
-        "description" : "__m_descr__"
+        "description" : "__m_descr__",
+        "sepl_url":"ws://172.17.0.1:8092"
     },
     "schema": {
         "type": "object",
