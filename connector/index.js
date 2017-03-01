@@ -23,7 +23,8 @@ SeplConnector.prototype.stop = function () {
 };
 
 var sendCredentials = function(connection, config){
-    connection.send(JSON.stringify({user: config.user, pw: config.password}));
+    //TODO remove user given topics
+    connection.send(JSON.stringify({user: config.user, pw: config.password, topics: config.topic.split(",")}));
 };
 
 SeplConnector.prototype.initCom = function(config){
@@ -41,22 +42,19 @@ SeplConnector.prototype.initCom = function(config){
         console.log('WebSocket Closed');
     };
 
-// Log errors
     connection.onerror = function (error) {
-        console.log('WebSocket Error ' + error);
+        setTimeout(function () {
+            self.initCom(config);
+        },10000);
+        console.log('WebSocket Error ', error);
     };
 
-// Log messages from the server
     connection.onmessage = function (e) {
-        console.log('Server: ', e.data);
-        console.log(typeof e.data);
         var msg = JSON.parse(e.data);
-
         var command = msg.service_url;
         var id = msg.device_url;
 
-        var metrics = null;
-        console.log(msg.protocol_parts); //TODO
+        var metrics = msg.protocol_parts && msg.protocol_parts.length == 1 && msg.protocol_parts[0];
 
         msg.protocol_parts = self.sendCommandToZway(id, command, metrics);
         connection.send(JSON.stringify(msg));
@@ -66,15 +64,21 @@ SeplConnector.prototype.initCom = function(config){
 
 SeplConnector.prototype.sendCommandToZway = function(id, command, metrics){
     var device = this.controller.devices.get(id);
-    if (metrics != null){
+    if (metrics){
         device.performCommand(command);
     }else{
         device.performCommand(command, metrics);
     }
-    console.log(JSON.stringify(device));
+
     if(command == "update"){
         //TODO
-        return [];
+        var metricsWithUpdateTime = JSON.parse(JSON.stringify(device.get("metrics")));
+        metricsWithUpdateTime.updateTime = device.get("updateTime");
+        console.log(JSON.stringify(metricsWithUpdateTime));
+        return [{
+            name: "metrics",
+            value: JSON.stringify(metricsWithUpdateTime)
+        }];
     }else{
         return null;
     }
