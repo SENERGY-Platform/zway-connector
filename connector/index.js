@@ -46,7 +46,7 @@ SeplConnector.prototype.initCom = function(config){
         setTimeout(function () {
             self.initCom(config);
         },10000);
-        console.log('WebSocket Error ', error);
+        console.log('WebSocket Error');
     };
 
     connection.onmessage = function (e) {
@@ -54,7 +54,7 @@ SeplConnector.prototype.initCom = function(config){
         var command = msg.service_url;
         var id = msg.device_url;
 
-        var metrics = msg.protocol_parts && msg.protocol_parts.length == 1 && msg.protocol_parts[0];
+        var metrics = msg.protocol_parts && msg.protocol_parts.length == 1 && msg.protocol_parts[0] && msg.protocol_parts[0].name == "metrics" && JSON.parse(msg.protocol_parts[0].value);
 
         msg.protocol_parts = self.sendCommandToZway(id, command, metrics);
         connection.send(JSON.stringify(msg));
