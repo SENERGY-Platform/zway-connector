@@ -29,7 +29,10 @@ var sendCredentials = function(connection, config){
 
 SeplConnector.prototype.initCom = function(config){
     var self = this;
-    var connection = new sockets.websocket(config.sepl_url);
+
+    var connectorUrl = self.lookupConnector(config);
+
+    var connection = new sockets.websocket(connectorUrl);
     connection.onopen = function () {
         console.log('WebSocket Open');
         sendCredentials(connection, config);
@@ -61,6 +64,12 @@ SeplConnector.prototype.initCom = function(config){
     };
 };
 
+SeplConnector.prototype.lookupConnector = function(config){
+    var resp = http.request({
+        url: "http://"+config.sepl_url+"/lookup"
+    });
+    return resp.data;
+};
 
 SeplConnector.prototype.sendCommandToZway = function(id, command, metrics){
     var device = this.controller.devices.get(id);
