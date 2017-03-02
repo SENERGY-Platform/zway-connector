@@ -2,5 +2,11 @@
     "m_title": "SEPL Connector",
     "m_descr": "Connects to the SEPL-Platform",
     "l_sepl_url": "SEPL Connector URL",
-    "l_sepl_url_help": "Url to the sepl connector serverside e.g. localhost:8080"
+    "l_sepl_url_help": "Url to the sepl connector serverside e.g. localhost:8080",
+    "l_topic": "Device-IDs",
+    "h_topic": "comma separated device-ids, used to determine the kafka-consumer-topics on platform-side (only temporary. to be replaced by functioning user/owner system)",
+    "l_user": "User-Name",
+    "h_user": "user name (because of the missing user/owner system, this value will currently not be evaluated)",
+    "l_pw": "Password",
+    "h_pw": "password (because of the missing user/owner system, this value will currently not be evaluated)"
 }
