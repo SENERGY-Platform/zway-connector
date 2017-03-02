@@ -73,22 +73,20 @@ SeplConnector.prototype.lookupConnector = function(config){
 
 SeplConnector.prototype.sendCommandToZway = function(id, command, metrics){
     var device = this.controller.devices.get(id);
-    if (metrics){
-        device.performCommand(command);
-    }else{
-        device.performCommand(command, metrics);
+    if(device){
+        if (metrics){
+            device.performCommand(command);
+        }else{
+            device.performCommand(command, metrics);
+        }
+        if(command == "update"){
+            var metricsWithUpdateTime = JSON.parse(JSON.stringify(device.get("metrics")));
+            metricsWithUpdateTime.updateTime = device.get("updateTime");
+            return [{
+                name: "metrics",
+                value: JSON.stringify(metricsWithUpdateTime)
+            }];
+        }
     }
-
-    if(command == "update"){
-        //TODO
-        var metricsWithUpdateTime = JSON.parse(JSON.stringify(device.get("metrics")));
-        metricsWithUpdateTime.updateTime = device.get("updateTime");
-        console.log(JSON.stringify(metricsWithUpdateTime));
-        return [{
-            name: "metrics",
-            value: JSON.stringify(metricsWithUpdateTime)
-        }];
-    }else{
-        return null;
-    }
+    return null;
 };
