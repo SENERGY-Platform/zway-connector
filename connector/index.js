@@ -32,6 +32,8 @@ SeplConnector.prototype.initCom = function(config){
 
     var connectorUrl = self.lookupConnector(config);
 
+    console.log(self.discovery(connectorUrl, config));
+
     var connection = new sockets.websocket(connectorUrl);
     connection.onopen = function () {
         console.log('WebSocket Open');
@@ -67,6 +69,23 @@ SeplConnector.prototype.initCom = function(config){
 SeplConnector.prototype.lookupConnector = function(config){
     var resp = http.request({
         url: "http://"+config.sepl_url+"/lookup"
+    });
+    return resp.data;
+};
+
+SeplConnector.prototype.discovery = function(url, config){
+    var resp = http.request({
+        url: "http://"+config.sepl_url+"/discovery",
+        method: "POST",
+        data: JSON.stringify({
+            "credentials": {
+                "user": config.user,
+                "pw": config.password
+            },
+            "devices": this.controller.devices.map(function (x) {
+                return {"id": x.id,  "zway_type": x.get("deviceType")};
+            })
+        })
     });
     return resp.data;
 };
