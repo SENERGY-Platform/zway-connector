@@ -99,18 +99,6 @@ SeplConnector.prototype.sendCommandToZway = function(id, command, metrics){
             if(metricsWithUpdateTime.icon){
                 delete metricsWithUpdateTime.icon;
             }
-
-            //level has to be a string
-            //but string value should only be set if level exists
-            //toString() throws exception if used on null or undefined
-            try{
-                metricsWithUpdateTime.level = metricsWithUpdateTime.level.toString()
-            }catch (e){}
-            /*
-             if(metricsWithUpdateTime.level !== undefined && metricsWithUpdateTime.level !== null){
-             metricsWithUpdateTime.level += '';   //level has to be a string
-             }
-             */
             return [{
                 name: "metrics",
                 value: JSON.stringify(metricsWithUpdateTime)
