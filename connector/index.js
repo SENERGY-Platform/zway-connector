@@ -24,7 +24,7 @@ SeplConnector.prototype.stop = function () {
 
 var sendCredentials = function(connection, config){
     //TODO remove user given topics
-    connection.send(JSON.stringify({user: config.user, pw: config.password, topics: config.topic.split(",")}));
+    connection.send(JSON.stringify({user: config.user, pw: config.password}));
 };
 
 SeplConnector.prototype.initCom = function(config){

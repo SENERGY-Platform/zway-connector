@@ -20,10 +20,6 @@
                 "type": "string",
                 "required": true
             },
-            "topic": {
-                "type": "string",
-                "required": true
-            },
             "user": {
                 "type": "string",
                 "required": true
@@ -39,10 +35,6 @@
             "sepl_url": {
                 "label": "__l_sepl_url__",
                 "helper": "__l_sepl_url_help__"
-            },
-            "topic": {
-                "label": "__l_topic__",
-                "helper": "__h_topic__"
             },
             "user": {
                 "label": "__l_user__",
