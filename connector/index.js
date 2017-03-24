@@ -83,7 +83,7 @@ SeplConnector.prototype.discovery = function(url, config){
                 "pw": config.password
             },
             "devices": this.controller.devices.map(function (x) {
-                return {"id": x.id,  "zway_type": x.get("deviceType")};
+                return {"id": x.id,  "zway_type": x.get("deviceType"), "title": x.get("metrics").title};
             })
         })
     });
