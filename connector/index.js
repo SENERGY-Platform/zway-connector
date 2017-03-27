@@ -19,6 +19,9 @@ SeplConnector.prototype.init = function (config) {
 /** Destroy method:
  Here you have to unregister Listeners see EventBus **/
 SeplConnector.prototype.stop = function () {
+    if (this.connection) {
+        this.connection.close();
+    }
     SeplConnector.super_.prototype.stop.call(this);
 };
 
@@ -35,6 +38,7 @@ SeplConnector.prototype.initCom = function(config){
     console.log(self.discovery(connectorUrl, config));
 
     var connection = new sockets.websocket(connectorUrl);
+    this.connection = connection;
     connection.onopen = function () {
         console.log('WebSocket Open');
         sendCredentials(connection, config);
