@@ -22,11 +22,11 @@
             },
             "user": {
                 "type": "string",
-                "required": true
+                "required": false
             },
             "password": {
                 "type": "string",
-                "required": true
+                "required": false
             }
         }
     },
