@@ -20,6 +20,7 @@ SeplConnector.prototype.init = function (config) {
  Here you have to unregister Listeners see EventBus **/
 SeplConnector.prototype.stop = function () {
     if (this.connection) {
+        this.stopWS = true;
         this.connection.close();
     }
     SeplConnector.super_.prototype.stop.call(this);
@@ -53,7 +54,9 @@ SeplConnector.prototype.initCom = function(config){
 
     connection.onerror = function (error) {
         setTimeout(function () {
-            self.initCom(config);
+            if (!self.stopWS) {
+                self.initCom(config);
+            }
         },10000);
         console.log('WebSocket Error');
     };
