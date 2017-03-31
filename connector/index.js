@@ -31,46 +31,54 @@ var sendCredentials = function(connection, config){
     connection.send(JSON.stringify({user: config.user, pw: config.password}));
 };
 
+SeplConnector.prototype.reInit = function(config){
+    var self = this;
+    setTimeout(function () {
+        if (!self.stopWS) {
+            self.initCom(config);
+        }
+    },10000);
+};
+
 SeplConnector.prototype.initCom = function(config){
     var self = this;
+    try{
+        var connectorUrl = self.lookupConnector(config);
 
-    var connectorUrl = self.lookupConnector(config);
+        console.log(self.discovery(connectorUrl, config));
+        console.log("connect to :"+connectorUrl);
 
-    console.log(self.discovery(connectorUrl, config));
+        var connection = new sockets.websocket(connectorUrl);
+        this.connection = connection;
+        connection.onopen = function () {
+            console.log('WebSocket Open');
+            sendCredentials(connection, config);
+        };
 
-    var connection = new sockets.websocket(connectorUrl);
-    this.connection = connection;
-    connection.onopen = function () {
-        console.log('WebSocket Open');
-        sendCredentials(connection, config);
-    };
+        connection.onclose = function(){
+            console.log('WebSocket Closed');
+            self.reInit(config);
+        };
 
-    connection.onclose = function(){
-        setTimeout(function () {
-            self.initCom(config);
-        },10000);
-        console.log('WebSocket Closed');
-    };
+        connection.onerror = function (error) {
+            console.log('WebSocket Error', error);
+            self.reInit(config);
+        };
 
-    connection.onerror = function (error) {
-        setTimeout(function () {
-            if (!self.stopWS) {
-                self.initCom(config);
-            }
-        },10000);
-        console.log('WebSocket Error');
-    };
+        connection.onmessage = function (e) {
+            var msg = JSON.parse(e.data);
+            var command = msg.service_url;
+            var id = msg.device_url;
 
-    connection.onmessage = function (e) {
-        var msg = JSON.parse(e.data);
-        var command = msg.service_url;
-        var id = msg.device_url;
+            var metrics = msg.protocol_parts && msg.protocol_parts.length == 1 && msg.protocol_parts[0] && msg.protocol_parts[0].name == "metrics" && JSON.parse(msg.protocol_parts[0].value);
 
-        var metrics = msg.protocol_parts && msg.protocol_parts.length == 1 && msg.protocol_parts[0] && msg.protocol_parts[0].name == "metrics" && JSON.parse(msg.protocol_parts[0].value);
-
-        msg.protocol_parts = self.sendCommandToZway(id, command, metrics);
-        connection.send(JSON.stringify(msg));
-    };
+            msg.protocol_parts = self.sendCommandToZway(id, command, metrics);
+            connection.send(JSON.stringify(msg));
+        };
+    }catch (e){
+        console.log("sepl connector init error:", e);
+        self.reInit(config);
+    }
 };
 
 SeplConnector.prototype.lookupConnector = function(config){
