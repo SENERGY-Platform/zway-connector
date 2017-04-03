@@ -14,16 +14,63 @@ _module = SeplConnector;
  Here you can register listeners see EventBus **/
 SeplConnector.prototype.init = function (config) {
     SeplConnector.super_.prototype.init.call(this, config);
+
+    //onMetricsChange cant be defined as prototype method
+    var self = this;
+    this.onMetricsChange = function (vDev){
+        var metrics = JSON.stringify(self.getMetrics(vDev));
+        console.log("metric change: ", vDev.id, metrics);
+        self.changedMetrics.push({metrics: metrics, device: vDev.id});
+        self.flushChangedMetrics();
+    };
+
+    this.watchMetrics();
     this.initCom(config);
 };
+
 /** Destroy method:
  Here you have to unregister Listeners see EventBus **/
 SeplConnector.prototype.stop = function () {
+    this.unwatchMetrics();
     if (this.connection) {
         this.stopWS = true;
         this.connection.close();
     }
     SeplConnector.super_.prototype.stop.call(this);
+};
+
+SeplConnector.prototype.changedMetrics = [];
+
+
+SeplConnector.prototype.unwatchMetrics = function(){
+    var self = this;
+    this.controller.devices.map(function (vDev) {
+        vDev.off("change:metrics:level", self.onMetricsChange);
+    });
+};
+
+SeplConnector.prototype.watchMetrics = function(){
+    var self = this;
+    this.controller.devices.map(function (vDev) {
+        vDev.on("change:metrics:level", self.onMetricsChange);
+    });
+};
+
+SeplConnector.prototype.flushChangedMetrics = function(){
+    while(this.changedMetrics.length){
+        if(!this.connection){
+            return;
+        }
+        this.sendMetricChange(this.changedMetrics.shift());
+    }
+};
+
+SeplConnector.prototype.sendMetricChange = function(change){
+    try{
+        this.connection.send("change:"+JSON.stringify(change));
+    }catch(e){
+        console.log(e);
+    }
 };
 
 var sendCredentials = function(connection, config){
@@ -33,6 +80,8 @@ var sendCredentials = function(connection, config){
 
 SeplConnector.prototype.reInit = function(config){
     var self = this;
+    self.connection.stop();
+    self.connection = null;
     setTimeout(function () {
         if (!self.stopWS) {
             self.initCom(config);
@@ -53,6 +102,7 @@ SeplConnector.prototype.initCom = function(config){
         connection.onopen = function () {
             console.log('WebSocket Open');
             sendCredentials(connection, config);
+            self.flushChangedMetrics();
         };
 
         connection.onclose = function(){
@@ -73,7 +123,7 @@ SeplConnector.prototype.initCom = function(config){
             var metrics = msg.protocol_parts && msg.protocol_parts.length == 1 && msg.protocol_parts[0] && msg.protocol_parts[0].name == "metrics" && JSON.parse(msg.protocol_parts[0].value);
 
             msg.protocol_parts = self.sendCommandToZway(id, command, metrics);
-            connection.send(JSON.stringify(msg));
+            connection.send("response:"+JSON.stringify(msg));
         };
     }catch (e){
         console.log("sepl connector init error:", e);
@@ -105,18 +155,23 @@ SeplConnector.prototype.discovery = function(url, config){
     return resp.data;
 };
 
+SeplConnector.prototype.getMetrics = function(device){
+    var metrics = JSON.parse(JSON.stringify(device.get("metrics")));
+    metrics.updateTime = device.get("updateTime");
+    if(metrics.icon){
+        delete metrics.icon;
+    }
+    return metrics;
+};
+
 SeplConnector.prototype.sendCommandToZway = function(id, command, metrics){
     var device = this.controller.devices.get(id);
     if(device){
         if(command == "sepl_get"){
-            var metricsWithUpdateTime = JSON.parse(JSON.stringify(device.get("metrics")));
-            metricsWithUpdateTime.updateTime = device.get("updateTime");
-            if(metricsWithUpdateTime.icon){
-                delete metricsWithUpdateTime.icon;
-            }
+            var metrics = this.getMetrics(device);
             return [{
                 name: "metrics",
-                value: JSON.stringify(metricsWithUpdateTime)
+                value: JSON.stringify(metrics)
             }];
         }else{
             if (metrics){
