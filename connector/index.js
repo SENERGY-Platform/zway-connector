@@ -78,19 +78,25 @@ var sendCredentials = function(connection, config){
     connection.send(JSON.stringify({user: config.user, pw: config.password}));
 };
 
-SeplConnector.prototype.reInit = function(config){
-    var self = this;
-    self.connection.stop();
-    self.connection = null;
-    setTimeout(function () {
-        if (!self.stopWS) {
-            self.initCom(config);
-        }
-    },10000);
-};
 
 SeplConnector.prototype.initCom = function(config){
     var self = this;
+
+    if(!self.reInit){
+        self.reInit = function(config){
+            if(self.connection && self.connection.stop){
+                self.connection.stop();
+                self.connection = null;
+            }
+            console.log("set reinit timeout: ", 10000)
+            setTimeout(function () {
+                if (!self.stopWS) {
+                    self.initCom(config);
+                }
+            },10000);
+        };
+    }
+
     try{
         var connectorUrl = self.lookupConnector(config);
 
