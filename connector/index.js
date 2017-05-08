@@ -47,6 +47,7 @@ SeplConnector.prototype.changedMetrics = [];
 SeplConnector.prototype.unwatchMetrics = function(){
     var self = this;
     this.controller.devices.map(function (vDev) {
+        console.log("sepl unwatch: ", JSON.stringify(vDev));
         vDev.off("change:metrics:level", self.onMetricsChange);
     });
 };
@@ -54,6 +55,7 @@ SeplConnector.prototype.unwatchMetrics = function(){
 SeplConnector.prototype.watchMetrics = function(){
     var self = this;
     this.controller.devices.map(function (vDev) {
+        console.log("sepl watch: ", JSON.stringify(vDev));
         vDev.on("change:metrics:level", self.onMetricsChange);
     });
 };
@@ -71,7 +73,7 @@ SeplConnector.prototype.sendMetricChange = function(change){
     try{
         this.connection.send("change:"+JSON.stringify(change));
     }catch(e){
-        console.log(e);
+        console.log("error on change sending: ", e);
     }
 };
 
