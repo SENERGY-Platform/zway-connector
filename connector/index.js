@@ -13,6 +13,7 @@ _module = SeplConnector;
  because this is context dependent in JavaScript
  Here you can register listeners see EventBus **/
 SeplConnector.prototype.init = function (config) {
+    console.log("Start SeplConnector");
     SeplConnector.super_.prototype.init.call(this, config);
 
     //onMetricsChange cant be defined as prototype method
@@ -31,6 +32,7 @@ SeplConnector.prototype.init = function (config) {
 /** Destroy method:
  Here you have to unregister Listeners see EventBus **/
 SeplConnector.prototype.stop = function () {
+    console.log("Stop SeplConnector");
     this.unwatchMetrics();
     if (this.connection) {
         this.stopWS = true;
@@ -75,11 +77,13 @@ SeplConnector.prototype.sendMetricChange = function(change){
 
 var sendCredentials = function(connection, config){
     //TODO remove user given topics
+    console.log("SeplConnector send credentials");
     connection.send(JSON.stringify({user: config.user, pw: config.password}));
 };
 
 
 SeplConnector.prototype.initCom = function(config){
+    console.log("SeplConnector initCom");
     var self = this;
 
     if(!self.reInit){
@@ -88,8 +92,9 @@ SeplConnector.prototype.initCom = function(config){
                 self.connection.stop();
                 self.connection = null;
             }
-            console.log("set reinit timeout: ", 10000)
+            console.log("set reinit timeout: ", 10000);
             setTimeout(function () {
+                console.log("SeplConnector try reinit if not stop:", self.stopWS);
                 if (!self.stopWS) {
                     self.initCom(config);
                 }
