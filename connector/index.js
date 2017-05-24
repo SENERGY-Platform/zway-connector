@@ -27,6 +27,10 @@ SeplConnector.prototype.init = function (config) {
 
     this.watchMetrics();
     this.initCom(config);
+
+    this.controller.on(function (name,eventarray){
+        self.eventHandler();
+    } );
 };
 
 /** Destroy method:
@@ -107,7 +111,11 @@ SeplConnector.prototype.initCom = function(config){
     try{
         var connectorUrl = self.lookupConnector(config);
 
-        console.log(self.discovery(connectorUrl, config));
+        self.registerDevices = function(){
+            return self.discovery(connectorUrl, config)
+        };
+
+        console.log(self.registerDevices());
         console.log("connect to :"+connectorUrl);
 
         var connection = new sockets.websocket(connectorUrl);
@@ -195,4 +203,34 @@ SeplConnector.prototype.sendCommandToZway = function(id, command, metrics){
         }
     }
     return null;
+};
+
+SeplConnector.prototype.eventHandler = function(){
+    var self = this;
+    if(!self.knownDevices){
+        self.knownDevices = [];
+    }
+    if(self.knownDevices.length < self.controller.devices.length){
+        self.controller.devices.map(function (vDev) {
+            var id = vDev.id;
+            if(self.knownDevices.indexOf(id) < 0){
+                self.knownDevices.push(id);
+                self.bufferedDeviceRegister(self.knownDevices.length);
+            }
+        });
+    }
+};
+
+SeplConnector.prototype.bufferedDeviceRegister = function(offset){
+    var timeout = 1000; //1s
+    var self = this;
+    setTimeout(function(){
+        if(self.knownDevices.length == offset){
+            console.log("sepl: register devices: ", self.knownDevices.length);
+            self.unwatchMetrics();
+            self.watchMetrics();
+            self.registerDevices();
+            self.connection.close();
+        }
+    }, timeout)
 };
