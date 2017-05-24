@@ -224,13 +224,17 @@ SeplConnector.prototype.eventHandler = function(){
 SeplConnector.prototype.bufferedDeviceRegister = function(offset){
     var timeout = 1000; //1s
     var self = this;
+    console.log("sepl: call to bufferedDeviceRegister(", offset, ")");
     setTimeout(function(){
+        console.log("sepl: check for registering new devices: ", offset);
         if(self.knownDevices.length == offset){
             console.log("sepl: register devices: ", self.knownDevices.length);
             self.unwatchMetrics();
             self.watchMetrics();
             self.registerDevices();
             self.connection.close();
+        }else{
+            console.log("sepl: registering wait: ", offset, "!=",  self.knownDevices.length)
         }
     }, timeout)
 };
