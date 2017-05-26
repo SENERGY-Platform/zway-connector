@@ -232,7 +232,7 @@ SeplConnector.prototype.bufferedDeviceRegister = function(offset){
             self.unwatchMetrics();
             self.watchMetrics();
             self.registerDevices();
-            self.connection.close();
+            self.connection.send("update");
         }else{
             console.log("sepl: registering wait: ", offset, "!=",  self.knownDevices.length)
         }
