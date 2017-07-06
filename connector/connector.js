@@ -28,7 +28,8 @@ function SeplConnectorClient(url, user, pw, typemapping) {
         url : url,
         credentials: {user: user, pw: pw},
         typemapping: typemapping,
-        devices: []
+        devices: [],
+        requestTimeout: 1000
     };
 
     client.com = SeplConnectorProtocol(client);
@@ -94,7 +95,7 @@ function SeplConnectorClient(url, user, pw, typemapping) {
             if(retrys && retrys > 0){
                 client.sendResponse(resp, retrys-1);
             }
-        }, 1000)
+        }, client.requestTimeout)
     };
 
     client.sendEvent = function(device_uri, service_uri, value, retrys){
@@ -103,7 +104,7 @@ function SeplConnectorClient(url, user, pw, typemapping) {
             if(retrys && retrys > 0){
                 client.sendEvent(device_uri, service_uri, value, retrys-1);
             }
-        }, 1000);
+        }, client.requestTimeout);
     };
 
     client.addDevices = function(newDevices){
@@ -118,7 +119,7 @@ function SeplConnectorClient(url, user, pw, typemapping) {
                 client._createDevices(client.devices, unusedUrls);
             },function(err){
                 console.log("error on addDevices: ", err)
-            }, 10000);
+            }, client.requestTimeout);
         }
     };
 
@@ -137,7 +138,7 @@ function SeplConnectorClient(url, user, pw, typemapping) {
                 console.log("newly created devices: ", msg);
             },function(err){
                 console.log("error on _createDevices: ", err)
-            }, 10000);
+            }, client.requestTimeout);
         }
     };
 
@@ -164,8 +165,13 @@ function SeplConnectorClient(url, user, pw, typemapping) {
         //TODO
     };
 
-    client.updateDevice = function(){
-            //TODO
+    client.updateDeviceName = function(device_uri, newName, retrys){
+        client.com.send("update_device_name", JSON.stringify({device_uri:device_uri, name: newName}), null, function(err){
+            console.log("error on updateDeviceName: ", err);
+            if(retrys && retrys > 0){
+                client.updateDeviceName(device_uri, newName, retrys-1);
+            }
+        }, client.requestTimeout);
     };
 
 
