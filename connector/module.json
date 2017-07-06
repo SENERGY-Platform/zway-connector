@@ -11,11 +11,16 @@
     "defaults" : {
         "title" : "__m_title__",
         "description" : "__m_descr__",
-        "sepl_url":"172.17.0.1:8092"
+        "sepl_url":"172.17.0.1:8092",
+        "controller_id": "unique_controller_id"
     },
     "schema": {
         "type": "object",
         "properties": {
+            "controller_id":{
+                "type": "string",
+                "required": true
+            },
             "sepl_url": {
                 "type": "string",
                 "required": true
@@ -32,6 +37,10 @@
     },
     "options" : {
         "fields": {
+            "controller_id":{
+                "label": "__l_sepl_cid__",
+                "helper": "__l_sepl_cid_help__"
+            },
             "sepl_url": {
                 "label": "__l_sepl_url__",
                 "helper": "__l_sepl_url_help__"

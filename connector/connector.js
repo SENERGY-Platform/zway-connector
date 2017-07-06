@@ -29,17 +29,22 @@ function SeplConnectorClient(url, user, pw, typemapping) {
         credentials: {user: user, pw: pw},
         typemapping: typemapping,
         devices: [],
-        requestTimeout: 1000
+        requestTimeout: 5000,
+        firstStart: true
     };
 
     client.com = SeplConnectorProtocol(client);
 
-    client.start = function(){
+    client.start = function(onFirstStart){
         client.ws = new sockets.websocket(client.url);
 
         client.ws.onopen = function () {
             console.log('WebSocket Open');
             client._handshake();
+            if(onFirstStart && client.firstStart){
+                client.firstStart = false;
+                onFirstStart();
+            }
         };
 
         client.ws.onclose = function(){
@@ -47,7 +52,8 @@ function SeplConnectorClient(url, user, pw, typemapping) {
             client.ws = null;
             if(!client.stopWS){
                 setTimeout(function () {
-                    client.start();
+                    client.start(onFirstStart);
+                    client.addDevices([]); //listen to same devices as before
                 },10000);
             }
         };
@@ -63,7 +69,6 @@ function SeplConnectorClient(url, user, pw, typemapping) {
             client.com.handle(msg.data);
         };
 
-        client.addDevices({});
     };
 
     client.stop = function(){
