@@ -1,3 +1,6 @@
+executeFile("userModules/SeplConnector/protocol.js");
+executeFile("userModules/SeplConnector/connector.js");
+
 
 function SeplConnector (id, controller) {
     SeplConnector.super_.call(this, id, controller);
@@ -109,11 +112,6 @@ SeplConnector.prototype.registerDevices = function(){
     this.client.addDevices(this.controller.devices.map(function (x) {
         return {"uri": getGloablDeviceUri(x),  "connector_type": x.get("deviceType"), "name": x.get("metrics").title};
     }));
-
-    //update potential name changes
-    this.controller.devices.map(function (x) {
-        self.client.updateDeviceName(getGloablDeviceUri(x), x.get("metrics").title);
-    });
 };
 
 SeplConnector.prototype.handleCommands = function(){

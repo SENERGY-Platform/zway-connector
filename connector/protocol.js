@@ -1,23 +1,35 @@
-
-function SeplConnectorProtocol(client){
+var SeplConnectorProtocol = function(client){
     var protocol = {
         client: client,
         tokenHandler: {},
         tokenlessHandler: {}
     };
 
+    var splitN = function(text, seperator, n){
+        var result = [];
+        var components = text.split(seperator);
+        for(i = 0; i<n-1 && components.length > 1; i++){
+            result.push(components.shift());
+        }
+        result.push(components.join(seperator));
+        return result;
+    };
+
     protocol.handle = function(message){
-        var msgParts = message.split(":", 2);
+        var msgParts = splitN(message, ":", 2);
         var msg = msgParts[1];
-        var prefix = msgParts[0].split(".",2);
+        var prefix = splitN(msgParts[0], ".", 2);
         var handler = prefix[0];
         var token = prefix[1];
+        console.log("handle: ",handler, token, msg);
         if(token){
-            protocol.tokenHandler[handler][token](msg)
+            protocol.tokenHandler[handler][token](msg);
         }
         var callbacks = protocol.tokenlessHandler[handler];
-        for (index = 0; index < callbacks.length; ++index) {
-            callbacks[index](msg, token)
+        if(Array.isArray(callbacks)){
+            for (index = 0; index < callbacks.length; ++index) {
+                callbacks[index](msg, token);
+            }
         }
     };
 
@@ -75,13 +87,17 @@ function SeplConnectorProtocol(client){
             protocol.listenOnce("error", token, onerror)
         }
         if(timeout){
-            protocol.muteToken(token);
-            if(onerror){
-                onerror("timout");
-            }
+            setTimeout(function () {
+                if(protocol.tokenHandler["error"][token]){
+                    protocol.muteToken(token);
+                    if(onerror){
+                        onerror("timout");
+                    }
+                }
+            }, timeout);
         }
         protocol.client.ws.send(endpoint+"."+token+":"+msg)
     };
 
     return protocol;
-}
+};

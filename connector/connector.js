@@ -1,33 +1,8 @@
-if (!Array.prototype.find) {
-    Array.prototype.find = function(predicate) {
-        'use strict';
-        if (this == null) {
-            throw new TypeError('Array.prototype.find called on null or undefined');
-        }
-        if (typeof predicate !== 'function') {
-            throw new TypeError('predicate must be a function');
-        }
-        var list = Object(this);
-        var length = list.length >>> 0;
-        var thisArg = arguments[1];
-        var value;
-
-        for (var i = 0; i < length; i++) {
-            value = list[i];
-            if (predicate.call(thisArg, value, i, list)) {
-                return value;
-            }
-        }
-        return undefined;
-    };
-}
-
-
-function SeplConnectorClient(url, user, pw, typemapping) {
+var SeplConnectorClient = function(url, user, pw) {
+    console.log("SeplConnectorClient(",url, user, pw,")");
     var client = {
         url : url,
         credentials: {user: user, pw: pw},
-        typemapping: typemapping,
         devices: [],
         requestTimeout: 5000,
         firstStart: true
@@ -36,6 +11,7 @@ function SeplConnectorClient(url, user, pw, typemapping) {
     client.com = SeplConnectorProtocol(client);
 
     client.start = function(onFirstStart){
+        console.log("SeplConnectorClient.start()");
         client.ws = new sockets.websocket(client.url);
 
         client.ws.onopen = function () {
@@ -53,15 +29,17 @@ function SeplConnectorClient(url, user, pw, typemapping) {
             if(!client.stopWS){
                 setTimeout(function () {
                     client.start(onFirstStart);
-                    client.addDevices([]); //listen to same devices as before
                 },10000);
             }
         };
 
         client.ws.onerror = function (error) {
-            console.log('WebSocket Error', error);
-            if(client.ws){
-                client.ws.close();
+            console.log('WebSocket Error', JSON.stringify(error));
+            client.ws = null;
+            if(!client.stopWS){
+                setTimeout(function () {
+                    client.start(onFirstStart);
+                },10000);
             }
         };
 
@@ -72,6 +50,7 @@ function SeplConnectorClient(url, user, pw, typemapping) {
     };
 
     client.stop = function(){
+        console.log("SeplConnectorClient.stop()");
         if (client.ws) {
             client.stopWS = true;
             client.ws.close();
@@ -86,6 +65,7 @@ function SeplConnectorClient(url, user, pw, typemapping) {
             console.log("successful handshake: ", msg)
         });
         client.ws.send(JSON.stringify({user: config.user, pw: config.password, token: "credentials"}));
+        client.addDevices([]); //listen to same devices as before potential restart
     };
 
     client.onCommand = function(callback){
@@ -113,27 +93,44 @@ function SeplConnectorClient(url, user, pw, typemapping) {
     };
 
     client.addDevices = function(newDevices){
-        client.devices.concat(newDevices);
+        client.devices = client.devices.concat(newDevices);
+        console.log("addDevices() ", JSON.stringify(client.devices));
         if(client.devices.length > 0){
             var urls = [];
             for (index = 0; index < client.devices.length; ++index) {
                 urls.push(client.devices[index].uri);
             }
             client.com.send("listen_to_devices", JSON.stringify(urls), function(msg){
-                var unusedUrls = JSON.parse(msg).unused;
-                client._createDevices(client.devices, unusedUrls);
+                console.log("debug: listen_to_devices result = ", msg);
+                var response = JSON.parse(msg);
+                client._createDevices(client.devices, response.unused);
+                client._updateNames(client.devices,response.used);
             },function(err){
                 console.log("error on addDevices: ", err)
             }, client.requestTimeout);
         }
     };
 
+    client._updateNames = function(devices, usedDevices){
+        var index = {};
+        for (i = 0; i < devices.length; ++i) {
+            index[devices[i].uri] = devices[i];
+        }
+        for (i = 0; i < usedDevices.length; ++i) {
+            var device = index[usedDevices[i].device.uri];
+            if(device.name != usedDevices[i].device.name){
+                client.updateDeviceName(device.uri, device.name);
+            }
+        }
+    };
+
     client._createDevices = function(devices, unusedUrls){
+        console.log("debug: _createDevices = ", devices, unusedUrls);
         var toCreate = [];
         for (i = 0; i < devices.length; ++i) {
             for (j = 0; j < unusedUrls.length; ++j) {
                 if(devices[i].uri == unusedUrls[j]){
-                    toCreate.push(devices[index]);
+                    toCreate.push(devices[i]);
                     break;
                 }
             }
@@ -181,4 +178,4 @@ function SeplConnectorClient(url, user, pw, typemapping) {
 
 
     return client;
-}
+};
