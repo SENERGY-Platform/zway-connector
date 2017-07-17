@@ -25,4 +25,6 @@ COPY ./config.xml ./config.xml
 
 ENV LD_LIBRARY_PATH=libs
 
-CMD ./z-way-server
+RUN touch z-way-server.log
+
+CMD ./z-way-server & tail -f z-way-server.log

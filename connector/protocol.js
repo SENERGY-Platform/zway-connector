@@ -21,9 +21,10 @@ var SeplConnectorProtocol = function(client){
         var prefix = splitN(msgParts[0], ".", 2);
         var handler = prefix[0];
         var token = prefix[1];
-        console.log("handle: ",handler, token, msg);
-        if(token){
-            protocol.tokenHandler[handler][token](msg);
+        //console.log("debug: handle: ", JSON.stringify([handler, token, msg]));
+        if(token && protocol.tokenHandler[handler] && protocol.tokenHandler[handler][token]){
+            //console.log("debug: found and run handler");
+            protocol.tokenHandler[handler][token].run(msg);
         }
         var callbacks = protocol.tokenlessHandler[handler];
         if(Array.isArray(callbacks)){
@@ -45,6 +46,7 @@ var SeplConnectorProtocol = function(client){
 
     protocol.listenOnce = function(handler, token, callback){
         protocol.listenToken(handler, token, function(msg){
+            //console.log("debug: listenOnce handler run");
             protocol.muteToken(token);
             callback(msg);
         })
@@ -54,7 +56,7 @@ var SeplConnectorProtocol = function(client){
         if(!protocol.tokenHandler[handler]){
             protocol.tokenHandler[handler] = {};
         }
-        protocol.tokenHandler[handler][token] = callback
+        protocol.tokenHandler[handler][token] = {run: callback}
     };
 
     protocol.listen = function(handler, callback){
@@ -65,29 +67,34 @@ var SeplConnectorProtocol = function(client){
     };
 
     protocol.muteToken = function(token){
+        //console.log("debug: mute token ", token, JSON.stringify(protocol.tokenHandler));
         for (var handler in protocol.tokenHandler) {
             if (protocol.tokenHandler.hasOwnProperty(handler) && protocol.tokenHandler[handler][token]) {
+                protocol.tokenHandler[handler][token] = null;
                 delete protocol.tokenHandler[handler][token];
             }
         }
     };
 
     protocol.muteHandler = function(handler, callback){
-        protocol.tokenlessHandler[handler]
         var index = protocol.tokenlessHandler[handler].indexOf(callback);
         protocol.tokenlessHandler[handler].splice(index, 1);
     };
 
     protocol.send = function(endpoint, msg, onresponse, onerror, timeout){
         var token = protocol.createToken();
+        if(!onresponse && timeout && onerror){
+            onresponse = function(){};
+        }
         if(onresponse){
             protocol.listenOnce("response", token, onresponse)
         }
         if(onerror){
             protocol.listenOnce("error", token, onerror)
         }
-        if(timeout){
+        if(timeout && onerror){
             setTimeout(function () {
+                //console.log("debug: timout tokenhandler ", token, JSON.stringify(protocol.tokenHandler));
                 if(protocol.tokenHandler["error"][token]){
                     protocol.muteToken(token);
                     if(onerror){

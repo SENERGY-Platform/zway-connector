@@ -22,7 +22,7 @@ SeplConnector.prototype.init = function (config) {
         self.onMetricsChange = function (vDev){
             var metrics = JSON.stringify(self.getMetrics(vDev));
             console.log("metric change: ", getGloablDeviceUri(vDev), metrics);
-            this.client.sendEvent(getGloablDeviceUri(vDev), "sepl_get", metrics, 10);
+            self.client.sendEvent(getGloablDeviceUri(vDev), "sepl_get", metrics, 10);
         };
         self.handleDevices();
         self.watchMetrics();
