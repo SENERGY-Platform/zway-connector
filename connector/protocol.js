@@ -83,8 +83,11 @@ var SeplConnectorProtocol = function(client){
 
     protocol.send = function(endpoint, msg, onresponse, onerror, timeout){
         var token = protocol.createToken();
-        if(!onresponse && timeout && onerror){
+        if(!onresponse && onerror){
             onresponse = function(){};
+        }
+        if(onresponse && !onerror){
+            onerror = function(){};
         }
         if(onresponse){
             protocol.listenOnce("response", token, onresponse)
