@@ -1,3 +1,4 @@
+
 var SeplConnectorClient = function(url, user, pw) {
     console.log("SeplConnectorClient(",url, user, pw,")");
     var client = {
@@ -93,7 +94,7 @@ var SeplConnectorClient = function(url, user, pw) {
     };
 
     client.addDevices = function(newDevices){
-        client.devices = client.devices.concat(newDevices);
+        client.devices = concatDistinct(client.devices, newDevices, function(device){return device.uri});
         console.log("addDevices() ", JSON.stringify(client.devices));
         if(client.devices.length > 0){
             var urls = [];
@@ -179,3 +180,25 @@ var SeplConnectorClient = function(url, user, pw) {
 
     return client;
 };
+
+function concatDistinct(listA, listB, idFunc) {
+    var known = {};
+    var result = [];
+    for (i = 0; i < listA.length; ++i) {
+        var element = listA[i];
+        var id = idFunc(element);
+        if(!known[id]){
+            result.push(element);
+            known[id] = element;
+        }
+    }
+    for (i = 0; i < listB.length; ++i) {
+        var element = listB[i];
+        var id = idFunc(element);
+        if(!known[id]){
+            result.push(element);
+            known[id] = element;
+        }
+    }
+    return result;
+}
