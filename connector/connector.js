@@ -93,23 +93,31 @@ var SeplConnectorClient = function(url, user, pw) {
         }, client.requestTimeout);
     };
 
-    client.addDevices = function(newDevices){
+    client.addDevices = function(newDevices, batchsize){
         client.devices = concatDistinct(client.devices, newDevices, function(device){return device.uri});
-        console.log("addDevices() ", JSON.stringify(client.devices));
-        if(client.devices.length > 0){
+        if(!batchsize){
+            batchsize = 5;
+        }
+        for(index=0; index<client.devices.length;){
             var urls = [];
-            for (index = 0; index < client.devices.length; ++index) {
+            var max = index + batchsize;
+            for (; index < max && index < client.devices.length; ++index) {
                 urls.push(client.devices[index].uri);
             }
-            client.com.send("listen_to_devices", JSON.stringify(urls), function(msg){
-                console.log("debug: listen_to_devices result = ", msg);
-                var response = JSON.parse(msg);
-                client._createDevices(client.devices, response.unused);
-                client._updateNames(client.devices,response.used);
-            },function(err){
-                console.log("error on addDevices: ", err)
-            }, client.requestTimeout);
+            client._addDevices(urls);
         }
+    };
+
+    client._addDevices = function(devices){
+        console.log("addDevices() ", JSON.stringify(devices));
+        client.com.send("listen_to_devices", JSON.stringify(devices), function(msg){
+            console.log("debug: listen_to_devices result = ", msg);
+            var response = JSON.parse(msg);
+            client._createDevices(client.devices, response.unused);
+            client._updateNames(client.devices,response.used);
+        },function(err){
+            console.log("error on addDevices: ", err)
+        }, client.requestTimeout);
     };
 
     client._updateNames = function(devices, usedDevices){
