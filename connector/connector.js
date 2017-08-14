@@ -11,12 +11,31 @@ var SeplConnectorClient = function(url, user, pw) {
 
     client.com = SeplConnectorProtocol(client);
 
+    client.currentStartTimeout = null;
+    client.setStartTimeout = function(onFirstStart){
+        client.stopStartTimeout();
+        client.currentStartTimeout = setTimeout(function() {
+            client.currentStartTimeout = null;
+            client.ws = null;
+            client.start(onFirstStart);
+        }, 10000);
+    };
+
+    client.stopStartTimeout = function(){
+        if(client.currentStartTimeout !== null){
+            clearTimeout(client.currentStartTimeout);
+        }
+    };
+
     client.start = function(onFirstStart){
         console.log("SeplConnectorClient.start()");
+
+        client.setStartTimeout(onFirstStart);
         client.ws = new sockets.websocket(client.url);
 
         client.ws.onopen = function () {
             console.log('WebSocket Open');
+            client.stopStartTimeout();
             client._handshake();
             if(onFirstStart && client.firstStart){
                 client.firstStart = false;
@@ -26,6 +45,7 @@ var SeplConnectorClient = function(url, user, pw) {
 
         client.ws.onclose = function(){
             console.log('WebSocket Closed');
+            client.stopStartTimeout();
             client.ws = null;
             if(!client.stopWS){
                 setTimeout(function () {
@@ -36,6 +56,8 @@ var SeplConnectorClient = function(url, user, pw) {
 
         client.ws.onerror = function (error) {
             console.log('WebSocket Error', JSON.stringify(error));
+            client.stopStartTimeout();
+            client.ws.close();
             client.ws = null;
             if(!client.stopWS){
                 setTimeout(function () {
@@ -77,18 +99,22 @@ var SeplConnectorClient = function(url, user, pw) {
 
     client.sendResponse = function(resp, retrys){
         client.com.send("response", JSON.stringify(resp), null, function(err){
-            console.log("error on response: ", err);
-            if(retrys && retrys > 0){
-                client.sendResponse(resp, retrys-1);
+            if (client.ws) {
+                console.log("error on response: ", err);
+                if (retrys && retrys > 0) {
+                    client.sendResponse(resp, retrys - 1);
+                }
             }
         }, client.requestTimeout)
     };
 
     client.sendEvent = function(device_uri, service_uri, value, retrys){
         client.com.send("event", JSON.stringify({device_uri:device_uri, service_uri: service_uri, value: value}), null, function(err){
-            console.log("error on sendEvent: ", err);
-            if(retrys && retrys > 0){
-                client.sendEvent(device_uri, service_uri, value, retrys-1);
+            if (client.ws) {
+                console.log("error on sendEvent: ", err);
+                if(retrys && retrys > 0){
+                    client.sendEvent(device_uri, service_uri, value, retrys-1);
+                }
             }
         }, client.requestTimeout);
     };
@@ -116,7 +142,9 @@ var SeplConnectorClient = function(url, user, pw) {
             client._createDevices(client.devices, response.unused);
             client._updateNames(client.devices,response.used);
         },function(err){
-            console.log("error on addDevices: ", err)
+            if (client.ws) {
+                console.log("error on addDevices: ", err)
+            }
         }, client.requestTimeout);
     };
 
@@ -148,7 +176,9 @@ var SeplConnectorClient = function(url, user, pw) {
             client.com.send("add_devices", JSON.stringify(toCreate), function(msg){
                 console.log("newly created devices: ", msg);
             },function(err){
-                console.log("error on _createDevices: ", err)
+                if (client.ws) {
+                    console.log("error on _createDevices: ", err);
+                }
             }, client.requestTimeout);
         }
     };
@@ -178,9 +208,11 @@ var SeplConnectorClient = function(url, user, pw) {
 
     client.updateDeviceName = function(device_uri, newName, retrys){
         client.com.send("update_device_name", JSON.stringify({device_uri:device_uri, name: newName}), null, function(err){
-            console.log("error on updateDeviceName: ", err);
-            if(retrys && retrys > 0){
-                client.updateDeviceName(device_uri, newName, retrys-1);
+            if (client.ws) {
+                console.log("error on updateDeviceName: ", err);
+                if (retrys && retrys > 0) {
+                    client.updateDeviceName(device_uri, newName, retrys - 1);
+                }
             }
         }, client.requestTimeout);
     };
