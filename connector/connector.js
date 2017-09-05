@@ -6,7 +6,7 @@ var SeplConnectorClient = function(url, user, pw) {
         url : url,
         credentials: {user: user, pw: pw},
         devices: [],
-        requestTimeout: 5000,
+        requestTimeout: null,
         firstStart: true
     };
 
@@ -173,7 +173,7 @@ var SeplConnectorClient = function(url, user, pw) {
                 tags: []
             };
             var index = {};
-            for (var i = 0; i < global.length; ++i) {
+            for (var i = 0; global && i < global.length; ++i) {
                 var parts = global[i].split(":");
                 var key = parts.shift();
                 var value = "";
@@ -182,7 +182,7 @@ var SeplConnectorClient = function(url, user, pw) {
                 }
                 index[key] = value;
             }
-            for (var i = 0; i < local.length; ++i) {
+            for (var i = 0; local && i < local.length; ++i) {
                 var parts = local[i].split(":");
                 var key = parts.shift();
                 var value = "";
