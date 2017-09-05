@@ -15,7 +15,12 @@ SeplConnector.prototype.init = function (config) {
     SeplConnector.UriPrefix = config.controller_id;
 
     var self = this;
+
     SeplConnector.super_.prototype.init.call(this, config);
+
+    //TODO: configuratable zway name (zway == Z-Wave Network Access.config.name (internalName))
+    this.zwayModuleName = "zway";
+
     this.client = SeplConnectorClient(config.sepl_url, config.user, config.password);
 
     this.client.start(function(){
@@ -33,6 +38,40 @@ SeplConnector.prototype.init = function (config) {
         self.handleCommands();
     });
 
+};
+
+SeplConnector.prototype.getTags = function(){
+    var self = this;
+    var result = {};
+
+    var pysicalDevices = {};
+    if(global.ZWave && global.ZWave[this.zwayModuleName]){
+        pysicalDevices = JSON.parse(global.ZWave[this.zwayModuleName].Data("").body).devices;
+    }
+
+    var parsePId = function(vId){
+        //ZWayVDev_zway_12-0-113-7-8-A
+        //ZWayVDev_[Node ID]:[Instance ID]:[Command Class ID]:[Scale ID]
+        var parts = vId.split("_");
+        var pId = parts[parts.length-1].split("-")[0];
+        return pId
+    };
+
+    self.controller.devices.map(function (vDev) {
+        var pId = parsePId(vDev.id);
+        var pDev = pysicalDevices[pId];
+        var groupName = "";
+        if(pDev){
+            groupName = pDev.data.givenName.value;
+        }
+        if(groupName != ""){
+            result[vDev.id] = [DEVICE_GROUP_TAG_KEY+":"+groupName];
+        }else{
+            result[vDev.id] = [];
+            //result[vDev.id] = ["test_tag:test"];
+        }
+    });
+    return result
 };
 
 
@@ -112,9 +151,12 @@ SeplConnector.prototype.bufferedDeviceRegister = function(offset){
 
 SeplConnector.prototype.registerDevices = function(){
     var self = this;
+
+    var tags = self.getTags();
+
     //listen to device commands
     this.client.addDevices(this.controller.devices.map(function (x) {
-        return {"uri": getGloablDeviceUri(x),  "connector_type": x.get("deviceType"), "name": x.get("metrics").title};
+        return {"uri": getGloablDeviceUri(x),  "connector_type": x.get("deviceType"), "name": x.get("metrics").title, "tags":tags[x.id]};
     }));
 };
 

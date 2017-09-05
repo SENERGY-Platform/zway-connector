@@ -1,3 +1,4 @@
+var DEVICE_GROUP_TAG_KEY = "zway_device_group";
 
 var SeplConnectorClient = function(url, user, pw) {
     console.log("SeplConnectorClient(",url, user, pw,")");
@@ -141,6 +142,7 @@ var SeplConnectorClient = function(url, user, pw) {
             var response = JSON.parse(msg);
             client._createDevices(client.devices, response.unused);
             client._updateNames(client.devices,response.used);
+            client._updateTags(client.devices,response.used);
         },function(err){
             if (client.ws) {
                 console.log("error on addDevices: ", err)
@@ -154,9 +156,66 @@ var SeplConnectorClient = function(url, user, pw) {
             index[devices[i].uri] = devices[i];
         }
         for (i = 0; i < usedDevices.length; ++i) {
-            var device = index[usedDevices[i].device.uri];
-            if(device.name != usedDevices[i].device.name){
+            var device = index[usedDevices[i].uri];
+            if(!(device && usedDevices[i])){
+                console.log("WARNING: missing device in updateName (index=", i, "usedDevice=",usedDevices[i], "device=",device, ")")
+            }else if(device.name != usedDevices[i].name){
                 client.updateDeviceName(device.uri, device.name);
+            }
+        }
+    };
+
+    client._updateTags = function(devices, usedDevices){
+
+        var mergeTags = function (local, global) {
+            var result = {
+                update: false,
+                tags: []
+            };
+            var index = {};
+            for (var i = 0; i < global.length; ++i) {
+                var parts = global[i].split(":");
+                var key = parts.shift();
+                var value = "";
+                if(parts.length > 0){
+                    value = parts.join(":");
+                }
+                index[key] = value;
+            }
+            for (var i = 0; i < local.length; ++i) {
+                var parts = local[i].split(":");
+                var key = parts.shift();
+                var value = "";
+                if(parts.length > 0){
+                    value = parts.join(":");
+                }
+                if(index[key] && index[key] != value){
+                    result.update = true;
+                }
+                index[key] = value;
+            }
+            for (var key in index) {
+                if (index.hasOwnProperty(key)){
+                    var value = index[key];
+                    result.tags.push(key+":"+value);
+                }
+            }
+            return result;
+        };
+
+        var index = {};
+        for (i = 0; i < devices.length; ++i) {
+            index[devices[i].uri] = devices[i];
+        }
+        for (i = 0; i < usedDevices.length; ++i) {
+            if(!(usedDevices[i] && usedDevices[i].uri && index[usedDevices[i].uri])){
+                console.log("WARNING: missing device in updateName (index=", i, "usedDevice=",usedDevices[i], "device=",device, ")")
+            }else{
+                var device = index[usedDevices[i].uri];
+                var merge = mergeTags(device.tags, usedDevices[i].tags);
+                if(merge.update){
+                    client.updateDeviceTags(device.uri, merge.tags);
+                }
             }
         }
     };
@@ -212,6 +271,17 @@ var SeplConnectorClient = function(url, user, pw) {
                 console.log("error on updateDeviceName: ", err);
                 if (retrys && retrys > 0) {
                     client.updateDeviceName(device_uri, newName, retrys - 1);
+                }
+            }
+        }, client.requestTimeout);
+    };
+
+    client.updateDeviceTags = function(device_uri, tags, retrys){
+        client.com.send("update_device_tags", JSON.stringify({device_uri:device_uri, tags: tags}), null, function(err){
+            if (client.ws) {
+                console.log("error on updateDeviceTags: ", err);
+                if (retrys && retrys > 0) {
+                    client.updateDeviceTags(device_uri, tags, retrys - 1);
                 }
             }
         }, client.requestTimeout);
