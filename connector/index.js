@@ -12,11 +12,10 @@ _module = SeplConnector;
 
 SeplConnector.prototype.init = function (config) {
     console.log("Start SeplConnector");
-    SeplConnector.UriPrefix = config.controller_id;
+    SeplConnector.super_.prototype.init.call(this, config);
 
     var self = this;
-
-    SeplConnector.super_.prototype.init.call(this, config);
+    self.UriPrefix = config.controller_id;
 
     //TODO: configuratable zway name (zway == Z-Wave Network Access.config.name (internalName))
     this.zwayModuleName = "zway";
@@ -26,12 +25,12 @@ SeplConnector.prototype.init = function (config) {
     this.client.start(function(){
         self.onMetricsChange = function (vDev){
             var metrics = JSON.stringify(self.getMetrics(vDev));
-            console.log("metric change: ", getGloablDeviceUri(vDev), metrics);
+            console.log("metric change: ", self.getGloablDeviceUri(vDev), metrics);
             var msg = [{
                 name: "metrics",
                 value: metrics
             }];
-            self.client.sendEvent(getGloablDeviceUri(vDev), "sepl_get", msg, 10);
+            self.client.sendEvent(self.getGloablDeviceUri(vDev), "sepl_get", msg, 10);
         };
         self.handleDevices();
         self.watchMetrics();
@@ -156,7 +155,7 @@ SeplConnector.prototype.registerDevices = function(){
 
     //listen to device commands
     this.client.addDevices(this.controller.devices.map(function (x) {
-        return {"uri": getGloablDeviceUri(x),  "connector_type": x.get("deviceType"), "name": x.get("metrics").title, "tags":tags[x.id]};
+        return {"uri": self.getGloablDeviceUri(x),  "connector_type": x.get("deviceType"), "name": x.get("metrics").title, "tags":tags[x.id]};
     }));
 };
 
@@ -174,7 +173,8 @@ SeplConnector.prototype.handleCommands = function(){
 };
 
 SeplConnector.prototype.sendCommandToZway = function(id, command, metrics){
-    var device = this.controller.devices.get(getLocalDeviceUri(id));
+    var self = this;
+    var device = this.controller.devices.get(self.getLocalDeviceUri(id));
     if(device){
         if(command == "sepl_get"){
             var metrics = this.getMetrics(device);
@@ -194,16 +194,16 @@ SeplConnector.prototype.sendCommandToZway = function(id, command, metrics){
 };
 
 
-function getGloablDeviceUri(device){
-    if(SeplConnector.UriPrefix){
-        return "ZWAY_"+SeplConnector.UriPrefix+"_"+device.id;
+SeplConnector.prototype.getGloablDeviceUri = function(device){
+    if(this.UriPrefix){
+        return "ZWAY_"+this.UriPrefix+"_"+device.id;
     }
     return "ZWAY_"+device.id;
-}
+};
 
-function getLocalDeviceUri(globalUri){
-    if(SeplConnector.UriPrefix){
-        return globalUri.replace("ZWAY_"+SeplConnector.UriPrefix+"_", "");
+SeplConnector.prototype.getLocalDeviceUri = function(globalUri){
+    if(this.UriPrefix){
+        return globalUri.replace("ZWAY_"+this.UriPrefix+"_", "");
     }
     return globalUri.replace("ZWAY_", "");
-}
+};
