@@ -28,6 +28,15 @@ var SeplConnectorClient = function(url, user, pw) {
         }
     };
 
+    client.fatalCount=0;
+    client.errorIsFatal = function(error){
+        client.fatalLimit = 2;
+        if(error.data && error.data === "Could not contact DNS servers"){
+            client.fatalCount++;
+        }
+        return client.fatalCount > client.fatalLimit;
+    };
+
     client.start = function(onFirstStart){
         console.log("SeplConnectorClient.start()");
 
@@ -36,6 +45,7 @@ var SeplConnectorClient = function(url, user, pw) {
 
         client.ws.onopen = function () {
             console.log('WebSocket Open');
+            client.fatalCount = 0;
             client.stopStartTimeout();
             client._handshake();
             if(onFirstStart && client.firstStart){
@@ -60,6 +70,16 @@ var SeplConnectorClient = function(url, user, pw) {
             client.stopStartTimeout();
             client.ws.close();
             client.ws = null;
+            if(client.errorIsFatal(error)){
+                console.log("ERROR: is fatal; try z-way-server restart");
+                //console.log("not implemented");
+                setTimeout(function () {
+                    system("/etc/init.d/z-way-server restart")
+                }, 100);
+                setTimeout(function () {
+                    exit()
+                }, 2000);
+            }
             if(!client.stopWS){
                 setTimeout(function () {
                     client.start(onFirstStart);
