@@ -1,6 +1,7 @@
 var DEVICE_GROUP_TAG_KEY = "zway_device_group";
 
-var SeplConnectorClient = function(url, user, pw) {
+
+var SeplConnectorClient = function(url, user, pw, networkid) {
     console.log("SeplConnectorClient(",url, user, pw,")");
     var client = {
         url : url,

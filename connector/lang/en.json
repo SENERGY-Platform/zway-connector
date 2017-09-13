@@ -6,7 +6,5 @@
     "l_user": "User-Name",
     "h_user": "user name (because of the missing user/owner system, this value will currently not be evaluated)",
     "l_pw": "Password",
-    "h_pw": "password (because of the missing user/owner system, this value will currently not be evaluated)",
-    "l_sepl_cid": "ControllerId",
-    "l_sepl_cid_help": "needed if you use more then one Z-Way-Connector"
+    "h_pw": "password (because of the missing user/owner system, this value will currently not be evaluated)"
 }

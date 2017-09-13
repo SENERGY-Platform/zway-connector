@@ -1,6 +1,25 @@
 executeFile("userModules/SeplConnector/protocol.js");
 executeFile("userModules/SeplConnector/connector.js");
 
+function uuidv4() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+}
+
+function getId(){
+    var result = "";
+    var object_name = "sepl_network_id";
+    var idObject = loadObject(object_name);
+    if(idObject && idObject.id){
+        result = idObject.id;
+    }else{
+        result = uuidv4();
+        saveObject(object_name, {id: result});
+    }
+    return result;
+}
 
 function SeplConnector (id, controller) {
     SeplConnector.super_.call(this, id, controller);
@@ -15,12 +34,12 @@ SeplConnector.prototype.init = function (config) {
     SeplConnector.super_.prototype.init.call(this, config);
 
     var self = this;
-    self.UriPrefix = config.controller_id;
+    self.UriPrefix = getId();
 
     //TODO: configuratable zway name (zway == Z-Wave Network Access.config.name (internalName))
     this.zwayModuleName = "zway";
 
-    this.client = SeplConnectorClient(config.sepl_url, config.user, config.password);
+    this.client = SeplConnectorClient(config.sepl_url, config.user, config.password, self.UriPrefix);
 
     this.client.start(function(){
         self.onMetricsChange = function (vDev){
