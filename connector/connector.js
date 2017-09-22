@@ -19,6 +19,9 @@ var SeplConnectorClient = function(url, user, pw, networkid) {
         client.stopStartTimeout();
         client.currentStartTimeout = setTimeout(function() {
             client.currentStartTimeout = null;
+            if(client.ws && client.ws.close){
+                client.ws.close();
+            }
             client.ws = null;
             client.start(onFirstStart);
         }, 10000);
@@ -46,8 +49,8 @@ var SeplConnectorClient = function(url, user, pw, networkid) {
             return
         }
 
-        client.setStartTimeout(onFirstStart);
         client.ws = new sockets.websocket(client.url);
+        client.setStartTimeout(onFirstStart);
 
         client.ws.onopen = function () {
             console.log('WebSocket Open');
