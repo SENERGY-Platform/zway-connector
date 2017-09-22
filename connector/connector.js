@@ -8,7 +8,8 @@ var SeplConnectorClient = function(url, user, pw, networkid) {
         credentials: {user: user, pw: pw},
         devices: [],
         requestTimeout: null,
-        firstStart: true
+        firstStart: true,
+        ws: null
     };
 
     client.com = SeplConnectorProtocol(client);
@@ -40,6 +41,10 @@ var SeplConnectorClient = function(url, user, pw, networkid) {
 
     client.start = function(onFirstStart){
         console.log("SeplConnectorClient.start()");
+        if(client.ws != null){
+            console.log("ERROR: ws not null --> not starting");
+            return
+        }
 
         client.setStartTimeout(onFirstStart);
         client.ws = new sockets.websocket(client.url);
