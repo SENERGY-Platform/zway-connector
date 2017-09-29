@@ -15,17 +15,21 @@ var SeplConnectorProtocol = function(client){
         return result;
     };
 
-    protocol.handle = function(raw){
-        var msg = JSON.parse(raw);
-        var handler = msg.handler;
-        var token = msg.token;
+    protocol.handle = function(message){
+        var msgParts = splitN(message, ":", 2);
+        var msg = msgParts[1];
+        var prefix = splitN(msgParts[0], ".", 2);
+        var handler = prefix[0];
+        var token = prefix[1];
+        //console.log("debug: handle: ", JSON.stringify([handler, token, msg]));
         if(token && protocol.tokenHandler[handler] && protocol.tokenHandler[handler][token]){
+            //console.log("debug: found and run handler");
             protocol.tokenHandler[handler][token].run(msg);
         }
         var callbacks = protocol.tokenlessHandler[handler];
         if(Array.isArray(callbacks)){
             for (index = 0; index < callbacks.length; ++index) {
-                callbacks[index](msg);
+                callbacks[index](msg, token);
             }
         }
     };
@@ -42,6 +46,7 @@ var SeplConnectorProtocol = function(client){
 
     protocol.listenOnce = function(handler, token, callback){
         protocol.listenToken(handler, token, function(msg){
+            //console.log("debug: listenOnce handler run");
             protocol.muteToken(token);
             callback(msg);
         })
@@ -62,6 +67,7 @@ var SeplConnectorProtocol = function(client){
     };
 
     protocol.muteToken = function(token){
+        //console.log("debug: mute token ", token, JSON.stringify(protocol.tokenHandler));
         for (var handler in protocol.tokenHandler) {
             if (protocol.tokenHandler.hasOwnProperty(handler) && protocol.tokenHandler[handler][token]) {
                 protocol.tokenHandler[handler][token] = null;
@@ -75,7 +81,7 @@ var SeplConnectorProtocol = function(client){
         protocol.tokenlessHandler[handler].splice(index, 1);
     };
 
-    protocol.send = function(endpoint, msg, onresponse, onerror){
+    protocol.send = function(endpoint, msg, onresponse, onerror, timeout){
         var token = protocol.createToken();
         if(!onresponse && onerror){
             onresponse = function(){};
@@ -83,17 +89,24 @@ var SeplConnectorProtocol = function(client){
         if(onresponse && !onerror){
             onerror = function(){};
         }
-        if(onresponse || onerror){
-            protocol.listenOnce("response", token, function(msg){
-                if(msg.status == 200 && onresponse){
-                    onresponse(msg)
-                }
-                if(msg.status != 200 && onerror){
-                    onerror(msg)
-                }
-            });
+        if(onresponse){
+            protocol.listenOnce("response", token, onresponse)
         }
-        protocol.client.ws.send(JSON.stringify({handler: endpoint, token: token, payload: msg}))
+        if(onerror){
+            protocol.listenOnce("error", token, onerror)
+        }
+        if(timeout && onerror){
+            setTimeout(function () {
+                //console.log("debug: timout tokenhandler ", token, JSON.stringify(protocol.tokenHandler));
+                if(protocol.tokenHandler["error"][token]){
+                    protocol.muteToken(token);
+                    if(onerror){
+                        onerror("timout");
+                    }
+                }
+            }, timeout);
+        }
+        protocol.client.ws.send(endpoint+"."+token+":"+msg)
     };
 
     return protocol;

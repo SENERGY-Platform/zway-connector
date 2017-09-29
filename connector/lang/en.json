@@ -6,5 +6,7 @@
     "l_user": "User-Name",
     "h_user": "user name (because of the missing user/owner system, this value will currently not be evaluated)",
     "l_pw": "Password",
-    "h_pw": "password (because of the missing user/owner system, this value will currently not be evaluated)"
+    "h_pw": "password (because of the missing user/owner system, this value will currently not be evaluated)",
+    "l_startupdelay": "Startup-Delay",
+    "h_startupdelay": "delays startup of connector, to give zway-server time to initialize all devices before"
 }

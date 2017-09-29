@@ -21,7 +21,7 @@ EXPOSE 8183
 WORKDIR /opt/z-way-server/
 
 COPY ./connector ./automation/userModules/SeplConnector
-COPY ./config.xml ./config.xml
+COPY ./docker_resources/config.xml ./config.xml
 
 ENV LD_LIBRARY_PATH=libs
 

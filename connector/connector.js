@@ -1,18 +1,68 @@
 var DEVICE_GROUP_TAG_KEY = "zway_device_group";
 
+/*
+    options: {
+        url string,
+        user string,
+        pw string,
+        getHash function([{uri string, iot_type string, name string, tags [string]}])string,
+        getGatewayId function()string,
+        saveGatewayId function(string),
+        getDevices function()[{uri string, iot_type string, name string, tags [string]}],
+        onCommand function({device_url string, service_url string, protocol_parts [{name string, value string}], <<1>>}, respond function(<<2>>))
+        onStartupFinished function()
+    }
 
-var SeplConnectorClient = function(url, user, pw, networkid) {
-    console.log("SeplConnectorClient(",url, user, pw,")");
+    <<1>>: parts the user should ignore; this parts should be removed in the future (TODO)
+    <<2>>: copy of input with changed protocol_parts, representing the result of the command operation (must currently contain <<1>>)
+
+    to call on event: sendEvent(device_uri string, service_uri string, value [{name string, value string}], onsuccess function(), onerror function())
+    to call when new device is added or device is changed: put({uri string, iot_type string, name string, tags [string]}, onsuccess function(), onerror function())
+    to call when device is removed: remove(uri string, onsuccess function(), onerror function())
+    commit to persist current connector state after a put or remove (use your getHash() function): commit(hash string, onsuccess function(), onerror function())
+    get known devices with getKnownDevices(){<<uri>>:{}}
+
+    onsuccess and onerror are optional
+ */
+var SeplConnectorClient = function(options) {
+    console.log("SeplConnectorClient", JSON.stringify(options));
     var client = {
-        url : url,
-        credentials: {user: user, pw: pw},
-        devices: [],
-        requestTimeout: null,
-        firstStart: true,
-        ws: null
+        options: options,
+        ws: null,
+        knownDevices: {}
     };
 
     client.com = SeplConnectorProtocol(client);
+
+    client.getKnownDevices = function(){
+        return client.knownDevices;
+    };
+
+    client._getDevices = function(){
+        var devices = client.options.getDevices();
+        devices.forEach(function(element){
+            client.knownDevices[element.uri] = element;
+        });
+        return devices;
+    };
+
+    client.com.listen("command", function(message){
+        //the plattform side of the connector handles commands and their responses currently only as strings and relays them from and to kafka without any other processing
+        //this means for the client, that commands have to be parsed and responses stringified as json
+        //we hope to change this behavior in the future
+        options.onCommand(JSON.parse(message.payload), function(result){
+            client.com.send("response", JSON.stringify(result), null, function(msg){
+                console.log("ERROR: command response error; ", JSON.stringify(result), " --> ", JSON.stringify(msg));
+            });
+        });
+    });
+
+    client.sendEvent = function(device_uri, service_uri, value){
+        var event = {device_uri:device_uri, service_uri: service_uri, value: value};
+        client.com.send("event", event, null, function(msg){
+            console.log("ERROR: event error; ", JSON.stringify(event), " --> ", JSON.stringify(msg));
+        });
+    };
 
     client.currentStartTimeout = null;
     client.setStartTimeout = function(onFirstStart){
@@ -36,31 +86,30 @@ var SeplConnectorClient = function(url, user, pw, networkid) {
     client.fatalCount=0;
     client.errorIsFatal = function(error){
         client.fatalLimit = 2;
+        //zway-server specific error (TODO: move to index)
         if(error.data && error.data === "Could not contact DNS servers"){
             client.fatalCount++;
         }
         return client.fatalCount > client.fatalLimit;
     };
 
-    client.start = function(onFirstStart){
-        console.log("SeplConnectorClient.start()");
+    client.start = function(){
+        console.log("SeplConnectorClient.start()", JSON.stringify(client.options));
+
         if(client.ws != null){
             console.log("ERROR: ws not null --> not starting");
             return
         }
 
-        client.ws = new sockets.websocket(client.url);
-        client.setStartTimeout(onFirstStart);
+        //zway-server specific websocket (TODO: move to index)
+        client.ws = new sockets.websocket(client.options.url);
+        client.setStartTimeout();
 
         client.ws.onopen = function () {
             console.log('WebSocket Open');
             client.fatalCount = 0;
             client.stopStartTimeout();
             client._handshake();
-            if(onFirstStart && client.firstStart){
-                client.firstStart = false;
-                onFirstStart();
-            }
         };
 
         client.ws.onclose = function(){
@@ -69,7 +118,7 @@ var SeplConnectorClient = function(url, user, pw, networkid) {
             client.ws = null;
             if(!client.stopWS){
                 setTimeout(function () {
-                    client.start(onFirstStart);
+                    client.start();
                 },10000);
             }
         };
@@ -81,7 +130,6 @@ var SeplConnectorClient = function(url, user, pw, networkid) {
             client.ws = null;
             if(client.errorIsFatal(error)){
                 console.log("ERROR: is fatal; try z-way-server restart");
-                //console.log("not implemented");
                 setTimeout(function () {
                     system("/etc/init.d/z-way-server restart")
                 }, 100);
@@ -91,7 +139,7 @@ var SeplConnectorClient = function(url, user, pw, networkid) {
             }
             if(!client.stopWS){
                 setTimeout(function () {
-                    client.start(onFirstStart);
+                    client.start();
                 },10000);
             }
         };
@@ -111,233 +159,79 @@ var SeplConnectorClient = function(url, user, pw, networkid) {
     };
 
     client._handshake = function(){
-        client.com.listenOnce("error", "credentials", function (msg) {
-            console.log("error on handshake: ", msg)
-        });
+        var gatewayId = client.options.getGatewayId();
         client.com.listenOnce("response", "credentials", function (msg) {
-            console.log("successful handshake: ", msg)
-        });
-        client.ws.send(JSON.stringify({user: config.user, pw: config.password, token: "credentials"}));
-        client.addDevices([]); //listen to same devices as before potential restart
-    };
-
-    client.onCommand = function(callback){
-        client.com.listen("command", function(message, token){
-            callback(JSON.parse(message));
-        })
-    };
-
-    client.sendResponse = function(resp, retrys){
-        client.com.send("response", JSON.stringify(resp), null, function(err){
-            if (client.ws) {
-                console.log("error on response: ", err);
-                if (retrys && retrys > 0) {
-                    client.sendResponse(resp, retrys - 1);
+            if(msg.status == 200){
+                if(!msg.payload || !msg.payload.gid){
+                    console.log("ERROR: invalid handshake response; ", JSON.stringify(msg));
+                    client.ws.close();
+                    return
                 }
-            }
-        }, client.requestTimeout)
-    };
-
-    client.sendEvent = function(device_uri, service_uri, value, retrys){
-        client.com.send("event", JSON.stringify({device_uri:device_uri, service_uri: service_uri, value: value}), null, function(err){
-            if (client.ws) {
-                console.log("error on sendEvent: ", err);
-                if(retrys && retrys > 0){
-                    client.sendEvent(device_uri, service_uri, value, retrys-1);
+                if(msg.payload.gid != gatewayId || msg.payload.hash != client.options.getHash(client._getDevices())){
+                    client.options.saveGatewayId(msg.payload.gid);
+                    client.resetGateway();
+                }else{
+                    client.options.onStartupFinished();
                 }
-            }
-        }, client.requestTimeout);
-    };
-
-    client.addDevices = function(newDevices, batchsize){
-        client.devices = concatDistinct(client.devices, newDevices, function(device){return device.uri});
-        if(!batchsize){
-            batchsize = 5;
-        }
-        for(index=0; index<client.devices.length;){
-            var urls = [];
-            var max = index + batchsize;
-            for (; index < max && index < client.devices.length; ++index) {
-                urls.push(client.devices[index].uri);
-            }
-            client._addDevices(urls);
-        }
-    };
-
-    client._addDevices = function(devices){
-        console.log("addDevices() ", JSON.stringify(devices));
-        client.com.send("listen_to_devices", JSON.stringify(devices), function(msg){
-            console.log("debug: listen_to_devices result = ", msg);
-            var response = JSON.parse(msg);
-            client._createDevices(client.devices, response.unused);
-            client._updateNames(client.devices,response.used);
-            client._updateTags(client.devices,response.used);
-        },function(err){
-            if (client.ws) {
-                console.log("error on addDevices: ", err)
-            }
-        }, client.requestTimeout);
-    };
-
-    client._updateNames = function(devices, usedDevices){
-        var index = {};
-        for (i = 0; i < devices.length; ++i) {
-            index[devices[i].uri] = devices[i];
-        }
-        for (i = 0; i < usedDevices.length; ++i) {
-            var device = index[usedDevices[i].uri];
-            if(!(device && usedDevices[i])){
-                console.log("WARNING: missing device in updateName (index=", i, "usedDevice=",usedDevices[i], "device=",device, ")")
-            }else if(device.name != usedDevices[i].name){
-                client.updateDeviceName(device.uri, device.name);
-            }
-        }
-    };
-
-    client._updateTags = function(devices, usedDevices){
-
-        var mergeTags = function (local, global) {
-            var result = {
-                update: false,
-                tags: []
-            };
-            var index = {};
-            for (var i = 0; global && i < global.length; ++i) {
-                var parts = global[i].split(":");
-                var key = parts.shift();
-                var value = "";
-                if(parts.length > 0){
-                    value = parts.join(":");
-                }
-                index[key] = value;
-            }
-            for (var i = 0; local && i < local.length; ++i) {
-                var parts = local[i].split(":");
-                var key = parts.shift();
-                var value = "";
-                if(parts.length > 0){
-                    value = parts.join(":");
-                }
-                if(index[key] && index[key] != value){
-                    result.update = true;
-                }
-                index[key] = value;
-            }
-            for (var key in index) {
-                if (index.hasOwnProperty(key)){
-                    var value = index[key];
-                    result.tags.push(key+":"+value);
-                }
-            }
-            return result;
-        };
-
-        var index = {};
-        for (i = 0; i < devices.length; ++i) {
-            index[devices[i].uri] = devices[i];
-        }
-        for (i = 0; i < usedDevices.length; ++i) {
-            if(!(usedDevices[i] && usedDevices[i].uri && index[usedDevices[i].uri])){
-                console.log("WARNING: missing device in updateName (index=", i, "usedDevice=",usedDevices[i], "device=",device, ")")
             }else{
-                var device = index[usedDevices[i].uri];
-                var merge = mergeTags(device.tags, usedDevices[i].tags);
-                if(merge.update){
-                    client.updateDeviceTags(device.uri, merge.tags);
-                }
+                console.log("handshake error: ", JSON.stringify(msg))
             }
+        });
+        client.ws.send(JSON.stringify({user: client.options.user, pw: client.options.password, token: "credentials", gid: gatewayId}));
+    };
+
+
+    client.resetGateway = function(){
+        client.clear(function () {
+            client._addDevices(client._getDevices(), 0)
+        }, function(msg){
+            console.log("ERROR while clear: ", JSON.stringify(msg));
+            client.ws.close();
+        });
+    };
+
+    client.clear = function(onsuccess, onerr){
+        client.com.send("clear", null, function(msg){
+            client.knownDevices = {};
+            onsuccess(msg);
+        }, onerr);
+    };
+
+    client.put = function(device, onsuccess, onerr){
+        client.com.send("put", device, function(msg){
+            client.knownDevices[device.uri] = device;
+            onsuccess(msg);
+        }, onerr);
+    };
+
+    client.remove = function(device, onsuccess, onerr){
+        client.com.send("remove", device, function(msg){
+            delete client.knownDevices[device.uri];
+            onsuccess(msg);
+        }, onerr);
+    };
+
+    client._addDevices = function(devices, index){
+        if(devices && devices.length > index){
+            client.put(devices[index], function(){
+                client._addDevices(devices, index+1);
+            }, function(msg){
+                console.log("ERROR while adding device: ", JSON.stringify(devices[index]), JSON.stringify(msg));
+                client._addDevices(devices, index+1);
+            });
+        }else{
+            client.commit(client.options.getHash(devices), function(){
+                client.options.onStartupFinished();
+            }, function(msg){
+                console.log("ERROR on commit: ", JSON.stringify(msg));
+            });
         }
     };
 
-    client._createDevices = function(devices, unusedUrls){
-        console.log("debug: _createDevices = ", devices, unusedUrls);
-        var toCreate = [];
-        for (i = 0; i < devices.length; ++i) {
-            for (j = 0; j < unusedUrls.length; ++j) {
-                if(devices[i].uri == unusedUrls[j]){
-                    toCreate.push(devices[i]);
-                    break;
-                }
-            }
-        }
-        if(toCreate.length > 0){
-            client.com.send("add_devices", JSON.stringify(toCreate), function(msg){
-                console.log("newly created devices: ", msg);
-            },function(err){
-                if (client.ws) {
-                    console.log("error on _createDevices: ", err);
-                }
-            }, client.requestTimeout);
-        }
+    client.commit = function(hash, onsuccess, onerr){
+        client.com.send("commit", hash, onsuccess, onerr);
     };
 
-    client.removeDevices = function(devices){
-        console.log("not implemented: removeDevices()");
-        //TODO
-        /*
-        if(devices.length > 0){
-            for(i=0; i<devices.length; i++){
-                client.devices.find(function(value, index) {
-                    if(value.uri == devices[i].uri){
-                        delete client.devices[index];
-                        return
-                    }
-                });
-            }
-            client.com.send("remove_devices", JSON.stringify(devices));
-        }
-        */
-    };
-
-    client.muteDevices = function(devices){
-        console.log("not implemented: removeDevices()");
-        //TODO
-    };
-
-    client.updateDeviceName = function(device_uri, newName, retrys){
-        client.com.send("update_device_name", JSON.stringify({device_uri:device_uri, name: newName}), null, function(err){
-            if (client.ws) {
-                console.log("error on updateDeviceName: ", err);
-                if (retrys && retrys > 0) {
-                    client.updateDeviceName(device_uri, newName, retrys - 1);
-                }
-            }
-        }, client.requestTimeout);
-    };
-
-    client.updateDeviceTags = function(device_uri, tags, retrys){
-        client.com.send("update_device_tags", JSON.stringify({device_uri:device_uri, tags: tags}), null, function(err){
-            if (client.ws) {
-                console.log("error on updateDeviceTags: ", err);
-                if (retrys && retrys > 0) {
-                    client.updateDeviceTags(device_uri, tags, retrys - 1);
-                }
-            }
-        }, client.requestTimeout);
-    };
-
-
+    client.start();
     return client;
 };
-
-function concatDistinct(listA, listB, idFunc) {
-    var known = {};
-    var result = [];
-    for (i = 0; i < listA.length; ++i) {
-        var element = listA[i];
-        var id = idFunc(element);
-        if(!known[id]){
-            result.push(element);
-            known[id] = element;
-        }
-    }
-    for (i = 0; i < listB.length; ++i) {
-        var element = listB[i];
-        var id = idFunc(element);
-        if(!known[id]){
-            result.push(element);
-            known[id] = element;
-        }
-    }
-    return result;
-}
