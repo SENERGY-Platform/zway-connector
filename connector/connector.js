@@ -47,11 +47,8 @@ var SeplConnectorClient = function(options) {
     };
 
     client.com.listen("command", function(message){
-        //the plattform side of the connector handles commands and their responses currently only as strings and relays them from and to kafka without any other processing
-        //this means for the client, that commands have to be parsed and responses stringified as json
-        //we hope to change this behavior in the future
-        options.onCommand(JSON.parse(message.payload), function(result){
-            client.com.send("response", JSON.stringify(result), null, function(msg){
+        options.onCommand(message.payload, function(result){
+            client.com.send("response", result, null, function(msg){
                 console.log("ERROR: command response error; ", JSON.stringify(result), " --> ", JSON.stringify(msg));
             });
         });
