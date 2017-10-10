@@ -34,6 +34,12 @@ function deviceHash(device) {
 }
 
 function arrayHash(arr){
+    if(!arr){
+        return "";
+    }
+    if(!arr.sort){
+        return MD5(JSON.stringify(arr));
+    }
     return MD5(JSON.stringify(arr.sort()));
 }
 
@@ -47,11 +53,12 @@ _module = SeplConnector;
 
 
 SeplConnector.prototype.init = function (config) {
-    console.log("Start SeplConnector");
+    console.log("Start SeplConnector with delay: ", config.startupdelay, "s");
     SeplConnector.super_.prototype.init.call(this, config);
     var self = this;
 
     setTimeout(function(){
+        console.log("Start SeplConnector");
         executeFile("userModules/SeplConnector/protocol.js");
         executeFile("userModules/SeplConnector/connector.js");
 
@@ -108,9 +115,7 @@ SeplConnector.prototype.init = function (config) {
             }
         });
 
-        self.client = SeplConnectorClient(config.sepl_url, config.user, config.password);
-
-    }, config.startupdelay);
+    }, config.startupdelay*1000);
 
 };
 
@@ -166,6 +171,7 @@ SeplConnector.prototype.stop = function () {
 SeplConnector.prototype.handleDevices = function(){
     var self = this;
     this.controller.on(function (name,eventarray){
+        console.log("device event: ", JSON.stringify(name), JSON.stringify(eventarray));
         self.deviceEventHandler();
     });
 };
@@ -195,15 +201,43 @@ SeplConnector.prototype.getMetrics = function(device){
     return metrics;
 };
 
+
 SeplConnector.prototype.deviceEventHandler = function(){
+    this.bufferedDeviceHandler(this.getDevices().length);
+};
+
+SeplConnector.prototype.bufferedDeviceHandler = function(offset){
+    var timeout = 1000; //1s
     var self = this;
-    var devices = self.getDevices();
-    if(self.devicecount != devices.length){
-        self.devicecount = devices.length;
-        self.unwatchMetrics();
-        self.watchMetrics();
-        self.registerDevices(devices, 0);
-    }
+    console.log("sepl: call to bufferedDeviceHandler(", offset, ")");
+    setTimeout(function(){
+        var devices = self.getDevices();
+        var knownMap = self.client.getKnownDevices();
+        var knownList = [];
+        for (var knownUri in knownMap) {
+            if (!knownMap.hasOwnProperty(knownUri)){
+                continue;
+            }
+            knownList.push(knownUri);
+        }
+        if(devices.length == offset && devicesHash(devices) != devicesHash(knownList)){
+            console.log("sepl: bufferedDeviceHandler handle: ", offset, "!=",  devices.length);
+            self.unwatchMetrics();
+            self.watchMetrics();
+            console.log("handle devices: ", JSON.stringify(devices));
+            self.deregisterMissingDevices(devices, function(){
+                self.registerDevices(devices, 0, function () {
+                    self.client.commit(devicesHash(devices), function (msg) {
+                        console.log("successful commit: ", JSON.stringify(msg));
+                    }, function (msg) {
+                        console.log("failed commit: ", JSON.stringify(msg));
+                    })
+                });
+            });
+        }else{
+            console.log("sepl: bufferedDeviceHandler wait: ", offset, "!=",  devices.length);
+        }
+    }, timeout)
 };
 
 SeplConnector.prototype.getDevices = function(){
@@ -216,21 +250,69 @@ SeplConnector.prototype.getDevices = function(){
     });
 };
 
-SeplConnector.prototype.registerDevices = function(devices, index){
+function deviceChanged(oldDevice, newDevice) {
+    return deviceHash(oldDevice) != deviceHash(newDevice)
+}
+
+SeplConnector.prototype.registerDevices = function(devices, index, then){
     var self = this;
     var known = self.client.getKnownDevices();
-    if(devices.length < index){
+    if(index < devices.length){
         var device = devices[index];
-        if(!known[device.uri]){
+        console.log(JSON.stringify(known[device.uri]), JSON.stringify(device));
+        if(!known[device.uri] || deviceChanged(known[device.uri], device)){
             this.client.put(device, function(){
-                self.registerDevices(devices, index+1);
+                self.registerDevices(devices, index+1, then);
             }, function(err){
                 console.log("ERROR on device registering: ", JSON.stringify(err));
-                self.registerDevices(devices, index+1);
+                self.registerDevices(devices, index+1, then);
             });
+        }else{
+            self.registerDevices(devices, index+1, then);
         }
-        self.registerDevices(devices, index+1);
+    }else if(then){
+        then();
     }
+};
+
+SeplConnector.prototype.deregisterDevices = function(devices, index, then){
+    var self = this;
+    var known = self.client.getKnownDevices();
+    if(index < devices.length){
+        var device = devices[index];
+        if(known[device]){
+            this.client.remove(device, function(){
+                self.deregisterDevices(devices, index+1, then);
+            }, function(err){
+                console.log("ERROR on device deregistering: ", JSON.stringify(err));
+                self.deregisterDevices(devices, index+1, then);
+            });
+        }else{
+            self.deregisterDevices(devices, index+1, then);
+        }
+    }else if(then){
+        then();
+    }
+};
+
+SeplConnector.prototype.deregisterMissingDevices = function(devices, then){
+    var self = this;
+    var index = {};
+    for(var i=0; i<devices.length; i++){
+        index[devices[i].uri] = true;
+    }
+    var known = self.client.getKnownDevices();
+    var missingDevices = [];
+    for (var knownUri in known) {
+        // skip loop if the property is from prototype
+        if (!known.hasOwnProperty(knownUri)){
+            continue;
+        }
+        if(!index[knownUri]){
+            missingDevices.push(knownUri);
+        }
+    }
+    this.deregisterDevices(missingDevices, 0, then);
 };
 
 
