@@ -202,7 +202,7 @@ var SeplConnectorClient = function(options) {
     };
 
     client.remove = function(device, onsuccess, onerr){
-        client.com.send("remove", device, function(msg){
+        client.com.send("delete", device, function(msg){
             delete client.knownDevices[device.uri];
             onsuccess(msg);
         }, onerr);
