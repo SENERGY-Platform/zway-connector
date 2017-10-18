@@ -1,0 +1,3 @@
+sudo cp -r connector ../SeplConnector
+sudo service z-way-server restart
+tail -f /var/log/z-way-server.log
