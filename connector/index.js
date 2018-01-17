@@ -88,6 +88,7 @@ SeplConnector.prototype.init = function (config) {
             },
             getDevices:function(){return self.getDevices()},
             onCommand: function(msg, respond){
+                console.log("receive command: ", JSON.stringify(msg));
                 var command = msg.service_url;
                 var id = msg.device_url;
                 var metrics = msg.protocol_parts && msg.protocol_parts.length == 1 && msg.protocol_parts[0] && msg.protocol_parts[0].name == "metrics" && JSON.parse(msg.protocol_parts[0].value);
@@ -99,6 +100,7 @@ SeplConnector.prototype.init = function (config) {
                     return
                 }
                 self.startupFinished = true;
+                self.unwatchMetrics();
                 self.onMetricsChange = function (vDev){
                     var metrics = JSON.stringify(self.getMetrics(vDev));
                     console.log("metric change: ", self.getGloablDeviceUri(vDev), metrics);
@@ -190,7 +192,8 @@ SeplConnector.prototype.watchMetrics = function(){
 SeplConnector.prototype.unwatchMetrics = function(){
     var self = this;
     this.controller.devices.map(function (vDev) {
-        vDev.off("change:metrics:level", self.onMetricsChange);
+        if(self.onMetricsChange)
+            vDev.off("change:metrics:level", self.onMetricsChange);
     });
 };
 
