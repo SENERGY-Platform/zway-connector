@@ -149,6 +149,7 @@ var SeplConnectorClient = function(options) {
 
     client.stop = function(){
         console.log("SeplConnectorClient.stop()");
+        client.stopStartTimeout()
         if (client.ws) {
             client.stopWS = true;
             client.ws.close();
@@ -174,7 +175,7 @@ var SeplConnectorClient = function(options) {
                 console.log("handshake error: ", JSON.stringify(msg))
             }
         });
-        client.ws.send(JSON.stringify({user: client.options.user, pw: client.options.password, token: "credentials", gid: gatewayId}));
+        client.ws.send(JSON.stringify({user: client.options.user, pw: client.options.pw, token: "credentials", gid: gatewayId}));
     };
 
 

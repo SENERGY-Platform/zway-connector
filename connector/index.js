@@ -68,7 +68,6 @@ SeplConnector.prototype.init = function (config) {
         self.zwayModuleName = "zway";
 
         self.client = SeplConnectorClient({
-            test: "foo",
             user: config.user,
             pw: config.password,
             url: config.sepl_url,
