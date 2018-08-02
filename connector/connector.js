@@ -61,25 +61,6 @@ var SeplConnectorClient = function(options) {
         });
     };
 
-    client.currentStartTimeout = null;
-    client.setStartTimeout = function(onFirstStart){
-        client.stopStartTimeout();
-        client.currentStartTimeout = setTimeout(function() {
-            client.currentStartTimeout = null;
-            if(client.ws && client.ws.close){
-                client.ws.close();
-            }
-            client.ws = null;
-            client.start(onFirstStart);
-        }, 10000);
-    };
-
-    client.stopStartTimeout = function(){
-        if(client.currentStartTimeout !== null){
-            clearTimeout(client.currentStartTimeout);
-        }
-    };
-
     client.fatalCount=0;
     client.errorIsFatal = function(error){
         client.fatalLimit = 2;
@@ -91,6 +72,9 @@ var SeplConnectorClient = function(options) {
     };
 
     client.start = function(){
+        if(client.stopWS){
+            return
+        }
         console.log("SeplConnectorClient.start()", JSON.stringify(client.options));
 
         if(client.ws != null){
@@ -100,18 +84,15 @@ var SeplConnectorClient = function(options) {
 
         //zway-server specific websocket (TODO: move to index)
         client.ws = new sockets.websocket(client.options.url);
-        client.setStartTimeout();
 
         client.ws.onopen = function () {
             console.log('WebSocket Open');
             client.fatalCount = 0;
-            client.stopStartTimeout();
             client._handshake();
         };
 
         client.ws.onclose = function(){
             console.log('WebSocket Closed');
-            client.stopStartTimeout();
             client.ws = null;
             if(!client.stopWS){
                 setTimeout(function () {
@@ -122,7 +103,6 @@ var SeplConnectorClient = function(options) {
 
         client.ws.onerror = function (error) {
             console.log('WebSocket Error', JSON.stringify(error));
-            client.stopStartTimeout();
             client.ws.close();
             client.ws = null;
             if(client.errorIsFatal(error)){
@@ -149,9 +129,8 @@ var SeplConnectorClient = function(options) {
 
     client.stop = function(){
         console.log("SeplConnectorClient.stop()");
-        client.stopStartTimeout()
+        client.stopWS = true;
         if (client.ws) {
-            client.stopWS = true;
             client.ws.close();
         }
     };
