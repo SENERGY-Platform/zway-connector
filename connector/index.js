@@ -340,11 +340,7 @@ SeplConnector.prototype.sendCommandToZway = function(id, command, metrics){
                 value: JSON.stringify(metrics)
             }];
         }else{
-            if (metrics){
-                device.performCommand(command);
-            }else{
-                device.performCommand(command, metrics);
-            }
+            device.performCommand(command, metrics);
         }
     }
     return null;
