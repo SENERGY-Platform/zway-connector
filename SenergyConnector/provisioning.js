@@ -1,4 +1,4 @@
-executeFile("userModules/SenergyConnector/provisioning_helper.js");
+executeFile("userModules/SenergyConnector/hash.js");
 
 const waiting_time = 3000;
 
