@@ -35,7 +35,7 @@ curl --header "Content-Type: application/json" \
 curl --header "Content-Type: application/json" \
   -b cookie.txt -c cookie.txt \
   --request POST \
-  --data '{"instanceId":"0","moduleId":"SenergyConnector","active":"true","title":"SENERGY Connector","params":{"iot_repo_url":"'"$SENERGY_IOT"'","auth_url":"'"$SENERGY_AUTH"'","mqtt_url":"'"$SENERGY_MQTT"'", "user":"'"$SENERGY_USER"'", "password":"'"$SENERGY_PW"'", "startupdelay":2}}' \
+  --data '{"instanceId":"0","moduleId":"SenergyConnector","active":"true","title":"SENERGY Connector","params":{"iot_repo_url":"'"$SENERGY_IOT"'","auth_url":"'"$SENERGY_AUTH"'","mqtt_url":"'"$SENERGY_MQTT"'", "user":"'"$SENERGY_USER"'", "password":"'"$SENERGY_PW"'"}}' \
   http://zway:8083/ZAutomation/api/v1/instances
 
 tail -f /var/log/z-way-server.log

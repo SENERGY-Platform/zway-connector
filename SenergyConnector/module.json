@@ -13,8 +13,7 @@
         "description" : "__m_descr__",
         "mqtt_url":"tcp://connector:1883",
         "iot_repo_url": "https://api.sepl.infai.org/iot-device-repo",
-        "auth_url": "https://auth.sepl.infai.org",
-        "startupdelay": 20
+        "auth_url": "https://auth.sepl.infai.org"
     },
     "schema": {
         "type": "object",
@@ -38,10 +37,6 @@
             "password": {
                 "type": "string",
                 "required": false
-            },
-            "startupdelay": {
-                "type": "number",
-                "required": true
             }
         }
     },
@@ -66,10 +61,6 @@
             "password": {
                 "label": "__l_pw__",
                 "helper": "__h_pw__"
-            },
-            "startupdelay": {
-                "label": "__l_startupdelay__",
-                "helper": "__h_startupdelay__"
             }
         }
     }
