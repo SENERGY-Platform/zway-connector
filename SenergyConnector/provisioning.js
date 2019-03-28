@@ -33,6 +33,7 @@ function provisionHub(provisioningUrl, token, name, devices, idProvider, then){
     var timeout = 0;
 
     if(!id){
+        console.log("DEBUG: missing hub id; create new hub");
         result = createHub(provisioningUrl, token, name);
         if (result.err){
             then({err: result.err});
@@ -41,12 +42,14 @@ function provisionHub(provisioningUrl, token, name, devices, idProvider, then){
         timeout = waiting_time;
         idProvider.set(result.hub.id);
     }else{
+        console.log("DEBUG: read hub", id);
         result = getHub(provisioningUrl, token, id);
         if(result.err){
             then({err: result.err});
             return
         }
         if(result.unknown){
+            console.log("DEBUG: hub unknown, create new hub");
             result = createHub(provisioningUrl, token, name);
             if (result.err){
                 then({err: result.err});
@@ -57,6 +60,7 @@ function provisionHub(provisioningUrl, token, name, devices, idProvider, then){
         }
     }
     if(result.hub.hash != hash){
+        console.log("DEBUG: hub hash changed, update hub and devices", JSON.stringify(result.hub.hash), JSON.stringify(hash));
         var deviceResult = provisionDevices(provisioningUrl, token, devices);
         if(deviceResult.err){
             then({err: deviceResult.err});
@@ -173,8 +177,10 @@ function provisionDevice(provisioningUrl, token, device) {
         return {err: exists.err}
     }
     if(exists.exists){
+        console.log("DEBUG: update device", JSON.stringify(device));
         return updateDevice(provisioningUrl, token, device)
     }else{
+        console.log("DEBUG: create new device", JSON.stringify(device));
         return createDevice(provisioningUrl, token, device)
     }
 }
