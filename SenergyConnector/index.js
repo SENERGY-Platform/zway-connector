@@ -91,7 +91,7 @@ SenergyConnector.prototype.updateConnection = function (devices) {
     var clientId = hubIdProvider.get();
     var username = this.config.user;
     var password = this.config.password;
-    var keepAlive = 60;
+    var keepAlive = 20;
     var cleanSession = true;
     var ssl = url.protocol == "wss:";
     var that = this;
@@ -123,9 +123,9 @@ SenergyConnector.prototype.updateConnection = function (devices) {
                 devices.forEach(function (device) {
                     if(device.uri){
                         try{
-                            that.mqtt.subscribe("command/"+device.uri+"/+",  {qos: 3});
+                            that.mqtt.subscribe("command/"+device.uri+"/+",  {qos: 2});
                         }catch (e) {
-                            console.log("ERROR: unable to subscribe", JSON.stringify(e));
+                            console.log("ERROR: unable to subscribe", e, e.message, JSON.stringify(e));
                         }
 
                     }else{
@@ -161,7 +161,7 @@ SenergyConnector.prototype.handleCommandMessage = function(message){
         var result = this.sendCommandToZway(localDeviceUri, serviceUri, metrics);
         this.sendResponse(globalDeviceUri, serviceUri, correlationId, result);
     }catch (e) {
-        console.log("ERROR: unable to handle comamnd message", JSON.stringify(e))
+        console.log("ERROR: unable to handle comamnd message", e, e.message, JSON.stringify(e))
     }
 };
 
@@ -187,7 +187,7 @@ SenergyConnector.prototype.sendEvent = function(deviceUri, serviceUri, payload){
             message.retained = false;
             this.client.send(message);
         }catch (e) {
-            console.log("ERROR: unable to send event message", JSON.stringify(e))
+            console.log("ERROR: unable to send event message", e, e.message, JSON.stringify(e))
         }
     }else{
         console.log("WARNING: mqtt not connected; unable to send event message for", deviceUri, serviceUri)
@@ -204,7 +204,7 @@ SenergyConnector.prototype.sendResponse = function(deviceUri, serviceUri, correl
             message.retained = false;
             this.client.send(message);
         }catch (e) {
-            console.log("ERROR: unable to send event message", JSON.stringify(e))
+            console.log("ERROR: unable to send event message", e, e.message, JSON.stringify(e))
         }
     }else{
         console.log("WARNING: mqtt not connected; unable to send event message for", deviceUri, serviceUri)
