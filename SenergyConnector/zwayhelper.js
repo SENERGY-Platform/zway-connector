@@ -62,7 +62,7 @@ function getGloablDeviceUri(device){
 
 function getLocalDeviceUri(globalUri){
     var uriPrefix = getUriPrefix();
-    return globalUri.replace("SENERGY_"+this.UriPrefix+"_", "");
+    return globalUri.replace("SENERGY_"+uriPrefix+"_", "");
 }
 
 var uriPrefix = null;

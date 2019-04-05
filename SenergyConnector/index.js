@@ -43,7 +43,7 @@ SenergyConnector.prototype.provisioning = function () {
         var devices = getZwayDevices(this.controller);
         var hash = devicesHash(devices);
         var that = this;
-        console.log("DEBUG: local provision check", JSON.stringify(this.hash), JSON.stringify(hash));
+        //console.log("DEBUG: local provision check", JSON.stringify(this.hash), JSON.stringify(hash));
         if(this.hash != hash){
             console.log("DEBUG: update provisioning");
             var result = login(config.auth_url, SenergyClientId, config.user, config.password);
@@ -147,7 +147,7 @@ SenergyConnector.prototype.updateConnection = function (devices) {
 };
 
 SenergyConnector.prototype.handleCommandMessage = function(message){
-    console.log("handleCommandMessage:" + message.payloadString + " qos: " + message.qos, message.destinationName);
+    //console.log("handleCommandMessage:" + message.payloadString + " qos: " + message.qos, message.destinationName);
     try{
         var msg = JSON.parse(message.payloadString);
         var correlationId = msg.correlation_id;
@@ -166,11 +166,11 @@ SenergyConnector.prototype.handleCommandMessage = function(message){
 };
 
 SenergyConnector.prototype.sendCommandToZway = function(id, command, metrics){
+    console.log("DEBUG: command to zway: ", id, command, metrics);
     var device = this.controller.devices.get(id);
     if(device){
         if(command == "sepl_get"){
-            var metrics = getMetrics(device);
-            return JSON.stringify(metrics)
+            return JSON.stringify(getMetrics(device))
         }else{
             device.performCommand(command, metrics);
         }
@@ -183,9 +183,9 @@ SenergyConnector.prototype.sendEvent = function(deviceUri, serviceUri, payload){
         try{
             var message = new Messaging.Message({metrics: payload});
             message.destinationName = "event/"+deviceUri+"/"+serviceUri;
-            message.qos = 2;
+            message.qos = 1;
             message.retained = false;
-            this.client.send(message);
+            this.mqtt.send(message);
         }catch (e) {
             console.log("ERROR: unable to send event message", e, e.message, JSON.stringify(e))
         }
@@ -200,9 +200,10 @@ SenergyConnector.prototype.sendResponse = function(deviceUri, serviceUri, correl
             var msgSegments = payload ? {metrics: payload} : {};
             var message = new Messaging.Message(JSON.stringify({payload: msgSegments, correlation_id: correlationId}));
             message.destinationName = "response/"+deviceUri+"/"+serviceUri;
-            message.qos = 2;
+            message.qos = 1;
             message.retained = false;
-            this.client.send(message);
+            //console.log("DEBUG: send response", "response/"+deviceUri+"/"+serviceUri, JSON.stringify({payload: msgSegments, correlation_id: correlationId}));
+            this.mqtt.send(message);
         }catch (e) {
             console.log("ERROR: unable to send event message", e, e.message, JSON.stringify(e))
         }
