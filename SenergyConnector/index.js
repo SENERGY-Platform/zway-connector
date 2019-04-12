@@ -38,31 +38,43 @@ SenergyConnector.prototype.start = function () {
 };
 
 SenergyConnector.prototype.provisioning = function () {
+    var that = this;
+    if(that.provisioningLock){
+        console.log("DEBUG: provisioning is running...");
+        return
+    }
+    that.provisioningLock = true;
     try{
         var config = this.config;
         var devices = getZwayDevices(this.controller);
         var hash = devicesHash(devices);
-        var that = this;
+
         //console.log("DEBUG: local provision check", JSON.stringify(this.hash), JSON.stringify(hash));
         if(this.hash != hash){
             console.log("DEBUG: update provisioning");
             var result = login(config.auth_url, SenergyClientId, config.user, config.password);
             if(result.err){
+                that.provisioningLock = false;
                 console.log("login error:", JSON.stringify(result.err));
                 return
             }
             var token = result.token;
             provisionHub(config.iot_repo_url, token, "", devices, hubIdProvider, function(result){
                 if(result.err){
+                    that.provisioningLock = false;
                     console.log("ERROR: provisioning error:", JSON.stringify(result.err));
                     return
                 }
                 that.hash = hash;
-                that.updateConnection(devices)
+                that.updateConnection(devices);
+                that.provisioningLock = false;
             });
+        }else{
+            that.provisioningLock = false;
         }
     }
     catch (e) {
+        that.provisioningLock = false;
         console.log("ERROR: catch:", e, e.stack)
     }
 };
@@ -137,9 +149,11 @@ SenergyConnector.prototype.updateConnection = function (devices) {
         onFailure: function (err) {
             console.log("DEBUG: onFailure:", JSON.stringify(err));
             that.hash = null;
-            that.mqtt.onConnectionLost = nullFunc;
-            that.mqtt.onMessageArrived = nullFunc;
-            that.mqtt = null;
+            if(that.mqtt){
+                that.mqtt.onConnectionLost = nullFunc;
+                that.mqtt.onMessageArrived = nullFunc;
+                that.mqtt = null;
+            }
         }
     };
 
