@@ -181,7 +181,7 @@ SenergyConnector.prototype.sendCommandToZway = function(id, command, metrics){
 SenergyConnector.prototype.sendEvent = function(deviceUri, serviceUri, payload){
     if(this.mqtt && this.mqtt.send){
         try{
-            var message = new Messaging.Message({metrics: payload});
+            var message = new Messaging.Message(JSON.stringify({metrics: payload}));
             message.destinationName = "event/"+deviceUri+"/"+serviceUri;
             message.qos = 1;
             message.retained = false;
@@ -214,6 +214,7 @@ SenergyConnector.prototype.sendResponse = function(deviceUri, serviceUri, correl
 
 SenergyConnector.prototype.watchMetrics = function(){
     var self = this;
+    this.handleZwayEvent = this.getZwayEventHandler();
     this.controller.devices.map(function (vDev) {
         vDev.on("change:metrics:level", self.handleZwayEvent);
     });
@@ -228,11 +229,14 @@ SenergyConnector.prototype.unwatchMetrics = function(){
     });
 };
 
-SenergyConnector.prototype.handleZwayEvent = function (vDev) {
-    var deviceUri = getGloablDeviceUri(vDev);
-    var serviceUri = "sepl_get";
-    var payload = JSON.stringify(getMetrics(vDev));
-    this.sendEvent(deviceUri, serviceUri, payload)
+SenergyConnector.prototype.getZwayEventHandler = function(){
+    var that = this;
+    return function (vDev) {
+        var deviceUri = getGloablDeviceUri(vDev);
+        var serviceUri = "sepl_get";
+        var payload = JSON.stringify(getMetrics(vDev));
+        that.sendEvent(deviceUri, serviceUri, payload)
+    }
 };
 
 function getMetrics(device){
