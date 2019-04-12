@@ -5,7 +5,7 @@
     "author": "Ingo Rößner",
     "homepage": "",
     "icon": "icon.png",
-    "moduleName": "senergy-connector",
+    "moduleName": "SenergyConnector",
     "version": "0.0.1",
     "maturity": "beta",
     "defaults" : {
