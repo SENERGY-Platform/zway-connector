@@ -19,7 +19,7 @@ function login(authUrl, client_id, user, password) {
         return {err: {text: "unexpected response", status: resp.status, data: resp.data}}
     }
     if(resp.status == -1){
-        return {err: {text: "unable to run http request", req_url:authUrl+"/auth/realms/master/protocol/openid-connect/token", req_data: "client_id="+client_id+"&username="+user+"&password="+password+"&grant_type=password", resp: resp}}
+        return {err: {text: "unable to run http request", skip: true, resp: resp}}
     }
     if(!resp.data || !resp.data.access_token){
         return {err: {text: "empty access_token in response", status: resp.status, data: resp.data}}

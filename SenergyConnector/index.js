@@ -10,7 +10,7 @@ _module = SenergyConnector;
 const SenergyClientId = "client-connector-lib";
 
 SenergyConnector.prototype.init = function (config) {
-    console.log("Start SenergyConnector with delay: ", config.startupdelay, "s");
+    console.log("Init SenergyConnector");
     SenergyConnector.super_.prototype.init.call(this, config);
     this.config = config;
 
@@ -19,7 +19,8 @@ SenergyConnector.prototype.init = function (config) {
     executeFile("userModules/SenergyConnector/zwayhelper.js");
     executeFile("userModules/SenergyConnector/connector.js");
 
-    this.start()
+    var that = this;
+    setTimeout(function(){that.start()}, 20000)
 };
 
 SenergyConnector.prototype.stop = function () {
@@ -33,7 +34,7 @@ SenergyConnector.prototype.start = function () {
     console.log("Start SenergyConnector");
     this.provisioning();
     var that = this;
-    setInterval(function(){that.provisioning()}, 15000)
+    setInterval(function(){that.provisioning()}, 15000);
     this.watchMetrics();
 };
 
@@ -53,6 +54,12 @@ SenergyConnector.prototype.provisioning = function () {
         if(this.hash != hash){
             console.log("DEBUG: update provisioning");
             var result = login(config.auth_url, SenergyClientId, config.user, config.password);
+            if(result.err && result.err.skip){
+                console.log("WARNING: unable to provision devices; skip to updateConnection()", JSON.stringify(result.err));
+                that.provisioningLock = false;
+                that.updateConnection(devices);
+                return
+            }
             if(result.err){
                 that.provisioningLock = false;
                 console.log("login error:", JSON.stringify(result.err));
@@ -150,6 +157,11 @@ SenergyConnector.prototype.updateConnection = function (devices) {
             console.log("DEBUG: onFailure:", JSON.stringify(err));
             that.hash = null;
             if(that.mqtt){
+                try{
+                    that.mqtt.disconnect();
+                }catch (e) {
+                    console.log("DEBUG:", e, e.message)
+                }
                 that.mqtt.onConnectionLost = nullFunc;
                 that.mqtt.onMessageArrived = nullFunc;
                 that.mqtt = null;
