@@ -169,6 +169,7 @@ MQTTClient.prototype.connect = function () {
     // Setup socket
     this._connection = new sockets.tcp();
     this._connection.onrecv = function (chunk) {
+
         self._onData(new Buffer(new Uint8Array(chunk)));
     };
 

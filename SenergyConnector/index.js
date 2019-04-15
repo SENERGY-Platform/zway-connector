@@ -128,6 +128,7 @@ SenergyConnector.prototype.sendEvent = function(deviceUri, serviceUri, payload){
 };
 
 SenergyConnector.prototype.sendResponse = function(deviceUri, serviceUri, correlationId, payload){
+    var msgSegments = payload ? {metrics: payload} : {};
     this.send("response/"+deviceUri+"/"+serviceUri, JSON.stringify({payload: msgSegments, correlation_id: correlationId}));
 };
 
@@ -317,7 +318,9 @@ SenergyConnector.prototype.updateConnectionTcp = function (devices) {
         ping_timeout: 60,
         connect_timeout: 60,
         clean_session: cleanSession,
+        infoLogEnabled: false,
         onMessageArrived: function (topic, message) {
+            console.log("DEBUG: receive command", topic, message);
             that.handleTcpCommandMessage(topic, message);
         }
     };
