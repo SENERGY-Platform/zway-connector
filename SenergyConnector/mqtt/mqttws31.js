@@ -642,6 +642,22 @@ Messaging = (function (global) {
 
         /** @ignore */
         var doPing = function () {
+            if(!this._client.socket || !this._client.socket.send){
+                console.log("ERROR: unable to ping; missing socket");
+                try{
+                    this._client.disconnect();
+                }catch (e) {
+                    console.log("unable to call disconnect in ping", e, e.message);
+                    try{
+                        if(this._client.onConnectionLost){
+                            this._client.onConnectionLost();
+                        }
+                    }catch (e) {
+                        console.log("unable to call onConnectionLost in ping", e, e.message);
+                    }
+                }
+                return
+            }
             if (!this.isReset) {
                 this._client._trace("Pinger.doPing", "Timed out");
                 this._client._disconnected(ERROR.PING_TIMEOUT.code, format(ERROR.PING_TIMEOUT));
@@ -1466,6 +1482,7 @@ Messaging = (function (global) {
             throw new Error(format(ERROR.INVALID_ARGUMENT, [clientId, "clientId"]));
 
         var client = new ClientImpl(host, port, clientId);
+        this.client = client;
         this._getHost = function () {
             return client.host;
         };

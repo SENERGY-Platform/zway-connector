@@ -29,12 +29,17 @@ SenergyConnector.prototype.stop = function () {
     SenergyConnector.super_.prototype.stop.call(this);
 };
 
-
 SenergyConnector.prototype.start = function () {
     console.log("Start SenergyConnector");
     this.provisioning();
     var that = this;
-    setInterval(function(){that.provisioning()}, 15000);
+    setInterval(function(){
+        try{
+            that.provisioning();
+        }catch (e) {
+            console.log("ERROR: start::provisioning ", e, e.message);
+        }
+    }, 15000);
     this.watchMetrics();
 };
 
@@ -54,12 +59,14 @@ SenergyConnector.prototype.provisioning = function () {
         if(this.hash != hash){
             console.log("DEBUG: update provisioning");
             var result = login(config.auth_url, SenergyClientId, config.user, config.password);
-            if(result.err && result.err.skip){
+            /*
+            if(result.err && result.err.type == LocalRequestErrorType){
                 console.log("WARNING: unable to provision devices; skip to updateConnection()", JSON.stringify(result.err));
                 that.provisioningLock = false;
                 that.updateConnection(devices);
                 return
             }
+            */
             if(result.err){
                 that.provisioningLock = false;
                 console.log("login error:", JSON.stringify(result.err));
@@ -90,11 +97,7 @@ SenergyConnector.prototype.provisioning = function () {
 SenergyConnector.prototype.updateConnection = function (devices) {
     console.log("Update Senergy-MQTT-Connection", this.config.mqtt_url);
 
-    if(this.mqtt){
-        this.mqtt.onConnectionLost = nullFunc;
-        this.mqtt.onMessageArrived = nullFunc;
-    }
-    if(this.mqtt && this.mqtt.disconnect){
+    if(this.mqtt && this.mqtt.disconnect && this.mqtt.client.connected){
         try{
             this.mqtt.disconnect();
         }catch (e) {
@@ -120,9 +123,6 @@ SenergyConnector.prototype.updateConnection = function (devices) {
     this.mqtt.onConnectionLost = function () {
         console.log("MQTT: lost connection; reset local hash");
         that.hash = null;
-        that.mqtt.onConnectionLost = nullFunc;
-        that.mqtt.onMessageArrived = nullFunc;
-        that.mqtt = null;
     };
 
     this.mqtt.onMessageArrived = function (message) {
@@ -144,9 +144,9 @@ SenergyConnector.prototype.updateConnection = function (devices) {
                         try{
                             that.mqtt.subscribe("command/"+device.uri+"/+",  {qos: 2});
                         }catch (e) {
+                            that.hash = null;
                             console.log("ERROR: unable to subscribe", e, e.message, JSON.stringify(e));
                         }
-
                     }else{
                         console.log("WARNING: missing uri in device; ignore", JSON.stringify(device));
                     }
@@ -156,16 +156,6 @@ SenergyConnector.prototype.updateConnection = function (devices) {
         onFailure: function (err) {
             console.log("DEBUG: onFailure:", JSON.stringify(err));
             that.hash = null;
-            if(that.mqtt){
-                try{
-                    that.mqtt.disconnect();
-                }catch (e) {
-                    console.log("DEBUG:", e, e.message)
-                }
-                that.mqtt.onConnectionLost = nullFunc;
-                that.mqtt.onMessageArrived = nullFunc;
-                that.mqtt = null;
-            }
         }
     };
 
@@ -205,7 +195,7 @@ SenergyConnector.prototype.sendCommandToZway = function(id, command, metrics){
 };
 
 SenergyConnector.prototype.sendEvent = function(deviceUri, serviceUri, payload){
-    if(this.mqtt && this.mqtt.send){
+    if(this.mqtt && this.mqtt.send && this.mqtt.client.connected){
         try{
             var message = new Messaging.Message(JSON.stringify({metrics: payload}));
             message.destinationName = "event/"+deviceUri+"/"+serviceUri;
@@ -213,7 +203,8 @@ SenergyConnector.prototype.sendEvent = function(deviceUri, serviceUri, payload){
             message.retained = false;
             this.mqtt.send(message);
         }catch (e) {
-            console.log("ERROR: unable to send event message", e, e.message, JSON.stringify(e))
+            console.log("ERROR: unable to send event message", e, e.message, JSON.stringify(e));
+            this.hash = null;
         }
     }else{
         console.log("WARNING: mqtt not connected; unable to send event message for", deviceUri, serviceUri)
@@ -221,7 +212,7 @@ SenergyConnector.prototype.sendEvent = function(deviceUri, serviceUri, payload){
 };
 
 SenergyConnector.prototype.sendResponse = function(deviceUri, serviceUri, correlationId, payload){
-    if(this.mqtt && this.mqtt.send){
+    if(this.mqtt && this.mqtt.send && this.mqtt.client.connected){
         try{
             var msgSegments = payload ? {metrics: payload} : {};
             var message = new Messaging.Message(JSON.stringify({payload: msgSegments, correlation_id: correlationId}));
@@ -231,10 +222,11 @@ SenergyConnector.prototype.sendResponse = function(deviceUri, serviceUri, correl
             //console.log("DEBUG: send response", "response/"+deviceUri+"/"+serviceUri, JSON.stringify({payload: msgSegments, correlation_id: correlationId}));
             this.mqtt.send(message);
         }catch (e) {
-            console.log("ERROR: unable to send event message", e, e.message, JSON.stringify(e))
+            console.log("ERROR: unable to send response message", e, e.message, JSON.stringify(e));
+            this.hash = null;
         }
     }else{
-        console.log("WARNING: mqtt not connected; unable to send event message for", deviceUri, serviceUri)
+        console.log("WARNING: mqtt not connected; unable to send response message for", deviceUri, serviceUri)
     }
 };
 
@@ -258,10 +250,15 @@ SenergyConnector.prototype.unwatchMetrics = function(){
 SenergyConnector.prototype.getZwayEventHandler = function(){
     var that = this;
     return function (vDev) {
-        var deviceUri = getGloablDeviceUri(vDev);
-        var serviceUri = "sepl_get";
-        var payload = JSON.stringify(getMetrics(vDev));
-        that.sendEvent(deviceUri, serviceUri, payload)
+        try{
+            var deviceUri = getGloablDeviceUri(vDev);
+            var serviceUri = "sepl_get";
+            var payload = JSON.stringify(getMetrics(vDev));
+            that.sendEvent(deviceUri, serviceUri, payload);
+        }catch (e) {
+            console.log("ERROR: start::provisioning ", e, e.message);
+        }
+
     }
 };
 
@@ -290,5 +287,3 @@ function parseUrl(mqtt_url) {
     result.port = parseInt(parts[0]);
     return result
 }
-
-function nullFunc() {}

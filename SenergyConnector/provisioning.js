@@ -2,6 +2,8 @@ executeFile("userModules/SenergyConnector/hash.js");
 
 const waiting_time = 3000;
 
+const LocalRequestErrorType = "local request error";
+
 function login(authUrl, client_id, user, password) {
     if(encodeURIComponent){
         user = encodeURIComponent(user);
@@ -19,7 +21,7 @@ function login(authUrl, client_id, user, password) {
         return {err: {text: "unexpected response", status: resp.status, data: resp.data}}
     }
     if(resp.status == -1){
-        return {err: {text: "unable to run http request", skip: true, resp: resp}}
+        return {err: {text: "unable to run http request", type: LocalRequestErrorType, resp: resp}}
     }
     if(!resp.data || !resp.data.access_token){
         return {err: {text: "empty access_token in response", status: resp.status, data: resp.data}}
@@ -76,12 +78,18 @@ function provisionHub(provisioningUrl, token, name, devices, idProvider, then){
         //if a device has been added to hub, it may take some time until the first data transfer is successful
         var hub = result.hub;
         setTimeout(function () {
-            var result = updateHub(provisioningUrl, token, hub.id, hub.name, devices, hash);
-            if(result.err){
-                then({err: result.err});
-                return
+            try{
+                var result = updateHub(provisioningUrl, token, hub.id, hub.name, devices, hash);
+                if(result.err){
+                    then({err: result.err});
+                    return
+                }
+                then({hub: result.hub});
+            }catch (e) {
+                console.log("ERROR: unable to provisionHub::updateHub", e, e.message);
+                then({err: e.message})
             }
-            then({hub: result.hub});
+
         }, timeout);
     }else{
         then({hub:result.hub});
