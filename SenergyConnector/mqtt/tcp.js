@@ -34,7 +34,7 @@ function MQTTClient(host, port, options) {
     };
 
     if (typeof options.ping_timeout != 'undefined')
-        options.ping_interval = parseInt(this.options.ping_timeout * 0.6 * 1000);
+        options.ping_interval = parseInt(options.ping_timeout * 0.6 * 1000);
 
     // Options validation
     if (typeof options.username == 'string' && options.username.length > 12)
@@ -353,7 +353,7 @@ MQTTClient.prototype._onPublish = function (topic, payload) {
  */
 MQTTClient.prototype._clearPingTimer = function () {
     if (this._ping_timer) {
-        clearTimeout(this._ping_timer);
+        clearInterval(this._ping_timer);
         this._ping_timer = null;
     }
 };
@@ -472,11 +472,11 @@ MQTTClient.prototype._startSession = function () {
 
     var buffer = MQTTClient.buildMessage(fixed_header, variable_header, payload);
 
-    // Setup connect timeout
-    this._connect_timeout_timer = setTimeout(function() {
-        self._connect_timeout_timer = null;
-        self._onTimeout();
-    }, this.options.connect_timeout * 1000);
+    //keep alive
+    self._ping_timer = setInterval(function () {
+            self._ping();
+        },
+        self.options.ping_interval);
 
     this._send(buffer);
 };
@@ -509,25 +509,15 @@ MQTTClient.prototype._ping = function () {
         return;
     }
 
-    // Do not send another ping if still awaiting a response, new ping will be setup by PING message handler
-    if (this._ping_timeout_timer) {
-        return;
-    }
-
     // Build ping request
     var buffer = new Buffer(2);
     buffer[0] = MQTTClient.messageTypes.PINGREQ << 4;
     buffer[1] = 0x00;
 
-    // Setup ping timeout
-    this._ping_timeout_timer = setTimeout(function() {
-        self._ping_timeout_timer = null;
-        self._onTimeout();
-    }, this.options.ping_timeout * 1000);
-
     // Send ping request
     this._send(buffer);
 };
+
 
 /**
  * Message Handlers.
@@ -545,11 +535,6 @@ MQTTClient.messageHandlers[MQTTClient.messageTypes.CONNACK] = function (self, fi
         if (code == 0) {
             self.connected = true;
             self._last_message_id = 0;
-
-            self._ping_timer = setTimeout(function () {
-                    self._ping();
-                },
-                self.options.ping_interval);
 
             self._onConnect();
         } else if (code > 0 && code < 6) {

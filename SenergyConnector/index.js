@@ -287,6 +287,7 @@ SenergyConnector.prototype.updateConnectionTcp = function (devices) {
 
     if(this.mqtt && this.mqtt.close && this.mqtt.connected){
         try{
+            that.mqtt.onDisconnect(function () {console.log("DEBUG: close inception")});
             this.mqtt.close();
         }catch (e) {
             console.log("ERROR: while disconnecting", e)
@@ -312,7 +313,9 @@ SenergyConnector.prototype.updateConnectionTcp = function (devices) {
         will_flag: false,
         username: username,
         password: password,
-        ping_interval: keepAlive,
+        ping_interval: keepAlive*1000,
+        ping_timeout: 60,
+        connect_timeout: 60,
         clean_session: cleanSession,
         onMessageArrived: function (topic, message) {
             that.handleTcpCommandMessage(topic, message);
@@ -321,7 +324,7 @@ SenergyConnector.prototype.updateConnectionTcp = function (devices) {
 
     that.mqtt = new MQTTClient(host, port, mqttOptions);
     that.mqtt.onLog(function (msg) { console.log("DEBUG: ", msg.toString()); });
-    that.mqtt.onError(function (error) { that.hash = null; console.log("ERROR: ", error.toString()); });
+    that.mqtt.onError(function (error) { console.log("ERROR: ", error.toString()); });
     that.mqtt.onDisconnect(function () { that.hash = null; console.log("DEBUG: connection lost") });
     that.mqtt.onConnect(function () {
         console.log("DEBUG: connected");
