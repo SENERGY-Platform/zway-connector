@@ -12,9 +12,16 @@ const SenergyClientId = "client-connector-lib";
 SenergyConnector.prototype.init = function (config) {
     console.log("Init SenergyConnector");
     SenergyConnector.super_.prototype.init.call(this, config);
-    this.config = config;
+    this.config = JSON.parse(JSON.stringify(config));
+    var parsedUrl = parseUrl(this.config.mqtt_url);
+    if(!parsedUrl){
+        console.log("ERROR: unable to parse mqtt address", this.config.mqtt_url);
+        return
+    }
+    this.config.protocol = parsedUrl.protocol;
 
-    executeFile("userModules/SenergyConnector/mqtt/mqttws31.js");
+    executeFile("userModules/SenergyConnector/mqtt/ws.js");
+    executeFile("userModules/SenergyConnector/mqtt/tcp.js");
     executeFile("userModules/SenergyConnector/provisioning.js");
     executeFile("userModules/SenergyConnector/zwayhelper.js");
     executeFile("userModules/SenergyConnector/connector.js");
@@ -93,9 +100,83 @@ SenergyConnector.prototype.provisioning = function () {
     }
 };
 
-
 SenergyConnector.prototype.updateConnection = function (devices) {
-    console.log("Update Senergy-MQTT-Connection", this.config.mqtt_url);
+    if(this.config.protocol == "ws:" || this.config.protocol == "wss:"){
+        return this.updateConnectionWs(devices);
+    }else if(this.config.protocol == "tcp:") {
+        return this.updateConnectionTcp(devices);
+    }else{
+        console.log("ERROR: unknown protocol", this.config.protocol);
+    }
+};
+
+SenergyConnector.prototype.sendCommandToZway = function(id, command, metrics){
+    console.log("DEBUG: command to zway: ", id, command, metrics);
+    var device = this.controller.devices.get(id);
+    if(device){
+        if(command == "sepl_get"){
+            return JSON.stringify(getMetrics(device))
+        }else{
+            device.performCommand(command, metrics);
+        }
+    }
+    return null;
+};
+
+SenergyConnector.prototype.sendEvent = function(deviceUri, serviceUri, payload){
+    this.send("event/"+deviceUri+"/"+serviceUri, JSON.stringify({metrics: payload}));
+};
+
+SenergyConnector.prototype.sendResponse = function(deviceUri, serviceUri, correlationId, payload){
+    this.send("response/"+deviceUri+"/"+serviceUri, JSON.stringify({payload: msgSegments, correlation_id: correlationId}));
+};
+
+SenergyConnector.prototype.send = function(topic, msg){
+    if(this.config.protocol == "ws:" || this.config.protocol == "wss:"){
+        return this.sendWs(topic, msg);
+    }else if(this.config.protocol == "tcp:") {
+        return this.sendTcp(topic, msg);
+    }else{
+        console.log("ERROR: unknown protocol", this.config.protocol);
+    }
+};
+
+SenergyConnector.prototype.watchMetrics = function(){
+    var self = this;
+    this.handleZwayEvent = this.getZwayEventHandler();
+    this.controller.devices.map(function (vDev) {
+        vDev.on("change:metrics:level", self.handleZwayEvent);
+    });
+};
+
+SenergyConnector.prototype.unwatchMetrics = function(){
+    var self = this;
+    this.controller.devices.map(function (vDev) {
+        if(self.handleZwayEvent){
+            vDev.off("change:metrics:level", self.handleZwayEvent);
+        }
+    });
+};
+
+SenergyConnector.prototype.getZwayEventHandler = function(){
+    var that = this;
+    return function (vDev) {
+        try{
+            var deviceUri = getGloablDeviceUri(vDev);
+            var serviceUri = "sepl_get";
+            var payload = JSON.stringify(getMetrics(vDev));
+            that.sendEvent(deviceUri, serviceUri, payload);
+        }catch (e) {
+            console.log("ERROR: start::provisioning ", e, e.message);
+        }
+
+    }
+};
+
+//ws
+
+SenergyConnector.prototype.updateConnectionWs = function (devices) {
+    console.log("Update Senergy-MQTT-Connection ws", this.config.mqtt_url);
 
     if(this.mqtt && this.mqtt.disconnect && this.mqtt.client.connected){
         try{
@@ -126,7 +207,7 @@ SenergyConnector.prototype.updateConnection = function (devices) {
     };
 
     this.mqtt.onMessageArrived = function (message) {
-        that.handleCommandMessage(message);
+        that.handleWsCommandMessage(message);
     };
 
     var options = {
@@ -162,8 +243,8 @@ SenergyConnector.prototype.updateConnection = function (devices) {
     this.mqtt.connect(options);
 };
 
-SenergyConnector.prototype.handleCommandMessage = function(message){
-    //console.log("handleCommandMessage:" + message.payloadString + " qos: " + message.qos, message.destinationName);
+SenergyConnector.prototype.handleWsCommandMessage = function(message){
+    //console.log("handleWsCommandMessage:" + message.payloadString + " qos: " + message.qos, message.destinationName);
     try{
         var msg = JSON.parse(message.payloadString);
         var correlationId = msg.correlation_id;
@@ -177,90 +258,124 @@ SenergyConnector.prototype.handleCommandMessage = function(message){
         var result = this.sendCommandToZway(localDeviceUri, serviceUri, metrics);
         this.sendResponse(globalDeviceUri, serviceUri, correlationId, result);
     }catch (e) {
-        console.log("ERROR: unable to handle comamnd message", e, e.message, JSON.stringify(e))
+        console.log("ERROR: unable to handle ws command message", e, e.message, JSON.stringify(e))
     }
 };
 
-SenergyConnector.prototype.sendCommandToZway = function(id, command, metrics){
-    console.log("DEBUG: command to zway: ", id, command, metrics);
-    var device = this.controller.devices.get(id);
-    if(device){
-        if(command == "sepl_get"){
-            return JSON.stringify(getMetrics(device))
-        }else{
-            device.performCommand(command, metrics);
-        }
-    }
-    return null;
-};
-
-SenergyConnector.prototype.sendEvent = function(deviceUri, serviceUri, payload){
+SenergyConnector.prototype.sendWs = function(topic, msg){
     if(this.mqtt && this.mqtt.send && this.mqtt.client.connected){
         try{
-            var message = new Messaging.Message(JSON.stringify({metrics: payload}));
-            message.destinationName = "event/"+deviceUri+"/"+serviceUri;
+            var message = new Messaging.Message(msg);
+            message.destinationName = topic;
             message.qos = 1;
             message.retained = false;
             this.mqtt.send(message);
         }catch (e) {
-            console.log("ERROR: unable to send event message", e, e.message, JSON.stringify(e));
+            console.log("ERROR: unable to send ws message", e, e.message, JSON.stringify(e), topic, msg);
             this.hash = null;
         }
     }else{
-        console.log("WARNING: mqtt not connected; unable to send event message for", deviceUri, serviceUri)
+        console.log("WARNING: mqtt not connected; unable to send ws message for", topic, msg)
     }
 };
 
-SenergyConnector.prototype.sendResponse = function(deviceUri, serviceUri, correlationId, payload){
-    if(this.mqtt && this.mqtt.send && this.mqtt.client.connected){
+
+// tcp
+
+SenergyConnector.prototype.updateConnectionTcp = function (devices) {
+    console.log("Update Senergy-MQTT-Connection tcp", this.config.mqtt_url);
+
+    if(this.mqtt && this.mqtt.close && this.mqtt.connected){
         try{
-            var msgSegments = payload ? {metrics: payload} : {};
-            var message = new Messaging.Message(JSON.stringify({payload: msgSegments, correlation_id: correlationId}));
-            message.destinationName = "response/"+deviceUri+"/"+serviceUri;
-            message.qos = 1;
-            message.retained = false;
-            //console.log("DEBUG: send response", "response/"+deviceUri+"/"+serviceUri, JSON.stringify({payload: msgSegments, correlation_id: correlationId}));
-            this.mqtt.send(message);
+            this.mqtt.close();
         }catch (e) {
-            console.log("ERROR: unable to send response message", e, e.message, JSON.stringify(e));
-            this.hash = null;
+            console.log("ERROR: while disconnecting", e)
         }
-    }else{
-        console.log("WARNING: mqtt not connected; unable to send response message for", deviceUri, serviceUri)
     }
-};
+    this.mqtt = null;
 
-SenergyConnector.prototype.watchMetrics = function(){
-    var self = this;
-    this.handleZwayEvent = this.getZwayEventHandler();
-    this.controller.devices.map(function (vDev) {
-        vDev.on("change:metrics:level", self.handleZwayEvent);
-    });
-};
 
-SenergyConnector.prototype.unwatchMetrics = function(){
-    var self = this;
-    this.controller.devices.map(function (vDev) {
-        if(self.handleZwayEvent){
-            vDev.off("change:metrics:level", self.handleZwayEvent);
-        }
-    });
-};
-
-SenergyConnector.prototype.getZwayEventHandler = function(){
     var that = this;
-    return function (vDev) {
-        try{
-            var deviceUri = getGloablDeviceUri(vDev);
-            var serviceUri = "sepl_get";
-            var payload = JSON.stringify(getMetrics(vDev));
-            that.sendEvent(deviceUri, serviceUri, payload);
-        }catch (e) {
-            console.log("ERROR: start::provisioning ", e, e.message);
-        }
 
+    const url = parseUrl(this.config.mqtt_url);
+
+    var host = url.hostname;
+    var port = url.port;
+    var clientId = hubIdProvider.get();
+    var username = this.config.user;
+    var password = this.config.password;
+    var keepAlive = 20;
+    var cleanSession = true;
+
+    var mqttOptions = {
+        client_id: clientId,
+        will_flag: false,
+        username: username,
+        password: password,
+        ping_interval: keepAlive,
+        clean_session: cleanSession,
+        onMessageArrived: function (topic, message) {
+            that.handleTcpCommandMessage(topic, message);
+        }
+    };
+
+    that.mqtt = new MQTTClient(host, port, mqttOptions);
+    that.mqtt.onLog(function (msg) { console.log("DEBUG: ", msg.toString()); });
+    that.mqtt.onError(function (error) { that.hash = null; console.log("ERROR: ", error.toString()); });
+    that.mqtt.onDisconnect(function () { that.hash = null; console.log("DEBUG: connection lost") });
+    that.mqtt.onConnect(function () {
+        console.log("DEBUG: connected");
+        if(devices){
+            devices.forEach(function (device) {
+                if(device.uri){
+                    try{
+                        that.mqtt.subscribe("command/"+device.uri+"/+",  {qos: 2});
+                    }catch (e) {
+                        that.hash = null;
+                        console.log("ERROR: unable to subscribe", e, e.message, JSON.stringify(e));
+                    }
+                }else{
+                    console.log("WARNING: missing uri in device; ignore", JSON.stringify(device));
+                }
+            })
+        }
+    });
+    that.mqtt.connect();
+};
+
+SenergyConnector.prototype.handleTcpCommandMessage = function(topic, message){
+    try{
+        var msg = JSON.parse(message);
+        var correlationId = msg.correlation_id;
+        var payload = msg.payload.metrics;
+        var topic = topic;
+        var topicParts = topic.split("/");
+        var globalDeviceUri = topicParts[1];
+        var serviceUri = topicParts[2];
+        var localDeviceUri = getLocalDeviceUri(globalDeviceUri);
+        var metrics = payload && JSON.parse(payload);
+        var result = this.sendCommandToZway(localDeviceUri, serviceUri, metrics);
+        this.sendResponse(globalDeviceUri, serviceUri, correlationId, result);
+    }catch (e) {
+        console.log("ERROR: unable to handle tcp command message", e, e.message, JSON.stringify(e))
     }
 };
+
+SenergyConnector.prototype.sendTcp = function(topic, msg){
+    if(this.mqtt && this.mqtt.publish && this.mqtt.connected){
+        try{
+            this.mqtt.publish(topic, msg.trim(), {qos_level: 1, retain: false});
+        }catch (e) {
+            console.log("ERROR: unable to send tcp message", e, e.message, JSON.stringify(e), topic, msg);
+            this.hash = null;
+        }
+    }else{
+        console.log("WARNING: mqtt not connected; unable to send tcp message for", topic, msg)
+    }
+};
+
+
+// helper
 
 function getMetrics(device){
     var metrics = JSON.parse(JSON.stringify(device.get("metrics")));
