@@ -20,6 +20,7 @@ SenergyConnector.prototype.init = function (config) {
     }
     this.config.protocol = parsedUrl.protocol;
 
+    executeFile("userModules/SenergyConnector/reg.js");
     executeFile("userModules/SenergyConnector/mqtt/ws.js");
     executeFile("userModules/SenergyConnector/mqtt/tcp.js");
     executeFile("userModules/SenergyConnector/provisioning.js");
@@ -37,6 +38,7 @@ SenergyConnector.prototype.stop = function () {
 
 SenergyConnector.prototype.start = function () {
     console.log("Start SenergyConnector");
+    this.reg = new Reg();
     this.provisioning();
     var that = this;
     setInterval(function(){
@@ -59,20 +61,11 @@ SenergyConnector.prototype.provisioning = function () {
     try{
         var config = this.config;
         var devices = getZwayDevices(this.controller);
-        var hash = devicesHash(devices);
-
-        //console.log("DEBUG: local provision check", JSON.stringify(this.hash), JSON.stringify(hash));
-        if(this.hash != hash){
+        var diff = this.reg.diff(devices);
+        if(diff){
             console.log("DEBUG: update provisioning");
             var result = login(config.auth_url, SenergyClientId, config.user, config.password);
-            /*
-            if(result.err && result.err.type == LocalRequestErrorType){
-                console.log("WARNING: unable to provision devices; skip to updateConnection()", JSON.stringify(result.err));
-                that.provisioningLock = false;
-                that.updateConnection(devices);
-                return
-            }
-            */
+
             if(result.err){
                 that.provisioningLock = false;
                 console.log("login error:", JSON.stringify(result.err));
@@ -85,7 +78,16 @@ SenergyConnector.prototype.provisioning = function () {
                     console.log("ERROR: provisioning error:", JSON.stringify(result.err));
                     return
                 }
-                that.hash = hash;
+                console.log("DEBUG:",  JSON.stringify(diff));
+                if(diff.removed && diff.removed.length){
+                    result = removeDevices(config.iot_repo_url, token, diff.removed);
+                    if(result.err){
+                        that.provisioningLock = false;
+                        console.log("ERROR: removeDevices():", JSON.stringify(result.err));
+                        return
+                    }
+                }
+                that.reg.set(devices, diff.newHash);
                 that.updateConnection(devices);
                 that.provisioningLock = false;
             });
@@ -204,7 +206,7 @@ SenergyConnector.prototype.updateConnectionWs = function (devices) {
 
     this.mqtt.onConnectionLost = function () {
         console.log("MQTT: lost connection; reset local hash");
-        that.hash = null;
+        that.reg.resetHash();
     };
 
     this.mqtt.onMessageArrived = function (message) {
@@ -226,7 +228,7 @@ SenergyConnector.prototype.updateConnectionWs = function (devices) {
                         try{
                             that.mqtt.subscribe("command/"+device.uri+"/+",  {qos: 2});
                         }catch (e) {
-                            that.hash = null;
+                            that.reg.resetHash();
                             console.log("ERROR: unable to subscribe", e, e.message, JSON.stringify(e));
                         }
                     }else{
@@ -237,7 +239,7 @@ SenergyConnector.prototype.updateConnectionWs = function (devices) {
         },
         onFailure: function (err) {
             console.log("DEBUG: onFailure:", JSON.stringify(err));
-            that.hash = null;
+            that.reg.resetHash();
         }
     };
 
@@ -273,7 +275,7 @@ SenergyConnector.prototype.sendWs = function(topic, msg){
             this.mqtt.send(message);
         }catch (e) {
             console.log("ERROR: unable to send ws message", e, e.message, JSON.stringify(e), topic, msg);
-            this.hash = null;
+            this.reg.resetHash();
         }
     }else{
         console.log("WARNING: mqtt not connected; unable to send ws message for", topic, msg)
@@ -328,7 +330,7 @@ SenergyConnector.prototype.updateConnectionTcp = function (devices) {
     that.mqtt = new MQTTClient(host, port, mqttOptions);
     that.mqtt.onLog(function (msg) { console.log("DEBUG: ", msg.toString()); });
     that.mqtt.onError(function (error) { console.log("ERROR: ", error.toString()); });
-    that.mqtt.onDisconnect(function () { that.hash = null; console.log("DEBUG: connection lost") });
+    that.mqtt.onDisconnect(function () { that.reg.resetHash(); console.log("DEBUG: connection lost") });
     that.mqtt.onConnect(function () {
         console.log("DEBUG: connected");
         if(devices){
@@ -337,7 +339,7 @@ SenergyConnector.prototype.updateConnectionTcp = function (devices) {
                     try{
                         that.mqtt.subscribe("command/"+device.uri+"/+",  {qos: 2});
                     }catch (e) {
-                        that.hash = null;
+                        that.reg.resetHash();
                         console.log("ERROR: unable to subscribe", e, e.message, JSON.stringify(e));
                     }
                 }else{
@@ -373,7 +375,7 @@ SenergyConnector.prototype.sendTcp = function(topic, msg){
             this.mqtt.publish(topic, msg.trim(), {qos_level: 0, retain: false});
         }catch (e) {
             console.log("ERROR: unable to send tcp message", e, e.message, JSON.stringify(e), topic, msg);
-            this.hash = null;
+            this.reg.resetHash();
         }
     }else{
         console.log("WARNING: mqtt not connected; unable to send tcp message for", topic, msg)

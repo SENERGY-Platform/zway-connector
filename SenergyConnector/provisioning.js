@@ -1,4 +1,6 @@
-executeFile("userModules/SenergyConnector/hash.js");
+if(!devicesHash){
+    executeFile("userModules/SenergyConnector/hash.js");
+}
 
 const waiting_time = 3000;
 
@@ -258,3 +260,36 @@ function createDevice(provisioningUrl, token, device) {
     return {created: true}
 }
 
+function removeDevices(provisioningUrl, token, devices) {
+    for(var i=0; i<devices.length; i++){
+        if(devices[i].iot_type){
+            var result = removeDevice(provisioningUrl, token, devices[i]);
+            if(result.err){
+                return result
+            }
+        }
+    }
+    return {}
+}
+
+function removeDevice(provisioningUrl, token, device) {
+    console.log("SENERGY: remove device", device.uri);
+    if(!device.iot_type){
+        return {err: "missing device type id"}
+    }
+    var uri = device.uri;
+    if(encodeURIComponent){
+        uri = encodeURIComponent(uri);
+    }else{
+        console.log("WARNING: missing encodeURIComponent()")
+    }
+    var resp = http.request({
+        url:provisioningUrl+"/device-uris/"+uri,
+        method:"DELETE",
+        headers:{"Authorization":token},
+    });
+    if(resp.status >= 300){
+        return {err: {text: "unexpected response", status: resp.status, data: resp.data}}
+    }
+    return {updated: true}
+}
