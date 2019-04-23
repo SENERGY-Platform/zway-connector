@@ -1,6 +1,3 @@
-if(!devicesHash){
-    executeFile("userModules/SenergyConnector/hash.js");
-}
 
 const waiting_time = 3000;
 

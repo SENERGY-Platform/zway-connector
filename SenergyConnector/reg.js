@@ -1,6 +1,3 @@
-if(!devicesHash){
-    executeFile("userModules/SenergyConnector/hash.js");
-}
 
 function Reg() {
     this._devices = [];

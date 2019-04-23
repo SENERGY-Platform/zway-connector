@@ -9,6 +9,7 @@ _module = SenergyConnector;
 
 const SenergyClientId = "client-connector-lib";
 
+
 SenergyConnector.prototype.init = function (config) {
     console.log("Init SenergyConnector");
     SenergyConnector.super_.prototype.init.call(this, config);
@@ -20,6 +21,7 @@ SenergyConnector.prototype.init = function (config) {
     }
     this.config.protocol = parsedUrl.protocol;
 
+    executeFile("userModules/SenergyConnector/hash.js");
     executeFile("userModules/SenergyConnector/reg.js");
     executeFile("userModules/SenergyConnector/mqtt/ws.js");
     executeFile("userModules/SenergyConnector/mqtt/tcp.js");
