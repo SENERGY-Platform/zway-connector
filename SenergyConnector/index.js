@@ -24,7 +24,6 @@ SenergyConnector.prototype.init = function (config) {
     executeFile("userModules/SenergyConnector/mqtt/tcp.js");
     executeFile("userModules/SenergyConnector/provisioning.js");
     executeFile("userModules/SenergyConnector/zwayhelper.js");
-    executeFile("userModules/SenergyConnector/connector.js");
 
     var that = this;
     setTimeout(function(){that.start()}, 20000)
@@ -133,6 +132,7 @@ SenergyConnector.prototype.sendResponse = function(deviceUri, serviceUri, correl
 };
 
 SenergyConnector.prototype.send = function(topic, msg){
+    console.log("SENERGY: send ", topic, msg);
     if(this.config.protocol == "ws:" || this.config.protocol == "wss:"){
         return this.sendWs(topic, msg);
     }else if(this.config.protocol == "tcp:") {
@@ -268,7 +268,7 @@ SenergyConnector.prototype.sendWs = function(topic, msg){
         try{
             var message = new Messaging.Message(msg);
             message.destinationName = topic;
-            message.qos = 1;
+            message.qos = 0;
             message.retained = false;
             this.mqtt.send(message);
         }catch (e) {
@@ -370,7 +370,7 @@ SenergyConnector.prototype.handleTcpCommandMessage = function(topic, message){
 SenergyConnector.prototype.sendTcp = function(topic, msg){
     if(this.mqtt && this.mqtt.publish && this.mqtt.connected){
         try{
-            this.mqtt.publish(topic, msg.trim(), {qos_level: 1, retain: false});
+            this.mqtt.publish(topic, msg.trim(), {qos_level: 0, retain: false});
         }catch (e) {
             console.log("ERROR: unable to send tcp message", e, e.message, JSON.stringify(e), topic, msg);
             this.hash = null;
