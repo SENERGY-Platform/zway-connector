@@ -220,6 +220,9 @@ SeplConnector.prototype.getMetrics = function(device){
     return metrics;
 };
 
+SeplConnector.prototype.getMetricsLevel = function(device){
+    return {level: device.get("metrics").level, updateTime: new Date(device.get("updateTime")).toISOString()};
+};
 
 SeplConnector.prototype.deviceChangeHandler = function(){
     var self = this;
@@ -335,6 +338,13 @@ SeplConnector.prototype.sendCommandToZway = function(id, command, metrics){
     if(device){
         if(command == "sepl_get"){
             var metrics = this.getMetrics(device);
+            return [{
+                name: "metrics",
+                value: JSON.stringify(metrics)
+            }];
+        }else if (command == "sepl_get_level"){
+            var metrics = this.getMetricsLevel(device);
+            console.log("DEBUG", JSON.stringify(metrics));
             return [{
                 name: "metrics",
                 value: JSON.stringify(metrics)
