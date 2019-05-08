@@ -235,7 +235,7 @@ SeplConnector.prototype.getMetrics = function(device){
 };
 
 SeplConnector.prototype.getMetricsLevel = function(device){
-    return {level: device.get("metrics").level, updateTime: new Date(device.get("updateTime")).toISOString()};
+    return {level: device.get("metrics").level, updateTime: new Date(device.get("updateTime")*1000).toISOString()};
 };
 
 SeplConnector.prototype.deviceChangeHandler = function(){
