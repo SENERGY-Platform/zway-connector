@@ -116,13 +116,27 @@ SeplConnector.prototype.init = function (config) {
                 self.startupFinished = true;
                 self.unwatchMetrics();
                 self.onMetricsChange = function (vDev){
+                    var deviceUri = self.getGloablDeviceUri(vDev);
+
+                    //sepl_get_level
+                    var metrics_level = JSON.stringify(self.getMetricsLevel(vDev));
+                    console.log("metric level change: ", deviceUri, metrics_level);
+                    var levelMsg = [{
+                        name: "metrics",
+                        value: metrics_level
+                    }];
+                    self.client.sendEvent(deviceUri, "sepl_get_level", levelMsg, null, function(err){
+                        console.log("ERROR on event send: ", JSON.stringify(err))
+                    });
+
+                    //sepl_get
                     var metrics = JSON.stringify(self.getMetrics(vDev));
-                    console.log("metric change: ", self.getGloablDeviceUri(vDev), metrics);
+                    console.log("metric change: ", deviceUri, metrics);
                     var msg = [{
                         name: "metrics",
                         value: metrics
                     }];
-                    self.client.sendEvent(self.getGloablDeviceUri(vDev), "sepl_get", msg, null, function(err){
+                    self.client.sendEvent(deviceUri, "sepl_get", msg, null, function(err){
                         console.log("ERROR on event send: ", JSON.stringify(err))
                     });
                 };
