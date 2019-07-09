@@ -119,6 +119,8 @@ SenergyConnector.prototype.sendCommandToZway = function(id, command, metrics){
     if(device){
         if(command == "sepl_get"){
             return JSON.stringify(getMetrics(device))
+        }else if(command == "sepl_get_level"){
+            return JSON.stringify(getMetricsLevel(device))
         }else{
             device.performCommand(command, metrics);
         }
@@ -168,9 +170,11 @@ SenergyConnector.prototype.getZwayEventHandler = function(){
     return function (vDev) {
         try{
             var deviceUri = getGloablDeviceUri(vDev);
-            var serviceUri = "sepl_get";
             var payload = JSON.stringify(getMetrics(vDev));
-            that.sendEvent(deviceUri, serviceUri, payload);
+            that.sendEvent(deviceUri, "sepl_get", payload);
+
+            var level = JSON.stringify(getMetricsLevel(vDev));
+            that.sendEvent(deviceUri, "sepl_get_level", level);
         }catch (e) {
             console.log("ERROR: start::provisioning ", e, e.message);
         }
@@ -394,6 +398,10 @@ function getMetrics(device){
         delete metrics.icon;
     }
     return metrics;
+}
+
+function getMetricsLevel(device){
+    return {level: device.get("metrics").level, updateTime: new Date(device.get("updateTime")*1000).toISOString()};
 }
 
 function parseUrl(mqtt_url) {

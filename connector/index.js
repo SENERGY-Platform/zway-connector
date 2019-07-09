@@ -77,6 +77,14 @@ SeplConnector.prototype.init = function (config) {
         executeFile("userModules/SeplConnector/protocol.js");
         executeFile("userModules/SeplConnector/connector.js");
 
+        self.onMetricsChange = function(vDev){
+            if(self.onMetricsChangeHandler){
+                self.onMetricsChangeHandler(vDev);
+            }
+        };
+
+        self.watchMetrics();
+
         self.UriPrefix = getId();
 
         //TODO: configuratable zway name (zway == Z-Wave Network Access.config.name (internalName))
@@ -114,8 +122,7 @@ SeplConnector.prototype.init = function (config) {
                     return
                 }
                 self.startupFinished = true;
-                self.unwatchMetrics();
-                self.onMetricsChange = function (vDev){
+                self.onMetricsChangeHandler = function (vDev){
                     var deviceUri = self.getGloablDeviceUri(vDev);
 
                     //sepl_get_level
@@ -141,7 +148,6 @@ SeplConnector.prototype.init = function (config) {
                     });
                 };
                 self.handleDevices();
-                self.watchMetrics();
             }
         });
 
@@ -220,8 +226,9 @@ SeplConnector.prototype.watchMetrics = function(){
 SeplConnector.prototype.unwatchMetrics = function(){
     var self = this;
     this.controller.devices.map(function (vDev) {
-        if(self.onMetricsChange)
+        if(self.onMetricsChange){
             vDev.off("change:metrics:level", self.onMetricsChange);
+        }
     });
 };
 
@@ -264,6 +271,8 @@ SeplConnector.prototype.deviceChangeHandler = function(){
                         console.log("failed commit: ", JSON.stringify(msg));
                         self.watchMetrics();
                     })
+                }else{
+                    self.watchMetrics();
                 }
             });
         });
