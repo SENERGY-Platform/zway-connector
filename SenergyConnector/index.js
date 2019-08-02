@@ -196,60 +196,63 @@ SenergyConnector.prototype.updateConnectionWs = function (devices) {
     }
     this.mqtt = null;
 
-    const url = parseUrl(this.config.mqtt_url);
-
-    var host = url.hostname;
-    var port = url.port;
-    var clientId = hubIdProvider.get();
-    var username = this.config.user;
-    var password = this.config.password;
-    var keepAlive = 20;
-    var cleanSession = true;
-    var ssl = url.protocol == "wss:";
     var that = this;
 
-    this.mqtt = new Messaging.Client(host, port, clientId);
+    setTimeout(function () {
+        const url = parseUrl(that.config.mqtt_url);
 
-    this.mqtt.onConnectionLost = function () {
-        console.log("MQTT: lost connection; reset local hash");
-        that.reg.resetHash();
-    };
+        var host = url.hostname;
+        var port = url.port;
+        var clientId = hubIdProvider.get();
+        var username = that.config.user;
+        var password = that.config.password;
+        var keepAlive = 20;
+        var cleanSession = true;
+        var ssl = url.protocol == "wss:";
 
-    this.mqtt.onMessageArrived = function (message) {
-        that.handleWsCommandMessage(message);
-    };
+        that.mqtt = new Messaging.Client(host, port, clientId);
 
-    var options = {
-        timeout: 3,
-        keepAliveInterval: keepAlive,
-        cleanSession: cleanSession,
-        useSSL: ssl,
-        userName: username,
-        password: password,
-        onSuccess: function () {
-            console.log("DEBUG: connected");
-            if(devices){
-                devices.forEach(function (device) {
-                    if(device.uri){
-                        try{
-                            that.mqtt.subscribe("command/"+device.uri+"/+",  {qos: 2});
-                        }catch (e) {
-                            that.reg.resetHash();
-                            console.log("ERROR: unable to subscribe", e, e.message, JSON.stringify(e));
-                        }
-                    }else{
-                        console.log("WARNING: missing uri in device; ignore", JSON.stringify(device));
-                    }
-                })
-            }
-        },
-        onFailure: function (err) {
-            console.log("DEBUG: onFailure:", JSON.stringify(err));
+        that.mqtt.onConnectionLost = function () {
+            console.log("MQTT: lost connection; reset local hash");
             that.reg.resetHash();
-        }
-    };
+        };
 
-    this.mqtt.connect(options);
+        that.mqtt.onMessageArrived = function (message) {
+            that.handleWsCommandMessage(message);
+        };
+
+        var options = {
+            timeout: 3,
+            keepAliveInterval: keepAlive,
+            cleanSession: cleanSession,
+            useSSL: ssl,
+            userName: username,
+            password: password,
+            onSuccess: function () {
+                console.log("DEBUG: connected");
+                if(devices){
+                    devices.forEach(function (device) {
+                        if(device.uri){
+                            try{
+                                that.mqtt.subscribe("command/"+device.uri+"/+",  {qos: 2});
+                            }catch (e) {
+                                that.reg.resetHash();
+                                console.log("ERROR: unable to subscribe", e, e.message, JSON.stringify(e));
+                            }
+                        }else{
+                            console.log("WARNING: missing uri in device; ignore", JSON.stringify(device));
+                        }
+                    })
+                }
+            },
+            onFailure: function (err) {
+                console.log("DEBUG: onFailure:", JSON.stringify(err));
+                that.reg.resetHash();
+            }
+        };
+
+        that.mqtt.connect(options);
+    },30 * 1000)
 };
 
 SenergyConnector.prototype.handleWsCommandMessage = function(message){
@@ -304,57 +307,57 @@ SenergyConnector.prototype.updateConnectionTcp = function (devices) {
     }
     this.mqtt = null;
 
-
     var that = this;
+    setTimeout(function () {
+        const url = parseUrl(that.config.mqtt_url);
 
-    const url = parseUrl(this.config.mqtt_url);
+        var host = url.hostname;
+        var port = url.port;
+        var clientId = hubIdProvider.get();
+        var username = that.config.user;
+        var password = that.config.password;
+        var keepAlive = 20;
+        var cleanSession = true;
 
-    var host = url.hostname;
-    var port = url.port;
-    var clientId = hubIdProvider.get();
-    var username = this.config.user;
-    var password = this.config.password;
-    var keepAlive = 20;
-    var cleanSession = true;
+        var mqttOptions = {
+            client_id: clientId,
+            will_flag: false,
+            username: username,
+            password: password,
+            ping_interval: keepAlive*1000,
+            ping_timeout: 60,
+            connect_timeout: 60,
+            clean_session: cleanSession,
+            infoLogEnabled: false,
+            onMessageArrived: function (topic, message) {
+                console.log("DEBUG: receive command", topic, message);
+                that.handleTcpCommandMessage(topic, message);
+            }
+        };
 
-    var mqttOptions = {
-        client_id: clientId,
-        will_flag: false,
-        username: username,
-        password: password,
-        ping_interval: keepAlive*1000,
-        ping_timeout: 60,
-        connect_timeout: 60,
-        clean_session: cleanSession,
-        infoLogEnabled: false,
-        onMessageArrived: function (topic, message) {
-            console.log("DEBUG: receive command", topic, message);
-            that.handleTcpCommandMessage(topic, message);
-        }
-    };
-
-    that.mqtt = new MQTTClient(host, port, mqttOptions);
-    that.mqtt.onLog(function (msg) { console.log("DEBUG: ", msg.toString()); });
-    that.mqtt.onError(function (error) { console.log("ERROR: ", error.toString()); });
-    that.mqtt.onDisconnect(function () { that.reg.resetHash(); console.log("DEBUG: connection lost") });
-    that.mqtt.onConnect(function () {
-        console.log("DEBUG: connected");
-        if(devices){
-            devices.forEach(function (device) {
-                if(device.uri){
-                    try{
-                        that.mqtt.subscribe("command/"+device.uri+"/+",  {qos: 2});
-                    }catch (e) {
-                        that.reg.resetHash();
-                        console.log("ERROR: unable to subscribe", e, e.message, JSON.stringify(e));
+        that.mqtt = new MQTTClient(host, port, mqttOptions);
+        that.mqtt.onLog(function (msg) { console.log("DEBUG: ", msg.toString()); });
+        that.mqtt.onError(function (error) { console.log("ERROR: ", error.toString()); });
+        that.mqtt.onDisconnect(function () { that.reg.resetHash(); console.log("DEBUG: connection lost") });
+        that.mqtt.onConnect(function () {
+            console.log("DEBUG: connected");
+            if(devices){
+                devices.forEach(function (device) {
+                    if(device.uri){
+                        try{
+                            that.mqtt.subscribe("command/"+device.uri+"/+",  {qos: 2});
+                        }catch (e) {
+                            that.reg.resetHash();
+                            console.log("ERROR: unable to subscribe", e, e.message, JSON.stringify(e));
+                        }
+                    }else{
+                        console.log("WARNING: missing uri in device; ignore", JSON.stringify(device));
                     }
-                }else{
-                    console.log("WARNING: missing uri in device; ignore", JSON.stringify(device));
-                }
-            })
-        }
-    });
-    that.mqtt.connect();
+                })
+            }
+        });
+        that.mqtt.connect();
+    }, 30*1000)
 };
 
 SenergyConnector.prototype.handleTcpCommandMessage = function(topic, message){
