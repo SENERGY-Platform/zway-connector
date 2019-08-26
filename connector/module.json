@@ -5,19 +5,28 @@
     "author": "Ingo Rößner",
     "homepage": "",
     "icon": "icon.png",
-    "moduleName": "SeplConnector",
-    "version": "1.0.0",
+    "moduleName": "SenergyConnector",
+    "version": "0.0.1",
     "maturity": "beta",
     "defaults" : {
         "title" : "__m_title__",
         "description" : "__m_descr__",
-        "sepl_url":"ws://connector:8080",
-        "startupdelay": 20
+        "mqtt_url":"tcp://connector:1883",
+        "iot_repo_url": "https://api.sepl.infai.org/iot-device-repo",
+        "auth_url": "https://auth.sepl.infai.org"
     },
     "schema": {
         "type": "object",
         "properties": {
-            "sepl_url": {
+            "iot_repo_url": {
+                "type": "string",
+                "required": true
+            },
+            "auth_url": {
+                "type": "string",
+                "required": true
+            },
+            "mqtt_url": {
                 "type": "string",
                 "required": true
             },
@@ -28,18 +37,22 @@
             "password": {
                 "type": "string",
                 "required": false
-            },
-            "startupdelay": {
-                "type": "number",
-                "required": true
             }
         }
     },
     "options" : {
         "fields": {
-            "sepl_url": {
-                "label": "__l_sepl_url__",
-                "helper": "__l_sepl_url_help__"
+            "iot_repo_url": {
+                "label": "__l_iot_repo_url__",
+                "helper": "__l_iot_repo_url_help__"
+            },
+            "auth_url": {
+                "label": "__l_auth_url__",
+                "helper": "__l_auth_url_help__"
+            },
+            "mqtt_url": {
+                "label": "__l_mqtt_url__",
+                "helper": "__l_mqtt_url_help__"
             },
             "user": {
                 "label": "__l_user__",
@@ -48,10 +61,6 @@
             "password": {
                 "label": "__l_pw__",
                 "helper": "__h_pw__"
-            },
-            "startupdelay": {
-                "label": "__l_startupdelay__",
-                "helper": "__h_startupdelay__"
             }
         }
     }

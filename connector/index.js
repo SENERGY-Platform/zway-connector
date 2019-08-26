@@ -1,377 +1,126 @@
-/*
- *    Copyright 2018 InfAI (CC SES)
- *
- *    Licensed under the Apache License, Version 2.0 (the "License");
- *    you may not use this file except in compliance with the License.
- *    You may obtain a copy of the License at
- *
- *        http://www.apache.org/licenses/LICENSE-2.0
- *
- *    Unless required by applicable law or agreed to in writing, software
- *    distributed under the License is distributed on an "AS IS" BASIS,
- *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *    See the License for the specific language governing permissions and
- *    limitations under the License.
- */
 
-function uuidv4() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-        return v.toString(16);
-    });
+function SenergyConnector (id, controller) {
+    SenergyConnector.super_.call(this, id, controller);
 }
 
-function getId(){
-    var result = "";
-    var object_name = "sepl_id";
-    var idObject = loadObject(object_name);
-    if(idObject && idObject.id){
-        result = idObject.id;
-    }else{
-        result = uuidv4();
-        saveObject(object_name, {id: result});
+inherits(SenergyConnector, AutomationModule);
+_module = SenergyConnector;
+
+
+const SenergyClientId = "client-connector-lib";
+
+
+SenergyConnector.prototype.init = function (config) {
+    console.log("Init SenergyConnector");
+    SenergyConnector.super_.prototype.init.call(this, config);
+    this.config = JSON.parse(JSON.stringify(config));
+    var parsedUrl = parseUrl(this.config.mqtt_url);
+    if(!parsedUrl){
+        console.log("ERROR: unable to parse mqtt address", this.config.mqtt_url);
+        return
     }
-    return result;
-}
+    this.config.protocol = parsedUrl.protocol;
 
-function MD5(s){function L(k,d){return(k<<d)|(k>>>(32-d))}function K(G,k){var I,d,F,H,x;F=(G&2147483648);H=(k&2147483648);I=(G&1073741824);d=(k&1073741824);x=(G&1073741823)+(k&1073741823);if(I&d){return(x^2147483648^F^H)}if(I|d){if(x&1073741824){return(x^3221225472^F^H)}else{return(x^1073741824^F^H)}}else{return(x^F^H)}}function r(d,F,k){return(d&F)|((~d)&k)}function q(d,F,k){return(d&k)|(F&(~k))}function p(d,F,k){return(d^F^k)}function n(d,F,k){return(F^(d|(~k)))}function u(G,F,aa,Z,k,H,I){G=K(G,K(K(r(F,aa,Z),k),I));return K(L(G,H),F)}function f(G,F,aa,Z,k,H,I){G=K(G,K(K(q(F,aa,Z),k),I));return K(L(G,H),F)}function D(G,F,aa,Z,k,H,I){G=K(G,K(K(p(F,aa,Z),k),I));return K(L(G,H),F)}function t(G,F,aa,Z,k,H,I){G=K(G,K(K(n(F,aa,Z),k),I));return K(L(G,H),F)}function e(G){var Z;var F=G.length;var x=F+8;var k=(x-(x%64))/64;var I=(k+1)*16;var aa=Array(I-1);var d=0;var H=0;while(H<F){Z=(H-(H%4))/4;d=(H%4)*8;aa[Z]=(aa[Z]| (G.charCodeAt(H)<<d));H++}Z=(H-(H%4))/4;d=(H%4)*8;aa[Z]=aa[Z]|(128<<d);aa[I-2]=F<<3;aa[I-1]=F>>>29;return aa}function B(x){var k="",F="",G,d;for(d=0;d<=3;d++){G=(x>>>(d*8))&255;F="0"+G.toString(16);k=k+F.substr(F.length-2,2)}return k}function J(k){k=k.replace(/rn/g,"n");var d="";for(var F=0;F<k.length;F++){var x=k.charCodeAt(F);if(x<128){d+=String.fromCharCode(x)}else{if((x>127)&&(x<2048)){d+=String.fromCharCode((x>>6)|192);d+=String.fromCharCode((x&63)|128)}else{d+=String.fromCharCode((x>>12)|224);d+=String.fromCharCode(((x>>6)&63)|128);d+=String.fromCharCode((x&63)|128)}}}return d}var C=Array();var P,h,E,v,g,Y,X,W,V;var S=7,Q=12,N=17,M=22;var A=5,z=9,y=14,w=20;var o=4,m=11,l=16,j=23;var U=6,T=10,R=15,O=21;s=J(s);C=e(s);Y=1732584193;X=4023233417;W=2562383102;V=271733878;for(P=0;P<C.length;P+=16){h=Y;E=X;v=W;g=V;Y=u(Y,X,W,V,C[P+0],S,3614090360);V=u(V,Y,X,W,C[P+1],Q,3905402710);W=u(W,V,Y,X,C[P+2],N,606105819);X=u(X,W,V,Y,C[P+3],M,3250441966);Y=u(Y,X,W,V,C[P+4],S,4118548399);V=u(V,Y,X,W,C[P+5],Q,1200080426);W=u(W,V,Y,X,C[P+6],N,2821735955);X=u(X,W,V,Y,C[P+7],M,4249261313);Y=u(Y,X,W,V,C[P+8],S,1770035416);V=u(V,Y,X,W,C[P+9],Q,2336552879);W=u(W,V,Y,X,C[P+10],N,4294925233);X=u(X,W,V,Y,C[P+11],M,2304563134);Y=u(Y,X,W,V,C[P+12],S,1804603682);V=u(V,Y,X,W,C[P+13],Q,4254626195);W=u(W,V,Y,X,C[P+14],N,2792965006);X=u(X,W,V,Y,C[P+15],M,1236535329);Y=f(Y,X,W,V,C[P+1],A,4129170786);V=f(V,Y,X,W,C[P+6],z,3225465664);W=f(W,V,Y,X,C[P+11],y,643717713);X=f(X,W,V,Y,C[P+0],w,3921069994);Y=f(Y,X,W,V,C[P+5],A,3593408605);V=f(V,Y,X,W,C[P+10],z,38016083);W=f(W,V,Y,X,C[P+15],y,3634488961);X=f(X,W,V,Y,C[P+4],w,3889429448);Y=f(Y,X,W,V,C[P+9],A,568446438);V=f(V,Y,X,W,C[P+14],z,3275163606);W=f(W,V,Y,X,C[P+3],y,4107603335);X=f(X,W,V,Y,C[P+8],w,1163531501);Y=f(Y,X,W,V,C[P+13],A,2850285829);V=f(V,Y,X,W,C[P+2],z,4243563512);W=f(W,V,Y,X,C[P+7],y,1735328473);X=f(X,W,V,Y,C[P+12],w,2368359562);Y=D(Y,X,W,V,C[P+5],o,4294588738);V=D(V,Y,X,W,C[P+8],m,2272392833);W=D(W,V,Y,X,C[P+11],l,1839030562);X=D(X,W,V,Y,C[P+14],j,4259657740);Y=D(Y,X,W,V,C[P+1],o,2763975236);V=D(V,Y,X,W,C[P+4],m,1272893353);W=D(W,V,Y,X,C[P+7],l,4139469664);X=D(X,W,V,Y,C[P+10],j,3200236656);Y=D(Y,X,W,V,C[P+13],o,681279174);V=D(V,Y,X,W,C[P+0],m,3936430074);W=D(W,V,Y,X,C[P+3],l,3572445317);X=D(X,W,V,Y,C[P+6],j,76029189);Y=D(Y,X,W,V,C[P+9],o,3654602809);V=D(V,Y,X,W,C[P+12],m,3873151461);W=D(W,V,Y,X,C[P+15],l,530742520);X=D(X,W,V,Y,C[P+2],j,3299628645);Y=t(Y,X,W,V,C[P+0],U,4096336452);V=t(V,Y,X,W,C[P+7],T,1126891415);W=t(W,V,Y,X,C[P+14],R,2878612391);X=t(X,W,V,Y,C[P+5],O,4237533241);Y=t(Y,X,W,V,C[P+12],U,1700485571);V=t(V,Y,X,W,C[P+3],T,2399980690);W=t(W,V,Y,X,C[P+10],R,4293915773);X=t(X,W,V,Y,C[P+1],O,2240044497);Y=t(Y,X,W,V,C[P+8],U,1873313359);V=t(V,Y,X,W,C[P+15],T,4264355552);W=t(W,V,Y,X,C[P+6],R,2734768916);X=t(X,W,V,Y,C[P+13],O,1309151649);Y=t(Y,X,W,V,C[P+4],U,4149444226);V=t(V,Y,X,W,C[P+11],T,3174756917);W=t(W,V,Y,X,C[P+2],R,718787259);X=t(X,W,V,Y,C[P+9],O,3951481745);Y=K(Y,h);X=K(X,E);W=K(W,v);V=K(V,g)}var i=B(Y)+B(X)+B(W)+B(V);return i.toLowerCase()};
+    executeFile("userModules/SenergyConnector/hash.js");
+    executeFile("userModules/SenergyConnector/reg.js");
+    executeFile("userModules/SenergyConnector/mqtt/ws.js");
+    executeFile("userModules/SenergyConnector/mqtt/tcp.js");
+    executeFile("userModules/SenergyConnector/provisioning.js");
+    executeFile("userModules/SenergyConnector/zwayhelper.js");
 
-function devicesHash(devices){
-    var hashes = [];
-    devices.forEach(function(element){
-        hashes.push(deviceHash(element));
-    });
-    return arrayHash(hashes);
-}
+    var that = this;
+    setTimeout(function(){that.start()}, 20000)
+};
 
-function deviceHash(device) {
-    return MD5("uri:"+device.uri+",name:"+device.name+",tags:"+arrayHash(device.tags))
-}
+SenergyConnector.prototype.stop = function () {
+    console.log("Stop SenergyConnector");
+    this.unwatchMetrics();
+    SenergyConnector.super_.prototype.stop.call(this);
+};
 
-function arrayHash(arr){
-    if(!arr){
-        return "";
+SenergyConnector.prototype.start = function () {
+    console.log("Start SenergyConnector");
+    this.reg = new Reg();
+    this.provisioning();
+    var that = this;
+    setInterval(function(){
+        try{
+            that.provisioning();
+        }catch (e) {
+            console.log("ERROR: start::provisioning ", e, e.message);
+        }
+    }, 15000);
+    this.watchMetrics();
+};
+
+SenergyConnector.prototype.provisioning = function () {
+    var that = this;
+    if(that.provisioningLock){
+        console.log("DEBUG: provisioning is running...");
+        return
     }
-    if(!arr.sort){
-        return MD5(JSON.stringify(arr));
-    }
-    return MD5(JSON.stringify(arr.sort()));
-}
+    that.provisioningLock = true;
+    try{
+        var config = this.config;
+        var devices = getZwayDevices(this.controller);
+        var diff = this.reg.diff(devices);
+        if(diff){
+            console.log("DEBUG: update provisioning");
+            var result = login(config.auth_url, SenergyClientId, config.user, config.password);
 
-
-function SeplConnector (id, controller) {
-    SeplConnector.super_.call(this, id, controller);
-}
-
-inherits(SeplConnector, AutomationModule);
-_module = SeplConnector;
-
-
-SeplConnector.prototype.init = function (config) {
-    console.log("Start SeplConnector with delay: ", config.startupdelay, "s");
-    SeplConnector.super_.prototype.init.call(this, config);
-    var self = this;
-
-    setTimeout(function(){
-        console.log("Start SeplConnector");
-        executeFile("userModules/SeplConnector/protocol.js");
-        executeFile("userModules/SeplConnector/connector.js");
-
-        self.onMetricsChange = function(vDev){
-            if(self.onMetricsChangeHandler){
-                self.onMetricsChangeHandler(vDev);
+            if(result.err){
+                that.provisioningLock = false;
+                console.log("login error:", JSON.stringify(result.err));
+                return
             }
-        };
-
-        self.watchMetrics();
-
-        self.UriPrefix = getId();
-
-        //TODO: configuratable zway name (zway == Z-Wave Network Access.config.name (internalName))
-        self.zwayModuleName = "zway";
-
-        self.client = SeplConnectorClient({
-            user: config.user,
-            pw: config.password,
-            url: config.sepl_url,
-            getHash: devicesHash,
-            getGatewayId: function(){
-                var result = "";
-                var object_name = "sepl_gw_id";
-                var idObject = loadObject(object_name);
-                if(idObject && idObject.id){
-                    result = idObject.id;
-                }
-                return result;
-            },
-            saveGatewayId: function(gwId){
-                var object_name = "sepl_gw_id";
-                saveObject(object_name, {id: gwId});
-            },
-            getDevices:function(){return self.getDevices()},
-            onCommand: function(msg, respond){
-                console.log("receive command: ", JSON.stringify(msg));
-                var command = msg.service_url;
-                var id = msg.device_url;
-                var metrics = msg.protocol_parts && msg.protocol_parts.length == 1 && msg.protocol_parts[0] && msg.protocol_parts[0].name == "metrics" && JSON.parse(msg.protocol_parts[0].value);
-                msg.protocol_parts = self.sendCommandToZway(id, command, metrics);
-                respond(msg);
-            },
-            onStartupFinished: function(){
-                if(self.startupFinished){
+            var token = result.token;
+            provisionHub(config.iot_repo_url, token, "", devices, hubIdProvider, function(result){
+                if(result.err){
+                    that.provisioningLock = false;
+                    console.log("ERROR: provisioning error:", JSON.stringify(result.err));
                     return
                 }
-                self.startupFinished = true;
-                self.onMetricsChangeHandler = function (vDev){
-                    var deviceUri = self.getGloablDeviceUri(vDev);
-
-                    //sepl_get_level
-                    var metrics_level = JSON.stringify(self.getMetricsLevel(vDev));
-                    console.log("metric level change: ", deviceUri, metrics_level);
-                    var levelMsg = [{
-                        name: "metrics",
-                        value: metrics_level
-                    }];
-                    self.client.sendEvent(deviceUri, "sepl_get_level", levelMsg, null, function(err){
-                        console.log("ERROR on event send: ", JSON.stringify(err))
-                    });
-
-                    //sepl_get
-                    var metrics = JSON.stringify(self.getMetrics(vDev));
-                    console.log("metric change: ", deviceUri, metrics);
-                    var msg = [{
-                        name: "metrics",
-                        value: metrics
-                    }];
-                    self.client.sendEvent(deviceUri, "sepl_get", msg, null, function(err){
-                        console.log("ERROR on event send: ", JSON.stringify(err))
-                    });
-                };
-                self.handleDevices();
-            }
-        });
-
-    }, config.startupdelay*1000);
-
-};
-
-SeplConnector.prototype.getZwayIdMap = function(){
-    if(!this.zwayIdMap){
-        this.zwayIdMap = fs.loadJSON("userModules/SeplConnector/typemapping.json");
-    }
-    return this.zwayIdMap;
-};
-
-SeplConnector.prototype.getTags = function(){
-    var self = this;
-    var result = {};
-
-    var pysicalDevices = {};
-    if(global.ZWave && global.ZWave[this.zwayModuleName]){
-        pysicalDevices = JSON.parse(global.ZWave[this.zwayModuleName].Data("").body).devices;
-    }
-
-    var parsePId = function(vId){
-        //ZWayVDev_zway_12-0-113-7-8-A
-        //ZWayVDev_[Node ID]:[Instance ID]:[Command Class ID]:[Scale ID]
-        var parts = vId.split("_");
-        var pId = parts[parts.length-1].split("-")[0];
-        return pId
-    };
-
-    self.controller.devices.map(function (vDev) {
-        var pId = parsePId(vDev.id);
-        var pDev = pysicalDevices[pId];
-        var groupName = "";
-        if(pDev){
-            groupName = pDev.data.givenName.value;
-        }
-        if(groupName != ""){
-            result[vDev.id] = [DEVICE_GROUP_TAG_KEY+":"+groupName];
-        }else{
-            result[vDev.id] = [];
-            //result[vDev.id] = ["test_tag:test"];
-        }
-    });
-    return result
-};
-
-
-SeplConnector.prototype.stop = function () {
-    console.log("Start SeplConnector");
-    this.unwatchMetrics();
-    this.client.stop();
-    SeplConnector.super_.prototype.stop.call(this);
-};
-
-SeplConnector.prototype.handleDevices = function(){
-    var self = this;
-    var time = 10 * 1000;
-    self.devicecheck = function(){
-        setTimeout(function(){
-            self.devicecheck();
-            self.deviceChangeHandler();
-        }, time)
-    };
-    self.devicecheck();
-};
-
-SeplConnector.prototype.watchMetrics = function(){
-    var self = this;
-    this.controller.devices.map(function (vDev) {
-        vDev.on("change:metrics:level", self.onMetricsChange);
-    });
-};
-
-SeplConnector.prototype.unwatchMetrics = function(){
-    var self = this;
-    this.controller.devices.map(function (vDev) {
-        if(self.onMetricsChange){
-            vDev.off("change:metrics:level", self.onMetricsChange);
-        }
-    });
-};
-
-SeplConnector.prototype.getMetrics = function(device){
-    var metrics = JSON.parse(JSON.stringify(device.get("metrics")));    //copy metrics
-    metrics.updateTime = device.get("updateTime");
-    if(metrics.icon){
-        delete metrics.icon;
-    }
-    return metrics;
-};
-
-SeplConnector.prototype.getMetricsLevel = function(device){
-    return {level: device.get("metrics").level, updateTime: new Date(device.get("updateTime")*1000).toISOString()};
-};
-
-SeplConnector.prototype.deviceChangeHandler = function(){
-    var self = this;
-    var devices = self.getDevices();
-    var knownMap = self.client.getKnownDevices();
-    var knownList = [];
-    for (var knownUri in knownMap) {
-        if (!knownMap.hasOwnProperty(knownUri)){
-            continue;
-        }
-        knownList.push(knownMap[knownUri]);
-    }
-    var newHash = devicesHash(devices);
-    var oldHash = devicesHash(knownList);
-    if(newHash != oldHash){
-        console.log("sepl: handle changed devices: ", devices.length, newHash, "!=", oldHash);
-        self.unwatchMetrics();
-        self.deregisterMissingDevices(devices, function(deregistered){
-            self.registerDevices(devices, 0, 0, function (registered) {
-                if(deregistered > 0 || registered > 0){
-                    self.client.commit(devicesHash(devices), function (msg) {
-                        console.log("successful commit: ", JSON.stringify(msg));
-                        self.watchMetrics();
-                    }, function (msg) {
-                        console.log("failed commit: ", JSON.stringify(msg));
-                        self.watchMetrics();
-                    })
-                }else{
-                    self.watchMetrics();
+                console.log("DEBUG:",  JSON.stringify(diff));
+                if(diff.removed && diff.removed.length){
+                    result = removeDevices(config.iot_repo_url, token, diff.removed);
+                    if(result.err){
+                        that.provisioningLock = false;
+                        console.log("ERROR: removeDevices():", JSON.stringify(result.err));
+                        return
+                    }
                 }
-            });
-        });
-    }
-};
-
-
-SeplConnector.prototype.getDevices = function(){
-    var self = this;
-    var tags = self.getTags();
-    var zway_to_iot = self.getZwayIdMap();
-    return this.controller.devices.map(function (x) {
-        var uri = self.getGloablDeviceUri(x);
-        return {uri: uri, iot_type: zway_to_iot[x.get("deviceType")], name: x.get("metrics").title, tags:tags[x.id]};
-    });
-};
-
-function deviceChanged(oldDevice, newDevice) {
-    return deviceHash(oldDevice) != deviceHash(newDevice)
-}
-
-SeplConnector.prototype.registerDevices = function(devices, index, registeredCount, then){
-    var self = this;
-    var known = self.client.getKnownDevices();
-    if(index < devices.length){
-        var device = devices[index];
-        if(!known[device.uri] || deviceChanged(known[device.uri], device)){
-            this.client.put(device, function(){
-                self.registerDevices(devices, index+1, registeredCount+1, then);
-            }, function(err){
-                console.log("ERROR on device registering: ", JSON.stringify(err));
-                self.registerDevices(devices, index+1, registeredCount, then);
+                that.reg.set(devices, diff.newHash);
+                that.updateConnection(devices);
+                that.provisioningLock = false;
             });
         }else{
-            self.registerDevices(devices, index+1, registeredCount, then);
+            that.provisioningLock = false;
         }
-    }else if(then){
-        then(registeredCount);
+    }
+    catch (e) {
+        that.provisioningLock = false;
+        console.log("ERROR: catch:", e, e.stack)
     }
 };
 
-SeplConnector.prototype.deregisterDevices = function(devices, index, deregisteredCount, then){
-    var self = this;
-    var known = self.client.getKnownDevices();
-    if(index < devices.length){
-        var device = devices[index];
-        if(known[device]){
-            this.client.remove(device, function(){
-                self.deregisterDevices(devices, index+1, deregisteredCount+1, then);
-            }, function(err){
-                console.log("ERROR on device deregistering: ", JSON.stringify(err));
-                self.deregisterDevices(devices, index+1, deregisteredCount, then);
-            });
-        }else{
-            self.deregisterDevices(devices, index+1, deregisteredCount, then);
-        }
-    }else if(then){
-        then(deregisteredCount);
+SenergyConnector.prototype.updateConnection = function (devices) {
+    if(this.config.protocol == "ws:" || this.config.protocol == "wss:"){
+        return this.updateConnectionWs(devices);
+    }else if(this.config.protocol == "tcp:") {
+        return this.updateConnectionTcp(devices);
+    }else{
+        console.log("ERROR: unknown protocol", this.config.protocol);
     }
 };
 
-SeplConnector.prototype.deregisterMissingDevices = function(devices, then){
-    var self = this;
-    var index = {};
-    for(var i=0; i<devices.length; i++){
-        index[devices[i].uri] = true;
-    }
-    var known = self.client.getKnownDevices();
-    var missingDevices = [];
-    for (var knownUri in known) {
-        // skip loop if the property is from prototype
-        if (!known.hasOwnProperty(knownUri)){
-            continue;
-        }
-        if(!index[knownUri]){
-            missingDevices.push(knownUri);
-        }
-    }
-    this.deregisterDevices(missingDevices, 0, 0, then);
-};
-
-
-SeplConnector.prototype.sendCommandToZway = function(id, command, metrics){
-    var self = this;
-    var device = this.controller.devices.get(self.getLocalDeviceUri(id));
+SenergyConnector.prototype.sendCommandToZway = function(id, command, metrics){
+    console.log("DEBUG: command to zway: ", id, command, metrics);
+    var device = this.controller.devices.get(id);
     if(device){
         if(command == "sepl_get"){
-            var metrics = this.getMetrics(device);
-            return [{
-                name: "metrics",
-                value: JSON.stringify(metrics)
-            }];
-        }else if (command == "sepl_get_level"){
-            var metrics = this.getMetricsLevel(device);
-            console.log("DEBUG", JSON.stringify(metrics));
-            return [{
-                name: "metrics",
-                value: JSON.stringify(metrics)
-            }];
+            return JSON.stringify(getMetrics(device))
+        }else if(command == "sepl_get_level"){
+            return JSON.stringify(getMetricsLevel(device))
         }else{
             device.performCommand(command, metrics);
         }
@@ -379,17 +128,298 @@ SeplConnector.prototype.sendCommandToZway = function(id, command, metrics){
     return null;
 };
 
-
-SeplConnector.prototype.getGloablDeviceUri = function(device){
-    if(this.UriPrefix){
-        return "ZWAY_"+this.UriPrefix+"_"+device.id;
-    }
-    return "ZWAY_"+device.id;
+SenergyConnector.prototype.sendEvent = function(deviceUri, serviceUri, payload){
+    this.send("event/"+deviceUri+"/"+serviceUri, JSON.stringify({metrics: payload}));
 };
 
-SeplConnector.prototype.getLocalDeviceUri = function(globalUri){
-    if(this.UriPrefix){
-        return globalUri.replace("ZWAY_"+this.UriPrefix+"_", "");
-    }
-    return globalUri.replace("ZWAY_", "");
+SenergyConnector.prototype.sendResponse = function(deviceUri, serviceUri, correlationId, payload){
+    var msgSegments = payload ? {metrics: payload} : {};
+    this.send("response/"+deviceUri+"/"+serviceUri, JSON.stringify({payload: msgSegments, correlation_id: correlationId}));
 };
+
+SenergyConnector.prototype.send = function(topic, msg){
+    console.log("SENERGY: send ", topic, msg);
+    if(this.config.protocol == "ws:" || this.config.protocol == "wss:"){
+        return this.sendWs(topic, msg);
+    }else if(this.config.protocol == "tcp:") {
+        return this.sendTcp(topic, msg);
+    }else{
+        console.log("ERROR: unknown protocol", this.config.protocol);
+    }
+};
+
+SenergyConnector.prototype.watchMetrics = function(){
+    var self = this;
+    this.handleZwayEvent = this.getZwayEventHandler();
+    this.controller.devices.map(function (vDev) {
+        vDev.on("change:metrics:level", self.handleZwayEvent);
+    });
+};
+
+SenergyConnector.prototype.unwatchMetrics = function(){
+    var self = this;
+    this.controller.devices.map(function (vDev) {
+        if(self.handleZwayEvent){
+            vDev.off("change:metrics:level", self.handleZwayEvent);
+        }
+    });
+};
+
+SenergyConnector.prototype.getZwayEventHandler = function(){
+    var that = this;
+    return function (vDev) {
+        try{
+            var deviceUri = getGloablDeviceUri(vDev);
+            var payload = JSON.stringify(getMetrics(vDev));
+            that.sendEvent(deviceUri, "sepl_get", payload);
+
+            var level = JSON.stringify(getMetricsLevel(vDev));
+            that.sendEvent(deviceUri, "sepl_get_level", level);
+        }catch (e) {
+            console.log("ERROR: start::provisioning ", e, e.message);
+        }
+
+    }
+};
+
+//ws
+
+SenergyConnector.prototype.updateConnectionWs = function (devices) {
+    console.log("Update Senergy-MQTT-Connection ws", this.config.mqtt_url);
+
+    if(this.mqtt && this.mqtt.disconnect && this.mqtt.client.connected){
+        try{
+            this.mqtt.disconnect();
+        }catch (e) {
+            console.log("ERROR: while disconnecting", e)
+        }
+    }
+    this.mqtt = null;
+
+    var that = this;
+
+    setTimeout(function () {
+        const url = parseUrl(that.config.mqtt_url);
+
+        var host = url.hostname;
+        var port = url.port;
+        var clientId = hubIdProvider.get();
+        var username = that.config.user;
+        var password = that.config.password;
+        var keepAlive = 20;
+        var cleanSession = true;
+        var ssl = url.protocol == "wss:";
+
+        that.mqtt = new Messaging.Client(host, port, clientId);
+
+        that.mqtt.onConnectionLost = function () {
+            console.log("MQTT: lost connection; reset local hash");
+            that.reg.resetHash();
+        };
+
+        that.mqtt.onMessageArrived = function (message) {
+            that.handleWsCommandMessage(message);
+        };
+
+        var options = {
+            timeout: 3,
+            keepAliveInterval: keepAlive,
+            cleanSession: cleanSession,
+            useSSL: ssl,
+            userName: username,
+            password: password,
+            onSuccess: function () {
+                console.log("DEBUG: connected");
+                if(devices){
+                    devices.forEach(function (device) {
+                        if(device.uri){
+                            try{
+                                that.mqtt.subscribe("command/"+device.uri+"/+",  {qos: 2});
+                            }catch (e) {
+                                that.reg.resetHash();
+                                console.log("ERROR: unable to subscribe", e, e.message, JSON.stringify(e));
+                            }
+                        }else{
+                            console.log("WARNING: missing uri in device; ignore", JSON.stringify(device));
+                        }
+                    })
+                }
+            },
+            onFailure: function (err) {
+                console.log("DEBUG: onFailure:", JSON.stringify(err));
+                that.reg.resetHash();
+            }
+        };
+
+        that.mqtt.connect(options);
+    },30 * 1000)
+};
+
+SenergyConnector.prototype.handleWsCommandMessage = function(message){
+    //console.log("handleWsCommandMessage:" + message.payloadString + " qos: " + message.qos, message.destinationName);
+    try{
+        var msg = JSON.parse(message.payloadString);
+        var correlationId = msg.correlation_id;
+        var payload = msg.payload.metrics;
+        var topic = message.destinationName;
+        var topicParts = topic.split("/");
+        var globalDeviceUri = topicParts[1];
+        var serviceUri = topicParts[2];
+        var localDeviceUri = getLocalDeviceUri(globalDeviceUri);
+        var metrics = payload && JSON.parse(payload);
+        var result = this.sendCommandToZway(localDeviceUri, serviceUri, metrics);
+        this.sendResponse(globalDeviceUri, serviceUri, correlationId, result);
+    }catch (e) {
+        console.log("ERROR: unable to handle ws command message", e, e.message, JSON.stringify(e))
+    }
+};
+
+SenergyConnector.prototype.sendWs = function(topic, msg){
+    if(this.mqtt && this.mqtt.send && this.mqtt.client.connected){
+        try{
+            var message = new Messaging.Message(msg);
+            message.destinationName = topic;
+            message.qos = 0;
+            message.retained = false;
+            this.mqtt.send(message);
+        }catch (e) {
+            console.log("ERROR: unable to send ws message", e, e.message, JSON.stringify(e), topic, msg);
+            this.reg.resetHash();
+        }
+    }else{
+        console.log("WARNING: mqtt not connected; unable to send ws message for", topic, msg)
+    }
+};
+
+
+// tcp
+
+SenergyConnector.prototype.updateConnectionTcp = function (devices) {
+    console.log("Update Senergy-MQTT-Connection tcp", this.config.mqtt_url);
+
+    if(this.mqtt && this.mqtt.close && this.mqtt.connected){
+        try{
+            that.mqtt.onDisconnect(function () {console.log("DEBUG: close inception")});
+            this.mqtt.close();
+        }catch (e) {
+            console.log("ERROR: while disconnecting", e)
+        }
+    }
+    this.mqtt = null;
+
+    var that = this;
+    setTimeout(function () {
+        const url = parseUrl(that.config.mqtt_url);
+
+        var host = url.hostname;
+        var port = url.port;
+        var clientId = hubIdProvider.get();
+        var username = that.config.user;
+        var password = that.config.password;
+        var keepAlive = 20;
+        var cleanSession = true;
+
+        var mqttOptions = {
+            client_id: clientId,
+            will_flag: false,
+            username: username,
+            password: password,
+            ping_interval: keepAlive*1000,
+            ping_timeout: 60,
+            connect_timeout: 60,
+            clean_session: cleanSession,
+            infoLogEnabled: false,
+            onMessageArrived: function (topic, message) {
+                console.log("DEBUG: receive command", topic, message);
+                that.handleTcpCommandMessage(topic, message);
+            }
+        };
+
+        that.mqtt = new MQTTClient(host, port, mqttOptions);
+        that.mqtt.onLog(function (msg) { console.log("DEBUG: ", msg.toString()); });
+        that.mqtt.onError(function (error) { console.log("ERROR: ", error.toString()); });
+        that.mqtt.onDisconnect(function () { that.reg.resetHash(); console.log("DEBUG: connection lost") });
+        that.mqtt.onConnect(function () {
+            console.log("DEBUG: connected");
+            if(devices){
+                devices.forEach(function (device) {
+                    if(device.uri){
+                        try{
+                            that.mqtt.subscribe("command/"+device.uri+"/+",  {qos: 2});
+                        }catch (e) {
+                            that.reg.resetHash();
+                            console.log("ERROR: unable to subscribe", e, e.message, JSON.stringify(e));
+                        }
+                    }else{
+                        console.log("WARNING: missing uri in device; ignore", JSON.stringify(device));
+                    }
+                })
+            }
+        });
+        that.mqtt.connect();
+    }, 30*1000)
+};
+
+SenergyConnector.prototype.handleTcpCommandMessage = function(topic, message){
+    try{
+        var msg = JSON.parse(message);
+        var correlationId = msg.correlation_id;
+        var payload = msg.payload.metrics;
+        var topic = topic;
+        var topicParts = topic.split("/");
+        var globalDeviceUri = topicParts[1];
+        var serviceUri = topicParts[2];
+        var localDeviceUri = getLocalDeviceUri(globalDeviceUri);
+        var metrics = payload && JSON.parse(payload);
+        var result = this.sendCommandToZway(localDeviceUri, serviceUri, metrics);
+        this.sendResponse(globalDeviceUri, serviceUri, correlationId, result);
+    }catch (e) {
+        console.log("ERROR: unable to handle tcp command message", e, e.message, JSON.stringify(e))
+    }
+};
+
+SenergyConnector.prototype.sendTcp = function(topic, msg){
+    if(this.mqtt && this.mqtt.publish && this.mqtt.connected){
+        try{
+            this.mqtt.publish(topic, msg.trim(), {qos_level: 0, retain: false});
+        }catch (e) {
+            console.log("ERROR: unable to send tcp message", e, e.message, JSON.stringify(e), topic, msg);
+            this.reg.resetHash();
+        }
+    }else{
+        console.log("WARNING: mqtt not connected; unable to send tcp message for", topic, msg)
+    }
+};
+
+
+// helper
+
+function getMetrics(device){
+    var metrics = JSON.parse(JSON.stringify(device.get("metrics")));
+    metrics.updateTime = device.get("updateTime");
+    if(metrics.icon){
+        delete metrics.icon;
+    }
+    return metrics;
+}
+
+function getMetricsLevel(device){
+    return {level: device.get("metrics").level, updateTime: new Date(device.get("updateTime")*1000).toISOString()};
+}
+
+function parseUrl(mqtt_url) {
+    var result = {};
+    var parts = mqtt_url.split("//");
+    if(parts.length<2){
+        return false
+    }
+    result.protocol = parts[0];
+    parts = parts[1].split(":");
+    if(parts.length<2){
+        return false
+    }
+    result.hostname = parts[0];
+    parts = parts[1].split("/");
+    result.port = parseInt(parts[0]);
+    return result
+}
