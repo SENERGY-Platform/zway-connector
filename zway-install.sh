@@ -129,6 +129,4 @@ wget -4 http://razberry.z-wave.me/mongoose.pkg.rPi.tgz -P $TEMP_DIR
 # Installing webserver mongoose for webif
 tar -zxf $TEMP_DIR/mongoose.pkg.rPi.tgz -C /
 
-echo "Thank you for using RaZberry!"
-
 exit 0
