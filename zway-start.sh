@@ -152,6 +152,6 @@ fi
 echo "Start mongoose http server"
 /etc/init.d/mongoose start
 
-echo "Starting z-way-server"
+echo "Start z-way-server"
 ./z-way-server
 
