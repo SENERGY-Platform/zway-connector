@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [ -z "$ZWAY_VERSION" ]; then
+  echo "No version provided"
+  exit 1
+fi
+
 # install old libs for z-way on raspbian stretch
 
 IS_STRETCH=`cat /etc/*-release | grep stretch`
@@ -113,9 +118,9 @@ fi
 write_upi "40%\nGetting Z-Way for Raspberry Pi"
 #####################################
 
-FILE=`basename z-way-server/z-way-server-RaspberryPiXTools-v2.3.7.tgz`
+FILE="z-way-server-RaspberryPiXTools-v${ZWAY_VERSION}.tgz"
 echo "Getting Z-Way for Raspberry Pi and installing"
-wget -4 http://razberry.z-wave.me/z-way-server/z-way-server-RaspberryPiXTools-v2.3.7.tgz -P $TEMP_DIR/
+wget -4 http://razberry.z-wave.me/z-way-server/${FILE} -P $TEMP_DIR/
 
 ##### The percentage of updates #####
 write_upi "50%\nExtracting new z-way-server"
@@ -143,7 +148,7 @@ else
 fi
 
 mkdir -p /etc/z-way
-echo "v2.3.7" > /etc/z-way/VERSION
+echo "$ZWAY_VERSION" > /etc/z-way/VERSION
 echo "razberry" > /etc/z-way/box_type
 
 
@@ -186,4 +191,3 @@ tar -zxf $TEMP_DIR/mongoose.pkg.rPi.tgz -C /
 echo "Thank you for using RaZberry!"
 
 exit 0
-
