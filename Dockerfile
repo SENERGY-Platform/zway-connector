@@ -2,7 +2,7 @@ FROM arm32v7/debian:stretch
 
 ENV LD_LIBRARY_PATH=/opt/z-way-server/libs
 ENV PATH=/opt/z-way-server:$PATH
-#ENV ZWAY_VERSION=2.3.7
+ENV ZWAY_VERSION=2.3.7
 
 RUN apt-get update
 RUN apt-get -y install wget sharutils tzdata gawk libc-ares2 libavahi-compat-libdnssd-dev libarchive-dev
