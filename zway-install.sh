@@ -85,10 +85,7 @@ then
 	done
 fi
 
-# Check if Z-Way was already installed in /opt/z-way-server
-upgrade_zway="no"
 echo "z-way-server new installation"
-
 
 # Check symlinks
 if [[ ! -e /usr/lib/arm-linux-gnueabihf/libssl.so ]]
