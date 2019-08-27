@@ -121,8 +121,6 @@ wget -4 http://razberry.z-wave.me/z-way-server/z-way-server-RaspberryPiXTools-v2
 write_upi "50%\nExtracting new z-way-server"
 #####################################
 
-# remove z-way-server if exist
-rm -rf $TEMP_DIR/z-way-server
 # Extracting z-way-server
 echo "Extracting new z-way-server"
 tar -zxf $TEMP_DIR/$FILE -C $TEMP_DIR
