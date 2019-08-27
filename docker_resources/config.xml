@@ -1,6 +1,0 @@
-<config>
-    <automation-dir>automation</automation-dir>
-    <log-file>/var/log/z-way-server.log</log-file>
-    <log-level>1</log-level>
-    <debug-port></debug-port>
-</config>
