@@ -6,7 +6,6 @@ if [ -z "$ZWAY_VERSION" ]; then
 fi
 
 # install old libs for z-way on raspbian stretch
-
 IS_STRETCH=`cat /etc/*-release | grep stretch`
 if [[ ! -z $IS_STRETCH ]]
 then
@@ -39,27 +38,10 @@ else
 	echo "No Raspbian Stretch system detected!"
 fi
 
-
-# installer zway to raspberry
-
 INSTALL_DIR=/opt
 ZWAY_DIR=$INSTALL_DIR/z-way-server
 TEMP_DIR=/tmp
 BOXED=`[ -e /etc/z-way/box_type ] && echo yes`
-
-if [[ $ZWAY_UPIF ]]; then
-    write_upi() {
-	echo -e $1 > $ZWAY_UPIF
-    }
-else
-    write_upi() {
-	true;
-    }
-fi
-
-##### The percentage of updates #####
-write_upi "10%\nStarting upgrading"
-#####################################
 
 # Check for root priviledges
 if [[ $(id -u) != 0 ]]
@@ -90,8 +72,6 @@ then
 	done
 fi
 
-echo "z-way-server new installation"
-
 # Check symlinks
 if [[ ! -e /usr/lib/arm-linux-gnueabihf/libssl.so ]]
 	then
@@ -114,34 +94,20 @@ then
 	ln -s /usr/lib/arm-linux-gnueabihf/libarchive.so /usr/lib/arm-linux-gnueabihf/libarchive.so.12
 fi
 
-##### The percentage of updates #####
-write_upi "40%\nGetting Z-Way for Raspberry Pi"
-#####################################
-
+# Download z-way-server
+echo "Downloading z-way-server"
 FILE="z-way-server-RaspberryPiXTools-v${ZWAY_VERSION}.tgz"
 echo "Getting Z-Way for Raspberry Pi and installing"
 wget -4 http://razberry.z-wave.me/z-way-server/${FILE} -P $TEMP_DIR/
 
-##### The percentage of updates #####
-write_upi "50%\nExtracting new z-way-server"
-#####################################
-
-# Extracting z-way-server
-echo "Extracting new z-way-server"
+# Extract z-way-server
+echo "Extracting z-way-server"
 tar -zxf $TEMP_DIR/$FILE -C $TEMP_DIR
 
-
-##### The percentage of updates #####
-write_upi "60%\nMaking backup and installing Z-Way"
-#####################################
-
-# If downloading and extracting is ok, then make backup and move z-way-server from /tmp to /data
 if [[ "$?" -eq "0" ]]; then
 	mv $TEMP_DIR/z-way-server $INSTALL_DIR/
-	echo "New version z-way-server installed"
+	echo "z-way-server installed"
 else
-	write_upi "30%\nDownloading and extracting z-way-server failed"
-
 	echo "Downloading and extracting z-way-server failed"
 	echo "Exiting"
 	exit 1
@@ -151,42 +117,17 @@ mkdir -p /etc/z-way
 echo "$ZWAY_VERSION" > /etc/z-way/VERSION
 echo "razberry" > /etc/z-way/box_type
 
-
-##### The percentage of updates #####
-write_upi "70%\nGetting Webif for Raspberry Pi and installing"
-#####################################
-
 # Getting Webif and installing
 echo "Getting Webif for Raspberry Pi and installing"
 wget -4 http://razberry.z-wave.me/webif_raspberry.tar.gz -O - | tar -zx -C /
-
-##### The percentage of updates #####
-write_upi "80%\nGetting webserver mongoose for Webif"
-#####################################
 
 # Getting webserver mongoose for webif
 cd $TEMP_DIR
 echo "Getting webserver mongoose for Webif"
 wget -4 http://razberry.z-wave.me/mongoose.pkg.rPi.tgz -P $TEMP_DIR
 
-##### The percentage of updates #####
-write_upi "90%\nRestarting Webif and Z-Way"
-#####################################
-
 # Installing webserver mongoose for webif
 tar -zxf $TEMP_DIR/mongoose.pkg.rPi.tgz -C /
-
-
-# Prepare AMA0
-# sed 's/console=ttyAMA0,115200//; s/kgdboc=ttyAMA0,115200//; s/console=serial0,115200//' /boot/cmdline.txt > /tmp/zway_install_cmdline.txt
-
-
-# Transform old DevicesData.xml to new format
-#(cd $ZWAY_DIR && test -x ./z-cfg-update && ls -1 config/zddx/*.xml > /dev/null 2>&1 | LD_LIBRARY_PATH=./libs xargs -l ./z-cfg-update)
-
-
-# Make sure to save changes
-#sync
 
 echo "Thank you for using RaZberry!"
 
