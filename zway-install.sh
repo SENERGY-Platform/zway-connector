@@ -39,7 +39,6 @@ else
 fi
 
 INSTALL_DIR=/opt
-ZWAY_DIR=$INSTALL_DIR/z-way-server
 TEMP_DIR=/tmp
 BOXED=`[ -e /etc/z-way/box_type ] && echo yes`
 
