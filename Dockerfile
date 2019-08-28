@@ -15,6 +15,7 @@ COPY zway-start.sh /opt/zway-start.sh
 RUN chmod +x /opt/zway-install.sh && chmod +x /opt/zway-start.sh && /opt/zway-install.sh
 COPY config.xml /opt/z-way-server/config.xml
 COPY connector-app /opt/z-way-server/automation/userModules/SenergyConnector
+RUN chmod ug+rwx /opt/z-way-server/config.xml && chmod -R ug+rwx /opt/z-way-server/automation/userModules/SenergyConnector
 
 WORKDIR /opt/z-way-server/
 
