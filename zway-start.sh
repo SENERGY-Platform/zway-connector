@@ -62,8 +62,5 @@ fi
 echo "Start mongoose http server"
 /etc/init.d/mongoose start
 
-echo "Update vendor database"
-(cd ZDDX && ./UpdateXMLs.sh)
-
 echo "Start z-way-server"
 ./z-way-server
