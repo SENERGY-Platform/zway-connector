@@ -101,7 +101,7 @@ wget -4 http://razberry.z-wave.me/z-way-server/${FILE} -P $TEMP_DIR/
 
 # Extract z-way-server
 echo "Extracting z-way-server"
-tar -zxf $TEMP_DIR/$FILE -C $TEMP_DIR
+tar -zxf $TEMP_DIR/$FILE --no-same-owner -C $TEMP_DIR
 
 if [[ "$?" -eq "0" ]]; then
 	mv $TEMP_DIR/z-way-server $INSTALL_DIR/
@@ -118,7 +118,7 @@ echo "razberry" > /etc/z-way/box_type
 
 # Getting Webif and installing
 echo "Getting Webif for Raspberry Pi and installing"
-wget -4 http://razberry.z-wave.me/webif_raspberry.tar.gz -O - | tar -zx -C /
+wget -4 http://razberry.z-wave.me/webif_raspberry.tar.gz -O - | tar -zx --no-same-owner -C /
 
 # Getting webserver mongoose for webif
 cd $TEMP_DIR
@@ -126,6 +126,6 @@ echo "Getting webserver mongoose for Webif"
 wget -4 http://razberry.z-wave.me/mongoose.pkg.rPi.tgz -P $TEMP_DIR
 
 # Installing webserver mongoose for webif
-tar -zxf $TEMP_DIR/mongoose.pkg.rPi.tgz -C /
+tar -zxf $TEMP_DIR/mongoose.pkg.rPi.tgz --no-same-owner -C /
 
 exit 0
