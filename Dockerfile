@@ -1,5 +1,7 @@
 FROM arm32v7/debian:stretch-slim
 
+USER root
+
 ENV LD_LIBRARY_PATH=/opt/z-way-server/libs
 ENV PATH=/opt/z-way-server:$PATH
 ENV ZWAY_VERSION=2.3.8
