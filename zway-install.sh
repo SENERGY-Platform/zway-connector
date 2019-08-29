@@ -1,5 +1,7 @@
 #!/bin/bash
 
+ZWAY_VERSION=$1
+
 if [ -z "$ZWAY_VERSION" ]; then
   echo "No version provided"
   exit 1
