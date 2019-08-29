@@ -188,7 +188,9 @@ SenergyConnector.prototype.updateConnectionWs = function (devices) {
     console.log("Update Senergy-MQTT-Connection ws", this.config.mqtt_url);
 
     if(this.mqtt && this.mqtt.disconnect && this.mqtt.client.connected){
+
         try{
+            this.mqtt.onConnectionLost = function () {console.log("MQTT: Disconnect")};
             this.mqtt.disconnect();
         }catch (e) {
             console.log("ERROR: while disconnecting", e)
