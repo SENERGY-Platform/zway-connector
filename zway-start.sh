@@ -54,6 +54,7 @@ esac
 	chmod +x /etc/init.d/zbw_autosetup
 	/etc/init.d/zbw_autosetup start
 	touch /opt/initialized
+	echo "Update vendor database"
 	(cd ZDDX && ./UpdateXMLs.sh)
 else
 	echo "Start zbw_connect"
