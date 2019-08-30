@@ -35,6 +35,11 @@ SenergyConnector.prototype.init = function (config) {
 SenergyConnector.prototype.stop = function () {
     console.log("Stop SenergyConnector");
     this.unwatchMetrics();
+    if(this.interval){
+        clearInterval(this.interval);
+    }
+    this.stopConnection();
+
     SenergyConnector.super_.prototype.stop.call(this);
 };
 
@@ -43,7 +48,7 @@ SenergyConnector.prototype.start = function () {
     this.reg = new Reg();
     this.provisioning();
     var that = this;
-    setInterval(function(){
+    this.interval = setInterval(function(){
         try{
             that.provisioning();
         }catch (e) {
@@ -112,6 +117,18 @@ SenergyConnector.prototype.updateConnection = function (devices) {
         console.log("ERROR: unknown protocol", this.config.protocol);
     }
 };
+
+
+SenergyConnector.prototype.stopConnection = function () {
+    if(this.config.protocol == "ws:" || this.config.protocol == "wss:"){
+        return this.stopConnectionWs();
+    }else if(this.config.protocol == "tcp:") {
+        return this.stopConnectionTcp();
+    }else{
+        console.log("ERROR: unknown protocol", this.config.protocol);
+    }
+};
+
 
 SenergyConnector.prototype.sendCommandToZway = function(id, command, metrics){
     console.log("DEBUG: command to zway: ", id, command, metrics);
@@ -183,6 +200,20 @@ SenergyConnector.prototype.getZwayEventHandler = function(){
 };
 
 //ws
+
+SenergyConnector.prototype.stopConnectionWs = function () {
+    console.log("Update Senergy-MQTT-Connection ws", this.config.mqtt_url);
+
+    if(this.mqtt && this.mqtt.disconnect && this.mqtt.client.connected){
+        try{
+            this.mqtt.onConnectionLost = function () {console.log("MQTT: Disconnect")};
+            this.mqtt.disconnect();
+        }catch (e) {
+            console.log("ERROR: while disconnecting", e)
+        }
+    }
+    this.mqtt = null;
+};
 
 SenergyConnector.prototype.updateConnectionWs = function (devices) {
     console.log("Update Senergy-MQTT-Connection ws", this.config.mqtt_url);
@@ -295,6 +326,21 @@ SenergyConnector.prototype.sendWs = function(topic, msg){
 
 
 // tcp
+
+
+SenergyConnector.prototype.stopConnectionTcp = function () {
+    console.log("Update Senergy-MQTT-Connection tcp", this.config.mqtt_url);
+
+    if(this.mqtt && this.mqtt.close && this.mqtt.connected){
+        try{
+            that.mqtt.onDisconnect(function () {console.log("DEBUG: close inception")});
+            this.mqtt.close();
+        }catch (e) {
+            console.log("ERROR: while disconnecting", e)
+        }
+    }
+    this.mqtt = null;
+};
 
 SenergyConnector.prototype.updateConnectionTcp = function (devices) {
     console.log("Update Senergy-MQTT-Connection tcp", this.config.mqtt_url);
