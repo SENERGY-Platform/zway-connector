@@ -6,6 +6,9 @@ function getZwayDevices(controller){
     return controller.devices.map(function (x) {
         var uri = getGloablDeviceUri(x);
         var iot_type = zway_to_iot[x.get("deviceType")];
+        if(!iot_type){
+            console.log("IGNORE: unknown device-type: ", x.get("deviceType"))
+        }
         return {uri: uri, iot_type: iot_type, name: x.get("metrics").title, tags:tags[x.id]};
     }).filter(function (e) {
         return e.iot_type
