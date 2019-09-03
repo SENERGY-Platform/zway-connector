@@ -34,7 +34,6 @@ SenergyConnector.prototype.init = function (config) {
 
 SenergyConnector.prototype.stop = function () {
     console.log("Stop SenergyConnector");
-    this.unwatchMetrics();
     if(this.interval){
         clearInterval(this.interval);
     }
@@ -55,7 +54,6 @@ SenergyConnector.prototype.start = function () {
             console.log("ERROR: start::provisioning ", e, e.message);
         }
     }, 15000);
-    this.watchMetrics();
 };
 
 SenergyConnector.prototype.provisioning = function () {
@@ -109,17 +107,22 @@ SenergyConnector.prototype.provisioning = function () {
 };
 
 SenergyConnector.prototype.updateConnection = function (devices) {
+    this.unwatchMetrics();
+    var result = null;
     if(this.config.protocol == "ws:" || this.config.protocol == "wss:"){
-        return this.updateConnectionWs(devices);
+        result = this.updateConnectionWs(devices);
     }else if(this.config.protocol == "tcp:") {
-        return this.updateConnectionTcp(devices);
+        result = this.updateConnectionTcp(devices);
     }else{
         console.log("ERROR: unknown protocol", this.config.protocol);
     }
+    this.watchMetrics();
+    return result
 };
 
 
 SenergyConnector.prototype.stopConnection = function () {
+    this.unwatchMetrics();
     if(this.config.protocol == "ws:" || this.config.protocol == "wss:"){
         return this.stopConnectionWs();
     }else if(this.config.protocol == "tcp:") {
@@ -175,11 +178,14 @@ SenergyConnector.prototype.watchMetrics = function(){
 
 SenergyConnector.prototype.unwatchMetrics = function(){
     var self = this;
-    this.controller.devices.map(function (vDev) {
-        if(self.handleZwayEvent){
-            vDev.off("change:metrics:level", self.handleZwayEvent);
-        }
-    });
+    if(self.handleZwayEvent){
+        self.controller.devices.map(function (vDev) {
+            if(self.handleZwayEvent){
+                vDev.off("change:metrics:level", self.handleZwayEvent);
+            }
+        });
+        self.handleZwayEvent = null;
+    }
 };
 
 SenergyConnector.prototype.getZwayEventHandler = function(){
