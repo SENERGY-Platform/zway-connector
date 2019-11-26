@@ -1,3 +1,4 @@
 Modules.registerModule("plugin", function (module) {
-    module.add("plugin")
+    module.add("plugin");
+    return {};
 });

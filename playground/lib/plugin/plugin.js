@@ -1,7 +1,7 @@
 Modules.include("physical-devices");
-Modules.include("mqtt");
+Modules.include("connector");
 var PhysicalDevices = Modules.get("physical-devices");
-var Mqtt = Modules.get("mqtt");
+var Connector = Modules.get("connector");
 
 function SenergyConnector (id, controller) {
     SenergyConnector.super_.call(this, id, controller);
@@ -15,22 +15,25 @@ SenergyConnector.prototype.init = function (config) {
     console.log("Init SenergyConnector");
     SenergyConnector.super_.prototype.init.call(this, config);
 
-    this.mqttConnection = Mqtt.connect(
+    //url, hubId, user, password, then, error
+    this.mqttConnection = Connector.connect(
         config.mqtt_url,
         "test-client",
         config.user,
         config.password,
-        true,
-        function (connection, err) {
-            console.log("DISCONNECT: ", JSON.stringify(err))
-        }, function (connection) {
+        function (connection) {
             console.log("CONNECT");
-            var subscribeResult = that.mqttConnection.subscribe("test/topic", 2);
-            console.log("Subscribtion: ", JSON.stringify(subscribeResult));
+            var err = that.mqttConnection.registerCommand("device", "service", function (device, service, message) {
+                //echo
+                return message
+            });
+
+            that.interval = setInterval(function(){
+                that.mqttConnection.sendEvent("device", "service", JSON.stringify({"body":"eventFooBar"}));
+                that.mqttConnection._connection.send("command/device/service", JSON.stringify({"correlation_id":42,"payload":{"body":"foobar"},"timestamp":0,"completion_strategy":"none"}));
+            }, 15000);
         }, function (connection, err) {
-            console.log("CONNECTION-ERROR: ", JSON.stringify(err))
-        }, function(connection, topic, payload){
-            console.log("MESSAGE: ", topic, payload)
+            console.log("ERROR: ", JSON.stringify(err))
         }
     );
 
@@ -38,12 +41,6 @@ SenergyConnector.prototype.init = function (config) {
         console.log("ERROR: unable to connect: ", this.mqttConnection.err);
         return
     }
-
-
-    this.interval = setInterval(function(){
-        that.mqttConnection.send("test/topic", "test-message");
-        console.log(JSON.stringify(PhysicalDevices.getDevices(that.controller)));
-    }, 15000);
 
 };
 
