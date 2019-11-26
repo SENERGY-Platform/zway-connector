@@ -1,0 +1,67 @@
+{
+    "singleton" : true,
+    "dependencies": [],
+    "category": "basic_gateway_modules",
+    "author": "Ingo Rößner",
+    "homepage": "",
+    "icon": "icon.png",
+    "moduleName": "SenergyConnector",
+    "version": "0.0.1",
+    "maturity": "beta",
+    "defaults" : {
+        "title" : "__m_title__",
+        "description" : "__m_descr__",
+        "mqtt_url":"tcp://connector:1883",
+        "iot_repo_url": "https://api.sepl.infai.org/iot-device-repo",
+        "auth_url": "https://auth.sepl.infai.org"
+    },
+    "schema": {
+        "type": "object",
+        "properties": {
+            "iot_repo_url": {
+                "type": "string",
+                "required": true
+            },
+            "auth_url": {
+                "type": "string",
+                "required": true
+            },
+            "mqtt_url": {
+                "type": "string",
+                "required": true
+            },
+            "user": {
+                "type": "string",
+                "required": false
+            },
+            "password": {
+                "type": "string",
+                "required": false
+            }
+        }
+    },
+    "options" : {
+        "fields": {
+            "iot_repo_url": {
+                "label": "__l_iot_repo_url__",
+                "helper": "__l_iot_repo_url_help__"
+            },
+            "auth_url": {
+                "label": "__l_auth_url__",
+                "helper": "__l_auth_url_help__"
+            },
+            "mqtt_url": {
+                "label": "__l_mqtt_url__",
+                "helper": "__l_mqtt_url_help__"
+            },
+            "user": {
+                "label": "__l_user__",
+                "helper": "__h_user__"
+            },
+            "password": {
+                "label": "__l_pw__",
+                "helper": "__h_pw__"
+            }
+        }
+    }
+}
