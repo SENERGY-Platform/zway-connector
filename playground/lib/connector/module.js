@@ -92,16 +92,12 @@ Modules.registerModule("connector", function (module) {
                 password,
                 true,
                 function (connection, err) {
-                    console.log("DISCONNECT: ", err, JSON.stringify(err));
                     error()
                 }, function (connection) {
-                    console.log("CONNECTED");
                     then();
                 }, function (connection, err) {
-                    console.log("CONNECTION-ERROR: ", JSON.stringify(err));
                     error();
                 }, function(connection, topic, payload){
-                    console.log("MESSAGE: ", topic, payload);
                     result._handleCommand(topic, payload);
                 }
             );
