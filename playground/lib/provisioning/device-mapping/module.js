@@ -6,6 +6,7 @@ Modules.registerModule("provisioning/device-mapping", function (module) {
         init: function (controller) {
             var result = {
                 uuid: null,
+                typemap: null,
 
                 /*
                     localDeviceId = localPrefix + "-" + id
@@ -88,7 +89,10 @@ Modules.registerModule("provisioning/device-mapping", function (module) {
 
                 //ref = getDeviceTypeIdMappingRef()
                 getDeviceTypeIdByMappingRef: function(ref){
-
+                    if(!result.typemap){
+                        result.typemap = Modules.loadJson("typemapping.json")
+                    }
+                    return result.typemap[ref]
                 },
 
                 /*

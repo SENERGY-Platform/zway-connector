@@ -11,7 +11,16 @@ Modules.include = function(dir /*string*/) {
         executeFile(ROOT+"/lib/"+dir+"/module.js");
         return Modules.get(dir)
     }catch (e) {
-        console.log("ERROR: unable to include module:", dir, JSON.stringify(e))
+        console.log("ERROR: unable to include module:", dir, e)
+    }
+};
+
+Modules.loadJson = function(fileName) {
+    try {
+        return fs.loadJSON(ROOT+"/"+fileName);
+    }catch (e) {
+        console.log("ERROR: unable to load json:", fileName, e);
+        return {}
     }
 };
 
