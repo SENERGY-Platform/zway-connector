@@ -11,7 +11,6 @@ Tests["device-mapping.getLocalPrefix()"] = function (ctx) {
 Tests["device-mapping.getDeviceDescriptions"] = function (ctx) {
     var mapping = Modules.include("provisioning/device-mapping").init(ctx.controller);
     var physicalDevices = Modules.include("provisioning/physical-devices").getDevices();
-    console.log("DEBUG: TEST: device-mapping.physicalDevices: \n",JSON.stringify(physicalDevices));
     console.log("DEBUG: TEST: device-mapping.getDeviceDescriptions: \n",JSON.stringify(mapping.getDeviceDescriptions(physicalDevices)));
     return null
 };

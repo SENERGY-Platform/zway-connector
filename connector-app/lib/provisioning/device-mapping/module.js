@@ -84,7 +84,7 @@ Modules.registerModule("provisioning/device-mapping", function (module) {
                     }
                  */
                 getDeviceTypeIdMappingRef: function(deviceInfo){
-                    return deviceInfo.manufacturerId + "-" + deviceInfo.manufacturerProductType + "-" + deviceInfo.manufacturerProductId
+                    return deviceInfo.manufacturerId.value + "-" + deviceInfo.manufacturerProductType.value + "-" + deviceInfo.manufacturerProductId.value
                 },
 
                 //ref = getDeviceTypeIdMappingRef()
@@ -92,7 +92,7 @@ Modules.registerModule("provisioning/device-mapping", function (module) {
                     if(!result.typemap){
                         result.typemap = Modules.loadJson("typemapping.json")
                     }
-                    return result.typemap[ref]
+                    return result.typemap[ref] || null
                 },
 
                 /*
@@ -150,7 +150,7 @@ Modules.registerModule("provisioning/device-mapping", function (module) {
                     var mappingRef = result.getDeviceTypeIdMappingRef(physicalDevice.info);
                     var deviceDescription = {
                         localId: result.getLocalDeviceId(physicalDevice.id),
-                        name: physicalDevice.name +" (#"+physicalDevice.id+")",
+                        name: physicalDevice.name,
                         deviceTypeMappingRef: mappingRef,
                         deviceTypeId: result.getDeviceTypeIdByMappingRef(mappingRef),
                         services:[],

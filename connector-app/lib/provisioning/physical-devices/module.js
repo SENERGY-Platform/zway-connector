@@ -82,13 +82,18 @@ Modules.registerModule("provisioning/physical-devices", function (module) {
             sub:[]
         };
 
-        var commandClases = device.instances["0"].commandClasses;
-        for (var commandClassId in commandClases) {
-            if( commandClases.hasOwnProperty(commandClassId) && !isNaN(commandClassId) ) {
-                var sub = PhysicalDevices.getSubDevices(commandClassId, commandClases);
+        var commandClasses = device.instances["0"].commandClasses;
+        console.log("DEBUG: getDevice() commandClasses:", JSON.stringify(commandClasses));
+        for (var commandClassId in commandClasses) {
+            if( commandClasses.hasOwnProperty(commandClassId) && !isNaN(commandClassId) ) {
+                var sub = PhysicalDevices.getSubDevices(commandClassId, commandClasses);
                 if (sub) {
                     result.sub.concat(sub)
+                }else{
+                    console.log("DEBUG: getDevice ignore sub (==null)")
                 }
+            }else{
+                console.log("DEBUG: ignore commandClassId = ", commandClassId, commandClasses.hasOwnProperty(commandClassId), !isNaN(commandClassId))
             }
         }
         return result;
@@ -108,7 +113,11 @@ Modules.registerModule("provisioning/physical-devices", function (module) {
                 var sub = PhysicalDevices.getSubDevice(id, commandClass.data, commandClassId, type_name);
                 if (sub) {
                     result.push(sub)
+                }else{
+                    console.log("DEBUG: getSubDevices ignore sub (==null)")
                 }
+            }else{
+                console.log("DEBUG: ignore commandClass.data = ", id, commandClasses.hasOwnProperty(id), !isNaN(id))
             }
         }
         return result;
