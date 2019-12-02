@@ -8,7 +8,7 @@ services:
     ports:
       - 8083:8083
     volumes:
-      - ../playground/:/opt/z-way-server/automation/userModules/SenergyConnector
+      - ../connector-app/:/opt/z-way-server/automation/userModules/SenergyConnector
       - /usr/bin/qemu-arm-static:/usr/bin/qemu-arm-static
     networks:
       sepl:
