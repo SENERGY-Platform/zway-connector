@@ -63,7 +63,7 @@ Modules.registerModule("provisioning/physical-devices", function (module) {
         */
 
         var device = descriptions[id];
-        if (!device.instances || device.instances.length != 1) {
+        if (!device.instances || !device.instances["0"]) {
             console.log("DEBUG: getDevice() no instances:", JSON.stringify(device));
             return null;
         }
@@ -82,7 +82,7 @@ Modules.registerModule("provisioning/physical-devices", function (module) {
             sub:[]
         };
 
-        var commandClases = device.instances[0].commandClasses;
+        var commandClases = device.instances["0"].commandClasses;
         for (var commandClassId in commandClases) {
             if( commandClases.hasOwnProperty(commandClassId) && !isNaN(commandClassId) ) {
                 var sub = PhysicalDevices.getSubDevices(commandClassId, commandClases);
