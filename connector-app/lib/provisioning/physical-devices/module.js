@@ -64,7 +64,6 @@ Modules.registerModule("provisioning/physical-devices", function (module) {
 
         var device = descriptions[id];
         if (!device.instances || !device.instances["0"]) {
-            console.log("DEBUG: getDevice() no instances:", JSON.stringify(device));
             return null;
         }
         var result = {
@@ -83,17 +82,12 @@ Modules.registerModule("provisioning/physical-devices", function (module) {
         };
 
         var commandClasses = device.instances["0"].commandClasses;
-        console.log("DEBUG: getDevice() commandClasses:", JSON.stringify(commandClasses));
         for (var commandClassId in commandClasses) {
             if( commandClasses.hasOwnProperty(commandClassId) && !isNaN(commandClassId) ) {
                 var sub = PhysicalDevices.getSubDevices(commandClassId, commandClasses);
-                if (sub) {
-                    result.sub.concat(sub)
-                }else{
-                    console.log("DEBUG: getDevice ignore sub (==null)")
+                if (sub && sub.length) {
+                    result.sub = result.sub.concat(sub)
                 }
-            }else{
-                console.log("DEBUG: ignore commandClassId = ", commandClassId, commandClasses.hasOwnProperty(commandClassId), !isNaN(commandClassId))
             }
         }
         return result;
@@ -104,20 +98,15 @@ Modules.registerModule("provisioning/physical-devices", function (module) {
         var result = [];
         var commandClass = commandClasses[commandClassId];
         if (!commandClass || !commandClass.data) {
-            console.log("DEBUG: getSubDevices() no commandClass:", JSON.stringify(commandClass));
             return result;
         }
         var type_name = commandClass.name;
         for (var id in commandClass.data){
-            if( commandClass.data.hasOwnProperty(id) && !isNaN(id) ) {
+            if(commandClass.data.hasOwnProperty(id) && !isNaN(id)) {
                 var sub = PhysicalDevices.getSubDevice(id, commandClass.data, commandClassId, type_name);
                 if (sub) {
                     result.push(sub)
-                }else{
-                    console.log("DEBUG: getSubDevices ignore sub (==null)")
                 }
-            }else{
-                console.log("DEBUG: ignore commandClass.data = ", id, commandClasses.hasOwnProperty(id), !isNaN(id))
             }
         }
         return result;
@@ -127,7 +116,6 @@ Modules.registerModule("provisioning/physical-devices", function (module) {
     PhysicalDevices.getSubDevice = function(id, data, commandClassId, type_name) {
         var sub = data[id];
         if (!sub){
-            console.log("DEBUG: getSubDevice() no sub device:", JSON.stringify(sub));
             return null
         }
         return {
