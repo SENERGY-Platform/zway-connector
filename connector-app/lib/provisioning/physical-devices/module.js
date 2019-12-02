@@ -12,6 +12,8 @@ Modules.registerModule("provisioning/physical-devices", function (module) {
             pysicalDevices = JSON.parse(global.ZWave[ZWAY_MODULE_NAME].Data("").body).devices;
         }
 
+        console.log("DEBUG: getDevices(); internal devices data:", JSON.stringify(pysicalDevices));
+
         for (var id in pysicalDevices) {
             if( pysicalDevices.hasOwnProperty(id) && !isNaN(id) ) {
                 var device = PhysicalDevices.getDevice(id, pysicalDevices);
@@ -62,6 +64,7 @@ Modules.registerModule("provisioning/physical-devices", function (module) {
 
         var device = descriptions[id];
         if (!device.instances || device.instances.length != 1) {
+            console.log("DEBUG: getDevice() no instances:", JSON.stringify(device));
             return null;
         }
         var result = {
@@ -96,6 +99,7 @@ Modules.registerModule("provisioning/physical-devices", function (module) {
         var result = [];
         var commandClass = commandClasses[commandClassId];
         if (!commandClass || !commandClass.data) {
+            console.log("DEBUG: getSubDevices() no commandClass:", JSON.stringify(commandClass));
             return result;
         }
         var type_name = commandClass.name;
@@ -114,6 +118,7 @@ Modules.registerModule("provisioning/physical-devices", function (module) {
     PhysicalDevices.getSubDevice = function(id, data, commandClassId, type_name) {
         var sub = data[id];
         if (!sub){
+            console.log("DEBUG: getSubDevice() no sub device:", JSON.stringify(sub));
             return null
         }
         return {

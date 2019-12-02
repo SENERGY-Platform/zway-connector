@@ -3,6 +3,7 @@ var SKIP = "___skip";
 
 Modules.registerModule("tests", function (module) {
     module.add("device-mapping");
+    module.add("connector");
     return {
         run: function (controller, config) {
             var ctx = {controller: controller, config: config};
@@ -13,11 +14,11 @@ Modules.registerModule("tests", function (module) {
                     try{
                         var testResult = Tests[testName](ctx);
                         if(testResult === SKIP){
-                            console.log("skip", testName)
+                            ok.push({name: "SKIP "+testName})
                         }else if(testResult){
                             failed.push({name: "\x1b[31m"+testName+"\x1b[0m", message: testResult})
                         }else{
-                            failed.push({name: "\x1b[36m"+testName+"\x1b[0m"})
+                            ok.push({name: "\x1b[36m"+testName+"\x1b[0m"})
                         }
                     }catch (e) {
                         failed.push({name: "\x1b[31m"+testName+"\x1b[0m", message: "exception: "+e.message})
