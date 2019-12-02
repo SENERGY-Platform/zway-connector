@@ -25,9 +25,12 @@ Tests["connector"]=function (ctx) {
         }
     );
 
-    if(this.mqttConnection.err){
-        console.log("ERROR: unable to connect: ", this.mqttConnection.err);
-        return this.mqttConnection.err
+    if(!mqttConnection){
+        mqttConnection = {err: "mqttConnection = null"}
+    }
+    if(mqttConnection.err){
+        console.log("ERROR: unable to connect: ", mqttConnection.err);
+        return mqttConnection.err
     }
     return null;
 };
