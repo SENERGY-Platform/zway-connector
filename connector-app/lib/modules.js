@@ -7,12 +7,14 @@ var Modules = {
 };
 
 Modules.include = function(dir /*string*/) {
-    try {
-        executeFile(ROOT+"/lib/"+dir+"/module.js");
-        return Modules.get(dir)
-    }catch (e) {
-        console.log("ERROR: unable to include module:", dir, e)
+    if(!Modules._modules[dir]) {
+        try {
+            executeFile(ROOT + "/lib/" + dir + "/module.js");
+        } catch (e) {
+            console.log("ERROR: unable to include module:", dir, e)
+        }
     }
+    return Modules.get(dir)
 };
 
 Modules.loadJson = function(fileName) {
@@ -25,23 +27,21 @@ Modules.loadJson = function(fileName) {
 };
 
 Modules.registerModule = function(dir /*string*/, initFunc /*function(module)*/){
-    if(!Modules._modules[dir]){
-        Modules._modules[dir] = initFunc({
-            add: function (filename /*string (without .js)*/) {
-                try {
-                    executeFile(ROOT+"/lib/"+dir+"/"+filename+".js");
-                }catch (e) {
-                    console.log("ERROR: unable to add file to module:", dir, filename, JSON.stringify(e))
-                }
-            },
-            include: function(subdir /*string*/) {
-                return Modules.include(dir+"/"+subdir);
+    Modules._modules[dir] = initFunc({
+        add: function (filename /*string (without .js)*/) {
+            try {
+                executeFile(ROOT+"/lib/"+dir+"/"+filename+".js");
+            }catch (e) {
+                console.log("ERROR: unable to add file to module:", dir, filename, JSON.stringify(e))
             }
-        });
-        if(!Modules._modules[dir]){
-            console.log("WARNING: null module "+dir);
-            Modules._modules[dir] = {};
+        },
+        include: function(subdir /*string*/) {
+            return Modules.include(dir+"/"+subdir);
         }
+    });
+    if(!Modules._modules[dir]){
+        console.log("WARNING: null module "+dir);
+        Modules._modules[dir] = {};
     }
 };
 
