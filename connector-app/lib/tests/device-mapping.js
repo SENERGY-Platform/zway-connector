@@ -10,7 +10,6 @@ Tests["device-mapping.getLocalPrefix()"] = function (ctx) {
 
 Tests["device-mapping.getVirtualDevices()"] = function (ctx) {
     var vDevs = Modules.include("provisioning/device-mapping").init(ctx.controller).getVirtualDevices();
-    console.log("LOG device-mapping.getVirtualDevices():", JSON.stringify(vDevs));
     if(vDevs){
         return null
     }else{
@@ -20,7 +19,26 @@ Tests["device-mapping.getVirtualDevices()"] = function (ctx) {
 
 Tests["device-mapping.getDeviceDescriptions"] = function (ctx) {
     var mapping = Modules.include("provisioning/device-mapping").init(ctx.controller);
-    var physicalDevices = Modules.include("provisioning/physical-devices").getDevices();
-    console.log("DEBUG: TEST: device-mapping.getDeviceDescriptions: \n",JSON.stringify(mapping.getDeviceDescriptions(physicalDevices)));
-    return null
+    var physicalDevices = Modules.loadJson("lib/tests/resources/physical-devices-raw.json");
+    var vDevs = Modules.loadJson("lib/tests/resources/virtual-devices.json");
+    var expected = Modules.loadJson("lib/tests/resources/device-descriptions-expected.json");
+    if(!expected){
+        return "missing expected"
+    }
+    if(!vDevs){
+        return "missing vDevs"
+    }
+    if(!physicalDevices){
+        return "missing physicalDevices"
+    }
+    var descriptions = mapping.getDeviceDescriptions(physicalDevices, vDevs);
+    if(!descriptions){
+        return "missing descriptions"
+    }
+    if(TestHelper.equal(expected, descriptions)){
+        return null
+    }else{
+        console.log("DEBUG: getDeviceDescriptions() = ", JSON.stringify(descriptions) );
+        return "unexpected result"
+    }
 };

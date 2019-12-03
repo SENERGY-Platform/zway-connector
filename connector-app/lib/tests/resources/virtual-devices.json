@@ -1,0 +1,330 @@
+[
+  {
+    "creationTime":1574779190,
+    "creatorId":7,
+    "customIcons":{
+
+    },
+    "deviceType":"battery",
+    "h":-592588978,
+    "hasHistory":false,
+    "id":"BatteryPolling_7",
+    "location":0,
+    "locationName":"globalRoom",
+    "metrics":{
+      "probeTitle":"Battery",
+      "scaleTitle":"%",
+      "title":"Battery Polling",
+      "level":79
+    },
+    "order":{
+      "rooms":0,
+      "elements":0,
+      "dashboard":0
+    },
+    "permanently_hidden":false,
+    "probeType":"",
+    "tags":[
+
+    ],
+    "visibility":true,
+    "updateTime":1575366028
+  },
+  {
+    "creationTime":1575366003,
+    "creatorId":5,
+    "customIcons":{
+
+    },
+    "deviceType":"text",
+    "h":-1261400328,
+    "hasHistory":false,
+    "id":"InfoWidget_5_Int",
+    "location":0,
+    "locationName":"globalRoom",
+    "metrics":{
+      "title":"Dear Expert User",
+      "text":"<center>If you still want to use ExpertUI please go, after you are successfully logged in, to <br><strong> Menu > Devices > Manage with ExpertUI </strong> <br> or call <br><strong> http://MYRASP:8083/expert </strong><br> in your browser. <br> <br>You could hide or remove this widget in menu <br><strong>Apps > Active Tab</strong>. </center>",
+      "icon":"app/img/logo-z-wave-z-only.png"
+    },
+    "order":{
+      "rooms":0,
+      "elements":0,
+      "dashboard":0
+    },
+    "permanently_hidden":false,
+    "probeType":"",
+    "tags":[
+
+    ],
+    "visibility":true,
+    "updateTime":1575366003
+  },
+  {
+    "creationTime":1575366003,
+    "creatorId":10,
+    "customIcons":{
+
+    },
+    "deviceType":"text",
+    "h":-606006820,
+    "hasHistory":false,
+    "id":"InfoWidget_10_Int",
+    "location":0,
+    "locationName":"globalRoom",
+    "metrics":{
+      "title":"Cloud Backup Instructions",
+      "text":"<center>Cloud backup is conveniently saving up to 3 backup files on our server (using SSL encryption).<br>By default, an automatic backup is created every month on 28 at 23:59.<br>If you don’t like to see your backup file on our server, just deactivate this service or change the interval.</br>To change the settings, please click on<br><strong>Menu > Management > Backup & Restore.</strong><br><br>You could hide or remove this widget in<br><strong>Menu >Apps > Active Tab</strong>.</center>",
+      "icon":"app/img/icon_cloudbackup.png"
+    },
+    "order":{
+      "rooms":0,
+      "elements":0,
+      "dashboard":0
+    },
+    "permanently_hidden":false,
+    "probeType":"",
+    "tags":[
+
+    ],
+    "visibility":true,
+    "updateTime":1575366003
+  },
+  {
+    "creationTime":1574779190,
+    "creatorId":12,
+    "customIcons":{
+
+    },
+    "deviceType":"toggleButton",
+    "h":-1891043069,
+    "hasHistory":false,
+    "id":"MailNotifier_12",
+    "location":0,
+    "locationName":"globalRoom",
+    "metrics":{
+      "level":"on",
+      "title":"Send Email Notification",
+      "icon":"/ZAutomation/api/v1/load/modulemedia/MailNotifier/icon.png",
+      "message":""
+    },
+    "order":{
+      "rooms":0,
+      "elements":0,
+      "dashboard":0
+    },
+    "permanently_hidden":false,
+    "probeType":"notification_email",
+    "tags":[
+
+    ],
+    "visibility":true,
+    "updateTime":1575366003
+  },
+  {
+    "creationTime":1574779362,
+    "creatorId":1,
+    "customIcons":{
+
+    },
+    "deviceType":"sensorMultilevel",
+    "h":1710831605,
+    "hasHistory":false,
+    "id":"ZWayVDev_zway_43-0-49-1",
+    "location":0,
+    "locationName":"globalRoom",
+    "metrics":{
+      "probeTitle":"Temperature",
+      "scaleTitle":"°C",
+      "level":22.8,
+      "icon":"temperature",
+      "title":"Thermostat Temperature (#43)",
+      "isFailed":false
+    },
+    "nodeId":43,
+    "order":{
+      "rooms":0,
+      "elements":0,
+      "dashboard":0
+    },
+    "permanently_hidden":false,
+    "probeType":"temperature",
+    "tags":[
+
+    ],
+    "visibility":true,
+    "updateTime":1575366028
+  },
+  {
+    "creationTime":1574779362,
+    "creatorId":1,
+    "customIcons":{
+
+    },
+    "deviceType":"thermostat",
+    "h":1710889265,
+    "hasHistory":false,
+    "id":"ZWayVDev_zway_43-0-67-1",
+    "location":0,
+    "locationName":"globalRoom",
+    "metrics":{
+      "scaleTitle":"°C",
+      "level":21,
+      "min":5,
+      "max":40,
+      "icon":"thermostat",
+      "title":"Thermostat Heat (#43)",
+      "isFailed":false
+    },
+    "nodeId":43,
+    "order":{
+      "rooms":0,
+      "elements":0,
+      "dashboard":0
+    },
+    "permanently_hidden":false,
+    "probeType":"thermostat_set_point",
+    "tags":[
+
+    ],
+    "visibility":true,
+    "updateTime":1575366028
+  },
+  {
+    "creationTime":1574779361,
+    "creatorId":1,
+    "customIcons":{
+
+    },
+    "deviceType":"battery",
+    "h":1440658347,
+    "hasHistory":false,
+    "id":"ZWayVDev_zway_43-0-128",
+    "location":0,
+    "locationName":"globalRoom",
+    "metrics":{
+      "probeTitle":"Battery",
+      "scaleTitle":"%",
+      "level":83,
+      "icon":"battery",
+      "title":"Danfoss Battery (#43)",
+      "isFailed":false
+    },
+    "nodeId":43,
+    "order":{
+      "rooms":0,
+      "elements":0,
+      "dashboard":0
+    },
+    "permanently_hidden":false,
+    "probeType":"",
+    "tags":[
+
+    ],
+    "visibility":true,
+    "updateTime":1575366028
+  },
+  {
+    "creationTime":1574779398,
+    "creatorId":1,
+    "customIcons":{
+
+    },
+    "deviceType":"sensorMultilevel",
+    "h":-841325356,
+    "hasHistory":false,
+    "id":"ZWayVDev_zway_44-0-49-1",
+    "location":0,
+    "locationName":"globalRoom",
+    "metrics":{
+      "probeTitle":"Temperature",
+      "scaleTitle":"°C",
+      "level":22.91,
+      "icon":"temperature",
+      "title":"Thermostat Temperature (#44)",
+      "isFailed":false
+    },
+    "nodeId":44,
+    "order":{
+      "rooms":0,
+      "elements":0,
+      "dashboard":0
+    },
+    "permanently_hidden":false,
+    "probeType":"temperature",
+    "tags":[
+
+    ],
+    "visibility":true,
+    "updateTime":1575366004
+  },
+  {
+    "creationTime":1574779397,
+    "creatorId":1,
+    "customIcons":{
+
+    },
+    "deviceType":"thermostat",
+    "h":-841267696,
+    "hasHistory":false,
+    "id":"ZWayVDev_zway_44-0-67-1",
+    "location":0,
+    "locationName":"globalRoom",
+    "metrics":{
+      "scaleTitle":"°C",
+      "level":21,
+      "min":5,
+      "max":40,
+      "icon":"thermostat",
+      "title":"Thermostat Heat (#44)",
+      "isFailed":false
+    },
+    "nodeId":44,
+    "order":{
+      "rooms":0,
+      "elements":0,
+      "dashboard":0
+    },
+    "permanently_hidden":false,
+    "probeType":"thermostat_set_point",
+    "tags":[
+
+    ],
+    "visibility":true,
+    "updateTime":1575366004
+  },
+  {
+    "creationTime":1574779397,
+    "creatorId":1,
+    "customIcons":{
+
+    },
+    "deviceType":"battery",
+    "h":-1966805268,
+    "hasHistory":false,
+    "id":"ZWayVDev_zway_44-0-128",
+    "location":0,
+    "locationName":"globalRoom",
+    "metrics":{
+      "probeTitle":"Battery",
+      "scaleTitle":"%",
+      "level":79,
+      "icon":"battery",
+      "title":"Danfoss Battery (#44)",
+      "isFailed":false
+    },
+    "nodeId":44,
+    "order":{
+      "rooms":0,
+      "elements":0,
+      "dashboard":0
+    },
+    "permanently_hidden":false,
+    "probeType":"",
+    "tags":[
+
+    ],
+    "visibility":true,
+    "updateTime":1575366004
+  }
+]

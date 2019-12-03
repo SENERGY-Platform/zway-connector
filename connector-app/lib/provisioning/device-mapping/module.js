@@ -262,9 +262,11 @@ Modules.registerModule("provisioning/device-mapping", function (module) {
                     return deviceDescription;
                 },
 
-                getDeviceDescriptions: function(physicalDevices){
-                    var vDevs = result.getVirtualDevices();
-                    return physicalDevices.map(function (device) {
+                getDeviceDescriptions: function(physicalDevices, vDevs /*optional*/){
+                    if(!vDevs){
+                        vDevs = result.getVirtualDevices();
+                    }
+                    return Modules.helper.map(physicalDevices,function (device) {
                         return result.getDeviceDescription(device, vDevs)
                     })
                 },
