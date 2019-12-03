@@ -266,7 +266,7 @@ Modules.registerModule("provisioning/device-mapping", function (module) {
                     if(!vDevs){
                         vDevs = result.getVirtualDevices();
                     }
-                    return Modules.helper.map(physicalDevices,function (device) {
+                    return physicalDevices.map(function (device) {
                         return result.getDeviceDescription(device, vDevs)
                     })
                 },

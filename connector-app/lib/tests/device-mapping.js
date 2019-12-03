@@ -19,7 +19,7 @@ Tests["device-mapping.getVirtualDevices()"] = function (ctx) {
 
 Tests["device-mapping.getDeviceDescriptions"] = function (ctx) {
     var mapping = Modules.include("provisioning/device-mapping").init(ctx.controller);
-    var physicalDevices = Modules.loadJson("lib/tests/resources/physical-devices-raw.json");
+    var physicalDevices = Modules.loadJson("lib/tests/resources/physical-devices-expected.json");
     var vDevs = Modules.loadJson("lib/tests/resources/virtual-devices.json");
     var expected = Modules.loadJson("lib/tests/resources/device-descriptions-expected.json");
     if(!expected){
@@ -31,7 +31,12 @@ Tests["device-mapping.getDeviceDescriptions"] = function (ctx) {
     if(!physicalDevices){
         return "missing physicalDevices"
     }
+    var prefixFunctionImpl = mapping.getLocalPrefix;
+    mapping.getLocalPrefix = function () {
+        return "testuuid"
+    };
     var descriptions = mapping.getDeviceDescriptions(physicalDevices, vDevs);
+    mapping.getLocalPrefix = prefixFunctionImpl;
     if(!descriptions){
         return "missing descriptions"
     }
