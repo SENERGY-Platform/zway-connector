@@ -214,6 +214,10 @@ Modules.registerModule("provisioning/device-mapping", function (module) {
                                         deviceDescription.services.push({localId: getLevel, info: sub.info, outputExample:{level: 42, updateTime:"date and time as string"}});
                                         var exact = result.getLocalServiceId(localIdInfo.controllerAddress, "exact");
                                         deviceDescription.services.push({localId: exact, info: sub.info, inputExample:{level: 42}});
+                                        var on = result.getLocalServiceId(localIdInfo.controllerAddress, "on");
+                                        deviceDescription.services.push({localId: on, info: sub.info});
+                                        var off = result.getLocalServiceId(localIdInfo.controllerAddress, "off");
+                                        deviceDescription.services.push({localId: off, info: sub.info});
                                         var update = result.getLocalServiceId(localIdInfo.controllerAddress, "update");
                                         deviceDescription.services.push({localId: update, info: sub.info});
                                         break;
