@@ -8,6 +8,16 @@ Tests["device-mapping.getLocalPrefix()"] = function (ctx) {
    }
 };
 
+Tests["device-mapping.getVirtualDevices()"] = function (ctx) {
+    var vDevs = Modules.include("provisioning/device-mapping").init(ctx.controller).getVirtualDevices();
+    console.log("LOG device-mapping.getVirtualDevices():", JSON.stringify(vDevs));
+    if(vDevs){
+        return null
+    }else{
+        return "not found"
+    }
+};
+
 Tests["device-mapping.getDeviceDescriptions"] = function (ctx) {
     var mapping = Modules.include("provisioning/device-mapping").init(ctx.controller);
     var physicalDevices = Modules.include("provisioning/physical-devices").getDevices();

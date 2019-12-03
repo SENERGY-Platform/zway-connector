@@ -95,6 +95,10 @@ Modules.registerModule("provisioning/device-mapping", function (module) {
                     return result.typemap[ref] || null
                 },
 
+                getVirtualDevices: function(){
+                    return controller.devices
+                },
+
                 /*
                      physicalDevice = {
                         id: "38",
@@ -146,7 +150,7 @@ Modules.registerModule("provisioning/device-mapping", function (module) {
                     }
 
                  */
-                getDeviceDescription: function(physicalDevice){
+                getDeviceDescription: function(physicalDevice, virtualDevices){
                     var mappingRef = result.getDeviceTypeIdMappingRef(physicalDevice.info);
                     var deviceDescription = {
                         localId: result.getLocalDeviceId(physicalDevice.id),
@@ -156,7 +160,7 @@ Modules.registerModule("provisioning/device-mapping", function (module) {
                         services:[],
                     };
                     physicalDevice.sub.forEach(function (sub) {
-                        controller.devices.forEach(function (vDev) {
+                        virtualDevices.forEach(function (vDev) {
                             var parts = vDev.id.split("_");
                             var idParts = parts[parts.length-1].split("-");
                             var nodeId = idParts[0];
@@ -259,8 +263,9 @@ Modules.registerModule("provisioning/device-mapping", function (module) {
                 },
 
                 getDeviceDescriptions: function(physicalDevices){
+                    var vDevs = result.getVirtualDevices();
                     return physicalDevices.map(function (device) {
-                        return result.getDeviceDescription(device)
+                        return result.getDeviceDescription(device, vDevs)
                     })
                 },
 
