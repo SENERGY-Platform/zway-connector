@@ -11,7 +11,7 @@ Tests["physical-devices"] = function (ctx) {
         if( physicalDevices.hasOwnProperty(id) && !isNaN(id) ) {
             var device = repo.getDevice(id, physicalDevices);
             if (device) {
-                result.push(device)
+                result.push(device);
             }
         }
     }

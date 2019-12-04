@@ -18,6 +18,16 @@ Modules.registerModule("connector", function (module) {
                 }
             };
 
+            result.disconnect = function(){
+                try{
+                    result._connection.disconnect();
+                    result._connection = null;
+                    result._commandHandlers = {};
+                }catch (e) {
+                    console.log("ERROR: while disconnecting connector", e, e.stack)
+                }
+            };
+
             //handler = function(deviceLocalId string, serviceLocalId string, message map[string]string) => responseMessage map[string]string
             result.registerCommand = function(deviceLocalId, serviceLocalId, handler){
                 try{

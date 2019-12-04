@@ -37,7 +37,7 @@
                 result.mqtt.onDisconnect(function () {console.log("DEBUG: close inception")});
                 result.mqtt.close();
             }catch (e) {
-                console.log("ERROR: while disconnecting", e)
+                console.log("ERROR: while disconnecting mqtt", e, e.stack)
             }
         };
 

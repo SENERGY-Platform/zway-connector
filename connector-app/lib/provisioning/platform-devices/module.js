@@ -14,7 +14,7 @@ Modules.registerModule("provisioning/platform-devices", function (module) {
                     url:authUrl+"/auth/realms/master/protocol/openid-connect/token",
                     method:"POST",
                     headers:{"Content-Type":"application/x-www-form-urlencoded"},
-                    data: "client_id="+client_id+"&username="+user+"&password="+password+"&grant_type=password"
+                    data: "client_id="+senergyClientId+"&username="+user+"&password="+password+"&grant_type=password"
                 });
                 if(resp.status >= 300){
                     return {err: {text: "unexpected response", status: resp.status, data: resp.data}}
@@ -84,7 +84,7 @@ Modules.registerModule("provisioning/platform-devices", function (module) {
                 if(!resp.data.id){
                     return {err: {text: "unable to interpret GET /hubs/{id} response (missing id)", status: resp.status, data: resp.data}}
                 }
-                return {hub: resp.data}
+                return {device: resp.data}
             };
 
 
