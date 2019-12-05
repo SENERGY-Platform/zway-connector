@@ -179,7 +179,7 @@ Modules.registerModule("provisioning", function (module) {
                     var result = [];
                     for(var i=0; i<descriptions.length; i++){
                         if(descriptions[i].services && descriptions[i].services.length){
-                            if(descriptions[i].deviceTypeId){
+                            if(!descriptions[i].deviceTypeId){
                                 provisioning.logMissingDeviceType(descriptions[i]);
                             }else{
                                 result.push(descriptions[i])

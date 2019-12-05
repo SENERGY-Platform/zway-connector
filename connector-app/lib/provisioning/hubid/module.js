@@ -1,4 +1,4 @@
-Modules.registerModule("hubid", function (module) {
+Modules.registerModule("provisioning/hubid", function (module) {
     var hubIdProvider_id = null;
     var hubIdProvider_object_name ="senergy_hub_id";
     var hubIdProvider = {

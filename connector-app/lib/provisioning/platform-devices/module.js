@@ -1,4 +1,6 @@
 Modules.registerModule("provisioning/platform-devices", function (module) {
+    const LocalRequestErrorType = "local request error";
+
     return {
         init: function (deviceManagerUrl, authUrl, client_id) {
             var result = {};
@@ -14,7 +16,7 @@ Modules.registerModule("provisioning/platform-devices", function (module) {
                     url:authUrl+"/auth/realms/master/protocol/openid-connect/token",
                     method:"POST",
                     headers:{"Content-Type":"application/x-www-form-urlencoded"},
-                    data: "client_id="+senergyClientId+"&username="+user+"&password="+password+"&grant_type=password"
+                    data: "client_id="+client_id+"&username="+user+"&password="+password+"&grant_type=password"
                 });
                 if(resp.status >= 300){
                     return {err: {text: "unexpected response", status: resp.status, data: resp.data}}
@@ -38,6 +40,7 @@ Modules.registerModule("provisioning/platform-devices", function (module) {
                 if(resp.status >= 300){
                     return {err: {text: "unexpected response", status: resp.status, data: resp.data}}
                 }
+                return {device: resp.data}
             };
 
             result.updateDevice = function(token, remoteId, localId, name, deviceTypeId){
@@ -50,6 +53,7 @@ Modules.registerModule("provisioning/platform-devices", function (module) {
                 if(resp.status >= 300){
                     return {err: {text: "unexpected response", status: resp.status, data: resp.data}}
                 }
+                return {device: resp.data}
             };
 
             result.deleteDevice = function(token, localId){
@@ -61,6 +65,7 @@ Modules.registerModule("provisioning/platform-devices", function (module) {
                 if(resp.status >= 300){
                     return {err: {text: "unexpected response", status: resp.status, data: resp.data}}
                 }
+                return {}
             };
 
             result.getDevice = function(token, localId){

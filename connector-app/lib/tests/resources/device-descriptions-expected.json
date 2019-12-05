@@ -12,7 +12,7 @@
     "localId":"testuuid-43",
     "name":"Devolo Radiator Thermostat (#43)",
     "deviceTypeMappingRef":"2-5-373",
-    "deviceTypeId":null,
+    "deviceTypeId":"urn:infai:ses:device-type:a72ccf9b-7d3e-4b3c-89ad-ee39ba789440",
     "services":[
       {
         "localId":"get_level:49-1",
@@ -153,7 +153,7 @@
     "localId":"testuuid-44",
     "name":"Devolo Radiator Thermostat (#44)",
     "deviceTypeMappingRef":"2-5-373",
-    "deviceTypeId":null,
+    "deviceTypeId":"urn:infai:ses:device-type:a72ccf9b-7d3e-4b3c-89ad-ee39ba789440",
     "services":[
       {
         "localId":"get_level:49-1",
