@@ -264,7 +264,7 @@ Modules.registerModule("provisioning/device-mapping", function (module) {
                                         deviceDescription.services.push({localId: off, info: sub.info});
                                         break;
                                     default:
-                                        deviceDescription.services.push({info: sub.info, comment: "unknown command class: "+sub.type_name});
+                                        console.log("WARNING unknown command class", sub.type_name,  JSON.stringify(sub.info));
                                 }
                             }
                         });

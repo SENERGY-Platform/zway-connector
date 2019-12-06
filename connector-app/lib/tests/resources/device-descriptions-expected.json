@@ -95,57 +95,6 @@
           "invalidateTime":1574779360,
           "updateTime":1575274114
         }
-      },
-      {
-        "info":{
-          "value":null,
-          "type":"empty",
-          "val":{
-            "value":21,
-            "type":"float",
-            "invalidateTime":1574779359,
-            "updateTime":1575274114
-          },
-          "scale":{
-            "value":0,
-            "type":"int",
-            "invalidateTime":1574779359,
-            "updateTime":1574779358
-          },
-          "scaleString":{
-            "value":"°C",
-            "type":"string",
-            "invalidateTime":1574779359,
-            "updateTime":1574779358
-          },
-          "setVal":{
-            "value":21,
-            "type":"float",
-            "invalidateTime":1574779359,
-            "updateTime":1575274114
-          },
-          "modeName":{
-            "value":"Heating",
-            "type":"string",
-            "invalidateTime":1574779359,
-            "updateTime":1574779358
-          },
-          "deviceScale":{
-            "value":0,
-            "type":"int",
-            "invalidateTime":1574779359,
-            "updateTime":1575274114
-          },
-          "deviceScaleString":{
-            "value":"°C",
-            "type":"string",
-            "invalidateTime":1574779359,
-            "updateTime":1575274114
-          },
-          "invalidateTime":1574779359,
-          "updateTime":1575274114
-        },
-        "comment":"unknown command class: ThermostatSetPoint"
       }
     ]
   },
@@ -236,57 +185,6 @@
           "invalidateTime":1574779396,
           "updateTime":1575273751
         }
-      },
-      {
-        "info":{
-          "value":null,
-          "type":"empty",
-          "val":{
-            "value":21,
-            "type":"float",
-            "invalidateTime":1574779395,
-            "updateTime":1575273751
-          },
-          "scale":{
-            "value":0,
-            "type":"int",
-            "invalidateTime":1574779395,
-            "updateTime":1574779394
-          },
-          "scaleString":{
-            "value":"°C",
-            "type":"string",
-            "invalidateTime":1574779395,
-            "updateTime":1574779394
-          },
-          "setVal":{
-            "value":21,
-            "type":"float",
-            "invalidateTime":1574779395,
-            "updateTime":1575273751
-          },
-          "modeName":{
-            "value":"Heating",
-            "type":"string",
-            "invalidateTime":1574779395,
-            "updateTime":1574779394
-          },
-          "deviceScale":{
-            "value":0,
-            "type":"int",
-            "invalidateTime":1574779395,
-            "updateTime":1575273751
-          },
-          "deviceScaleString":{
-            "value":"°C",
-            "type":"string",
-            "invalidateTime":1574779395,
-            "updateTime":1575273751
-          },
-          "invalidateTime":1574779395,
-          "updateTime":1575273751
-        },
-        "comment":"unknown command class: ThermostatSetPoint"
       }
     ]
   }

@@ -102,6 +102,10 @@ SenergyConnector.prototype.initConnectionHandler = function () {
             desc.services.forEach(function (serviceDesc) {
                 var localService = serviceDesc.localId;
 
+                if(!localService){
+                    return
+                }
+
                 //add event handler
                 var vDev = that.provisioning.mapping.getVirtualDevice(localDevice, localService);
                 var command = that.provisioning.mapping.getCommandName(localService);
