@@ -41,6 +41,8 @@ SenergyConnector.prototype.run = function (config) {
         var user = config.user;
         var password = config.password;
 
+        that.connectionError = true; //initial connection without provisioning update
+
         that.provisioning = Modules.include("provisioning").init(that.controller, deviceManagerUrl, authUrl, user, password);
         that.connector = Modules.include("connector");
         that.sendEvent = that.getSendEventHandler();
