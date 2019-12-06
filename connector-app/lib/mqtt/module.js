@@ -44,6 +44,7 @@
         result.subscribe = function(topic, qos){
             try{
                 result.mqtt.subscribe(topic,  {qos: qos});
+                return {}
             }catch (e) {
                 return {err: e}
             }

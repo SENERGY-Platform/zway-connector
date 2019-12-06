@@ -29,6 +29,12 @@ Modules.registerModule("provisioning/device-mapping", function (module) {
                     return device
                 },
 
+                //localServiceId = "exact:113-7-3-A"
+                //returns "exact"
+                getCommandName: function(localServiceId){
+                    return localServiceId.split(":")[0]
+                },
+
 
                 // virtualDevice.id = "ZWayVDev_zway_19-0-113-7-3-A"
                 // commando = "exact"

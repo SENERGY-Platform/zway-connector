@@ -24,7 +24,7 @@ Tests["provisioning"]=function (ctx) {
 
     var provisioning = Modules.include("provisioning").initWithModules(physicalDevices, platformDevices, mapping, hubIdProvider, user, password);
 
-    provisioning.run(function (changed) {
+    provisioning.run(function (changed, descriptions) {
         console.log("TEST-RESULT-PROVISIONING: run()", changed);
     });
 

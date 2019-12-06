@@ -20,7 +20,9 @@ Modules.registerModule("connector", function (module) {
 
             result.disconnect = function(){
                 try{
-                    result._connection.disconnect();
+                    if(result._connection){
+                        result._connection.disconnect();
+                    }
                     result._connection = null;
                     result._commandHandlers = {};
                 }catch (e) {
@@ -65,6 +67,7 @@ Modules.registerModule("connector", function (module) {
             result.sendEvent = function(deviceLocalId, serviceLocalId, message){
                 try{
                     //{"correlation_id":"","payload":{"segment":"string"}}
+                    console.log("send event: ", deviceLocalId, serviceLocalId, JSON.stringify(message));
                     var err = result._connection.send("event/"+deviceLocalId+"/"+serviceLocalId, JSON.stringify(message));
                     if(err.err){
                         console.log("ERROR: while sending event", err.err, err.err.message, JSON.stringify(err.err), deviceLocalId, serviceLocalId);

@@ -1,5 +1,4 @@
 Tests["connector"]=function (ctx) {
-    //skip
     return SKIP;
 
     var Connector = Modules.include("connector");
@@ -13,10 +12,11 @@ Tests["connector"]=function (ctx) {
         function (connection) {
             console.log("CONNECT");
             var err = mqttConnection.registerCommand("device", "service", function (device, service, message) {
+                console.log("TEST-HANDLE-COMMAND", message, JSON.stringify(message));
                 //echo
                 return message
             });
-            that.interval = setInterval(function(){
+            setInterval(function(){
                 mqttConnection.sendEvent("device", "service", JSON.stringify({"body":"eventFooBar"}));
                 mqttConnection._connection.send("command/device/service", JSON.stringify({"correlation_id":42,"payload":{"body":"foobar"},"timestamp":0,"completion_strategy":"none"}));
             }, 15000);
