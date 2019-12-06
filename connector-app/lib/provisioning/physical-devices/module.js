@@ -12,7 +12,7 @@ Modules.registerModule("provisioning/physical-devices", function (module) {
             pysicalDevices = JSON.parse(global.ZWave[ZWAY_MODULE_NAME].Data("").body).devices;
         }
 
-        console.log("DEBUG: getDevices(); internal devices data:", JSON.stringify(pysicalDevices));
+        //console.log("DEBUG: getDevices(); internal devices data:", JSON.stringify(pysicalDevices));
 
         for (var id in pysicalDevices) {
             if( pysicalDevices.hasOwnProperty(id) && !isNaN(id) ) {
