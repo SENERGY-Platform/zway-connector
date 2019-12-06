@@ -56,7 +56,7 @@ Modules.registerModule("provisioning", function (module) {
 
                     var login = platformDevices.login(user, password);
                     if(login.err){
-                        console.log("ERROR: provisioning.run() platformDevices.login()", login.err);
+                        console.log("ERROR: provisioning.run() platformDevices.login()", login.err.text);
                         done(false);
                         return
                     }
@@ -68,7 +68,7 @@ Modules.registerModule("provisioning", function (module) {
                         return
                     }
 
-                    setTimeout(function (err) {
+                    setTimeout(function () {
                         var localIds = [];
                         for(var i=0; i<descriptions.length; i++){
                             localIds.push(descriptions[i].localId);
