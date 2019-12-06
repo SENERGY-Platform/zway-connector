@@ -1,5 +1,4 @@
-const DEV = true;
-
+const DEV = false;
 
 function SenergyConnector (id, controller) {
     SenergyConnector.super_.call(this, id, controller);
