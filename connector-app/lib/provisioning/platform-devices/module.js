@@ -127,7 +127,7 @@ Modules.registerModule("provisioning/platform-devices", function (module) {
 
             result.getHub = function(token, id) {
                 var resp = http.request({
-                    url:provisioningUrl+"/hubs/"+encodeURIComponent(id),
+                    url:deviceManagerUrl+"/hubs/"+encodeURIComponent(id),
                     method:"GET",
                     headers:{"Content-Type":"application/json", "Authorization":token}
                 });
