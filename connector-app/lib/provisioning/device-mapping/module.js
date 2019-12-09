@@ -142,7 +142,10 @@ Modules.registerModule("provisioning/device-mapping", function (module) {
                     var vDevInfo = mapping.parseVDevId(vDev.id);
                     var result = [];
                     var service = physicalDevices.getService(rawDevices, vDevInfo.device, vDevInfo.command_class, vDevInfo.scale);
-                    switch(vDev.deviceType.toLowerCase()){
+                    var deviceType = vDev.deviceType || "";
+                    switch(deviceType.toLowerCase()){
+                        case "":
+                            break;
                         case "battery".toLowerCase():
                             var getLevel = mapping.getLocalServiceId(vDevInfo.controller_address, "get_level");
                             result.push({type: vDev.deviceType, vDevId: vDev.id, commandClass: service.command_class_name, localId: getLevel, info: service.scale_info, outputExample:{level: 42, updateTime:"date and time as string"}});
