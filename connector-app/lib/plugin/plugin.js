@@ -49,18 +49,22 @@ SenergyConnector.prototype.run = function (config) {
 
         that.interval = setInterval(function(){
             try{
+                console.log("provisioning...");
                 that.provisioning.run(function (ok, descriptions) {
                     if(descriptions){
                         that.descriptions = descriptions;
                     }
                     if(ok || that.connectionError){
+                        console.log("provisioning: update connection", ok, that.connectionError);
                         that.updateConnection(config);
+                    }else{
+                        console.log("provisioning: up to date");
                     }
                 });
             }catch (e) {
                 console.log("ERROR: ", e.message, e.stack);
             }
-        }, 15000);
+        }, 60000);
     }
 };
 
