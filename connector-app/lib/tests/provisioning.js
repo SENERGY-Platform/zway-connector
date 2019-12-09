@@ -1,5 +1,5 @@
 Tests["provisioning"]=function (ctx) {
-    return SKIP;
+    //return SKIP;
 
     var deviceManagerUrl = ctx.config.iot_repo_url;
     var authUrl = ctx.config.auth_url;
@@ -8,25 +8,37 @@ Tests["provisioning"]=function (ctx) {
     var senergyClientId = "client-connector-lib";
     var uuid = "testuuid";
 
-    var devices = Modules.loadJson("lib/tests/resources/physical-devices-expected.json");
+    var devicesModule = Modules.include("provisioning/physical-devices");
+
+    var physicalDevices = Modules.loadJson("lib/tests/resources/physical-devices-raw.json");
     var vDevs = Modules.loadJson("lib/tests/resources/virtual-devices.json");
+    if(!vDevs){
+        return "missing vDevs"
+    }
+    if(!physicalDevices){
+        return "missing physicalDevices"
+    }
 
-    var controller = Modules.include("tests/mocks/controller");
-    controller.mockSetDevices(vDevs);
-    controller.mockSetUUID(uuid);
+    var controllerMock = {devices: vDevs, uuid: uuid};
+    var mapping = Modules.include("provisioning/device-mapping").init(controllerMock, devicesModule);
 
-    var physicalDevices = Modules.include("tests/mocks/physical-devices");
-    physicalDevices.mockSetDevices(devices);
+    //mock raw physical devices
+    var getRawImpl = devicesModule.getRaw;
+    devicesModule.getRaw = function () {
+        return physicalDevices;
+    };
 
     var platformDevices = Modules.include("provisioning/platform-devices").init(deviceManagerUrl, authUrl, senergyClientId);
-    var mapping = Modules.include("provisioning/device-mapping").init(controller);
     var hubIdProvider = Modules.include("provisioning/hubid");
 
-    var provisioning = Modules.include("provisioning").initWithModules(physicalDevices, platformDevices, mapping, hubIdProvider, user, password);
+    var provisioning = Modules.include("provisioning").initWithModules(platformDevices, mapping, hubIdProvider, user, password);
 
     provisioning.run(function (changed, descriptions) {
         console.log("TEST-RESULT-PROVISIONING: run()", changed);
     });
+
+    //remove raw mock
+    devicesModule.getRaw = getRawImpl;
 
     return null;
 };

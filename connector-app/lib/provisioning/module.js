@@ -5,12 +5,13 @@ Modules.registerModule("provisioning", function (module) {
     var provisioningModule = {
         init: function (controller, deviceManagerUrl, authUrl, user, password){
             var platformDevices = module.include("platform-devices").init(deviceManagerUrl, authUrl, senergyClientId);
-            var mapping = module.include("device-mapping").init(controller);
+            var physicalDevices = module.include("physical-devices");
+            var mapping = module.include("device-mapping").init(controller, physicalDevices);
             var hubIdProvider = module.include("hubid");
-            return provisioningModule.initWithModules(physicalDevices, platformDevices, mapping, hubIdProvider, user, password)
+            return provisioningModule.initWithModules(platformDevices, mapping, hubIdProvider, user, password)
         },
 
-        initWithModules: function (physicalDevices, platformDevices, mapping, hubIdProvider, user, password) {
+        initWithModules: function (platformDevices, mapping, hubIdProvider, user, password) {
             //to init provisioning.hash from platformDevices.getHub
             var getInitHash = function(){
                 var hash = null;
