@@ -75,7 +75,7 @@ Modules.registerModule("provisioning", function (module) {
                         }
                         var err = provisioning.updateHub(login.token, localIds, hash);
                         if(err){
-                            console.log("ERROR: provisioning::run::updateHub()", err);
+                            console.log("ERROR: provisioning::run::updateHub()", JSON.stringify(err));
                             done(false);
                             return
                         }
