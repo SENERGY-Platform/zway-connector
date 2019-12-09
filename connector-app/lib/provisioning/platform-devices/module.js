@@ -112,7 +112,7 @@ Modules.registerModule("provisioning/platform-devices", function (module) {
             result.updateHub = function(token, id, name, localDeviceIds, hash) {
                 var resp = http.request({
                     url:deviceManagerUrl+"/hubs/"+encodeURIComponent(id),
-                    method:"POST",
+                    method:"PUT",
                     headers:{"Content-Type":"application/json", "Authorization":token},
                     data: JSON.stringify({id: id, name: name, hash: hash, device_local_ids: localDeviceIds})
                 });
