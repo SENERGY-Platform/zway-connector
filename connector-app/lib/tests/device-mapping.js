@@ -18,8 +18,9 @@ Tests["device-mapping.getVirtualDevices()"] = function (ctx) {
 };
 
 Tests["device-mapping.getDeviceDescriptions"] = function (ctx) {
-    var mapping = Modules.include("provisioning/device-mapping").init(ctx.controller);
-    var physicalDevices = Modules.loadJson("lib/tests/resources/physical-devices-expected.json");
+    var devicesModule = Modules.include("provisioning/physical-devices");
+
+    var physicalDevices = Modules.loadJson("lib/tests/resources/physical-devices-raw.json");
     var vDevs = Modules.loadJson("lib/tests/resources/virtual-devices.json");
     var expected = Modules.loadJson("lib/tests/resources/device-descriptions-expected.json");
     if(!expected){
@@ -31,19 +32,37 @@ Tests["device-mapping.getDeviceDescriptions"] = function (ctx) {
     if(!physicalDevices){
         return "missing physicalDevices"
     }
+    var controllerMock = {devices: vDevs};
+    var mapping = Modules.include("provisioning/device-mapping").init(controllerMock, devicesModule);
+
+    //mock raw physical devices
+    var getRawImpl = devicesModule.getRaw;
+    devicesModule.getRaw = function () {
+        return physicalDevices;
+    };
+
+    //mock prefix
     var prefixFunctionImpl = mapping.getLocalPrefix;
     mapping.getLocalPrefix = function () {
         return "testuuid"
     };
-    var descriptions = mapping.getDeviceDescriptions(physicalDevices, vDevs);
+
+    //run tested function
+    var descriptions = mapping.getDeviceDescriptions();
+
+    //remove prefix mock
     mapping.getLocalPrefix = prefixFunctionImpl;
+
+    //remove raw mock
+    devicesModule.getRaw = getRawImpl;
+
     if(!descriptions){
         return "missing descriptions"
     }
-    if(TestHelper.equal(expected, descriptions)){
+    if(TestHelper.equal(JSON.parse(JSON.stringify(expected)), JSON.parse(JSON.stringify(descriptions)))){
         return null
     }else{
-        console.log("DEBUG: getDeviceDescriptions() = ", JSON.stringify(descriptions) );
+        console.log("TEST-RESULT-ERROR: \n\n", JSON.stringify(descriptions), "\n\n",  JSON.stringify(expected));
         return "unexpected result"
     }
 };

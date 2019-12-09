@@ -1,56 +1,18 @@
 [
   {
-    "localId":"testuuid-1",
-    "name":" (#1)",
-    "deviceTypeMappingRef":"0-0-0",
-    "deviceTypeId":null,
-    "services":[
-
-    ]
-  },
-  {
     "localId":"testuuid-43",
     "name":"Devolo Radiator Thermostat (#43)",
     "deviceTypeMappingRef":"2-5-373",
     "deviceTypeId":"urn:infai:ses:device-type:a72ccf9b-7d3e-4b3c-89ad-ee39ba789440",
     "services":[
       {
+        "type":"sensorMultilevel",
+        "vDevId":"ZWayVDev_zway_43-0-49-1",
+        "commandClass":"SensorMultilevel",
         "localId":"get_level:49-1",
         "info":{
-          "value":null,
-          "type":"empty",
-          "sensorTypeString":{
-            "value":"Temperature",
-            "type":"string",
-            "invalidateTime":1574779360,
-            "updateTime":1574779361
-          },
-          "val":{
-            "value":21.89,
-            "type":"float",
-            "invalidateTime":1574779360,
-            "updateTime":1575274114
-          },
-          "deviceScale":{
-            "value":0,
-            "type":"int",
-            "invalidateTime":1574779360,
-            "updateTime":1575274114
-          },
-          "scale":{
-            "value":0,
-            "type":"int",
-            "invalidateTime":1574779360,
-            "updateTime":1574779361
-          },
-          "scaleString":{
-            "value":"°C",
-            "type":"string",
-            "invalidateTime":1574779360,
-            "updateTime":1575274114
-          },
-          "invalidateTime":1574779360,
-          "updateTime":1575274114
+          "sensorTypeString":"Temperature",
+          "scaleString":"°C"
         },
         "outputExample":{
           "level":42,
@@ -58,42 +20,52 @@
         }
       },
       {
+        "type":"sensorMultilevel",
+        "vDevId":"ZWayVDev_zway_43-0-49-1",
+        "commandClass":"SensorMultilevel",
         "localId":"update:49-1",
         "info":{
-          "value":null,
-          "type":"empty",
-          "sensorTypeString":{
-            "value":"Temperature",
-            "type":"string",
-            "invalidateTime":1574779360,
-            "updateTime":1574779361
-          },
-          "val":{
-            "value":21.89,
-            "type":"float",
-            "invalidateTime":1574779360,
-            "updateTime":1575274114
-          },
-          "deviceScale":{
-            "value":0,
-            "type":"int",
-            "invalidateTime":1574779360,
-            "updateTime":1575274114
-          },
-          "scale":{
-            "value":0,
-            "type":"int",
-            "invalidateTime":1574779360,
-            "updateTime":1574779361
-          },
-          "scaleString":{
-            "value":"°C",
-            "type":"string",
-            "invalidateTime":1574779360,
-            "updateTime":1575274114
-          },
-          "invalidateTime":1574779360,
-          "updateTime":1575274114
+          "sensorTypeString":"Temperature",
+          "scaleString":"°C"
+        }
+      },
+      {
+        "type":"thermostat",
+        "vDevId":"ZWayVDev_zway_43-0-67-1",
+        "commandClass":"ThermostatSetPoint",
+        "localId":"get_level:67-1",
+        "info":{
+          "scaleString":"°C",
+          "modeName":"Heating",
+          "deviceScaleString":"°C"
+        },
+        "outputExample":{
+          "level":42.2,
+          "updateTime":"date and time as string"
+        }
+      },
+      {
+        "type":"thermostat",
+        "vDevId":"ZWayVDev_zway_43-0-67-1",
+        "commandClass":"ThermostatSetPoint",
+        "localId":"exact:67-1",
+        "info":{
+          "scaleString":"°C",
+          "modeName":"Heating",
+          "deviceScaleString":"°C"
+        },
+        "inputExample":{
+          "level":42.2
+        }
+      },
+      {
+        "type":"battery",
+        "vDevId":"ZWayVDev_zway_43-0-128",
+        "commandClass":"Battery",
+        "localId":"get_level:128",
+        "outputExample":{
+          "level":42,
+          "updateTime":"date and time as string"
         }
       }
     ]
@@ -105,42 +77,13 @@
     "deviceTypeId":"urn:infai:ses:device-type:a72ccf9b-7d3e-4b3c-89ad-ee39ba789440",
     "services":[
       {
+        "type":"sensorMultilevel",
+        "vDevId":"ZWayVDev_zway_44-0-49-1",
+        "commandClass":"SensorMultilevel",
         "localId":"get_level:49-1",
         "info":{
-          "value":null,
-          "type":"empty",
-          "sensorTypeString":{
-            "value":"Temperature",
-            "type":"string",
-            "invalidateTime":1574779396,
-            "updateTime":1574779397
-          },
-          "val":{
-            "value":22.26,
-            "type":"float",
-            "invalidateTime":1574779396,
-            "updateTime":1575273751
-          },
-          "deviceScale":{
-            "value":0,
-            "type":"int",
-            "invalidateTime":1574779396,
-            "updateTime":1575273751
-          },
-          "scale":{
-            "value":0,
-            "type":"int",
-            "invalidateTime":1574779396,
-            "updateTime":1574779397
-          },
-          "scaleString":{
-            "value":"°C",
-            "type":"string",
-            "invalidateTime":1574779396,
-            "updateTime":1575273751
-          },
-          "invalidateTime":1574779396,
-          "updateTime":1575273751
+          "sensorTypeString":"Temperature",
+          "scaleString":"°C"
         },
         "outputExample":{
           "level":42,
@@ -148,43 +91,98 @@
         }
       },
       {
+        "type":"sensorMultilevel",
+        "vDevId":"ZWayVDev_zway_44-0-49-1",
+        "commandClass":"SensorMultilevel",
         "localId":"update:49-1",
         "info":{
-          "value":null,
-          "type":"empty",
-          "sensorTypeString":{
-            "value":"Temperature",
-            "type":"string",
-            "invalidateTime":1574779396,
-            "updateTime":1574779397
-          },
-          "val":{
-            "value":22.26,
-            "type":"float",
-            "invalidateTime":1574779396,
-            "updateTime":1575273751
-          },
-          "deviceScale":{
-            "value":0,
-            "type":"int",
-            "invalidateTime":1574779396,
-            "updateTime":1575273751
-          },
-          "scale":{
-            "value":0,
-            "type":"int",
-            "invalidateTime":1574779396,
-            "updateTime":1574779397
-          },
-          "scaleString":{
-            "value":"°C",
-            "type":"string",
-            "invalidateTime":1574779396,
-            "updateTime":1575273751
-          },
-          "invalidateTime":1574779396,
-          "updateTime":1575273751
+          "sensorTypeString":"Temperature",
+          "scaleString":"°C"
         }
+      },
+      {
+        "type":"thermostat",
+        "vDevId":"ZWayVDev_zway_44-0-67-1",
+        "commandClass":"ThermostatSetPoint",
+        "localId":"get_level:67-1",
+        "info":{
+          "scaleString":"°C",
+          "modeName":"Heating",
+          "deviceScaleString":"°C"
+        },
+        "outputExample":{
+          "level":42.2,
+          "updateTime":"date and time as string"
+        }
+      },
+      {
+        "type":"thermostat",
+        "vDevId":"ZWayVDev_zway_44-0-67-1",
+        "commandClass":"ThermostatSetPoint",
+        "localId":"exact:67-1",
+        "info":{
+          "scaleString":"°C",
+          "modeName":"Heating",
+          "deviceScaleString":"°C"
+        },
+        "inputExample":{
+          "level":42.2
+        }
+      },
+      {
+        "type":"battery",
+        "vDevId":"ZWayVDev_zway_44-0-128",
+        "commandClass":"Battery",
+        "localId":"get_level:128",
+        "outputExample":{
+          "level":42,
+          "updateTime":"date and time as string"
+        }
+      }
+    ]
+  },
+  {
+    "localId":"testuuid-45",
+    "name":"MainsDevice _45 (#45)",
+    "deviceTypeMappingRef":"1027-3-2",
+    "deviceTypeId":null,
+    "services":[
+      {
+        "type":"switchMultilevel",
+        "vDevId":"ZWayVDev_zway_45-0-38",
+        "commandClass":"SwitchMultilevel",
+        "localId":"get_level:38",
+        "outputExample":{
+          "level":42,
+          "updateTime":"date and time as string"
+        }
+      },
+      {
+        "type":"switchMultilevel",
+        "vDevId":"ZWayVDev_zway_45-0-38",
+        "commandClass":"SwitchMultilevel",
+        "localId":"exact:38",
+        "inputExample":{
+          "level":42
+        }
+      },
+      {
+        "type":"switchMultilevel",
+        "vDevId":"ZWayVDev_zway_45-0-38",
+        "commandClass":"SwitchMultilevel",
+        "localId":"on:38"
+      },
+      {
+        "type":"switchMultilevel",
+        "vDevId":"ZWayVDev_zway_45-0-38",
+        "commandClass":"SwitchMultilevel",
+        "localId":"off:38"
+      },
+      {
+        "type":"switchMultilevel",
+        "vDevId":"ZWayVDev_zway_45-0-38",
+        "commandClass":"SwitchMultilevel",
+        "localId":"update:38"
       }
     ]
   }

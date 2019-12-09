@@ -2,30 +2,18 @@ Modules.registerModule("provisioning/physical-devices", function (module) {
 
     //some documentation at https://zwayhomeautomation.docs.apiary.io/#reference/devices/virtual-device
 
-    var PhysicalDevices = {getDevices: function () {/*returns list of physical devices*/}};
+    var PhysicalDevices = {};
 
-    PhysicalDevices.getDevices = function(){
-        var result = [];
 
-        var pysicalDevices = {};
+    PhysicalDevices.getRaw = function(){
         if(global.ZWave && global.ZWave[ZWAY_MODULE_NAME]){
-            pysicalDevices = JSON.parse(global.ZWave[ZWAY_MODULE_NAME].Data("").body).devices;
+            return JSON.parse(global.ZWave[ZWAY_MODULE_NAME].Data("").body).devices;
+        }else{
+            return null
         }
-
-        //console.log("DEBUG: getDevices(); internal devices data:", JSON.stringify(pysicalDevices));
-
-        for (var id in pysicalDevices) {
-            if( pysicalDevices.hasOwnProperty(id) && !isNaN(id) ) {
-                var device = PhysicalDevices.getDevice(id, pysicalDevices);
-                if (device) {
-                    result.push(device)
-                }
-            }
-        }
-        return result
     };
 
-    PhysicalDevices.getDevice = function(id, descriptions) {
+    PhysicalDevices.getDevice = function(raw, id) {
         //example:
         /*
         var result = {
@@ -39,31 +27,12 @@ Modules.registerModule("provisioning/physical-devices", function (module) {
                 genericType: {value: 8, type: "int", invalidateTime: 1574779354, updateTime: 1574845736}
                 specificType: {value: 4, type: "int", invalidateTime: 1574779354, updateTime: 1574845736}
                 vendorString: {value: "Danfoss", type: "string", invalidateTime: 1574779354, updateTime: 1574779357}
-            },
-            sub: [
-                {
-                    id: "5",
-                    type_name: "SensorMultilevel",
-                    command_class_id:49,
-                    info: {
-                        deviceScale: {value: 0, type: "int", invalidateTime: 1567169818, updateTime: 1574846430},
-                        deviceScaleString: {value: "°C", type: "string", invalidateTime: 1567169818, updateTime: 1574846430},
-                        invalidateTime: 1567169818,
-                        modeName: {value: "Heating", type: "string", invalidateTime: 1567169818, updateTime: 1567169817},
-                        scale: {value: 0, type: "int", invalidateTime: 1567169818, updateTime: 1567169817},
-                        scaleString: {value: "°C", type: "string", invalidateTime: 1567169818, updateTime: 1567169817},
-                        setVal: {value: 21, type: "float", invalidateTime: 1567169818, updateTime: 1574846430},
-                        type: "empty",
-                        updateTime: 1574846430,
-                        val: {value: 21, type: "float", invalidateTime: 1567169818, updateTime: 1574846430},
-                    }
-                }
-            ]
+            }
         }
         */
 
-        var device = descriptions[id];
-        if (!device.instances || !device.instances["0"]) {
+        var device = raw[id];
+        if (!device || !device.instances || !device.instances["0"]) {
             return null;
         }
         var result = {
@@ -80,50 +49,58 @@ Modules.registerModule("provisioning/physical-devices", function (module) {
             },
             sub:[]
         };
+        return result;
+    };
 
+
+    /*
+    {
+        scale: "5",
+        type_name: "SensorMultilevel",
+        command_class_id:49,
+        scale_info: {
+            deviceScale: {value: 0, type: "int", invalidateTime: 1567169818, updateTime: 1574846430},
+            deviceScaleString: {value: "°C", type: "string", invalidateTime: 1567169818, updateTime: 1574846430},
+            invalidateTime: 1567169818,
+            modeName: {value: "Heating", type: "string", invalidateTime: 1567169818, updateTime: 1567169817},
+            scale: {value: 0, type: "int", invalidateTime: 1567169818, updateTime: 1567169817},
+            scaleString: {value: "°C", type: "string", invalidateTime: 1567169818, updateTime: 1567169817},
+            setVal: {value: 21, type: "float", invalidateTime: 1567169818, updateTime: 1574846430},
+            type: "empty",
+            updateTime: 1574846430,
+            val: {value: 21, type: "float", invalidateTime: 1567169818, updateTime: 1574846430},
+        }
+    }
+     */
+    PhysicalDevices.getService = function(raw, deviceId, commandClassId, scale){
+        var device = raw[deviceId];
+        if (!device.instances || !device.instances["0"]) {
+            return null;
+        }
         var commandClasses = device.instances["0"].commandClasses;
-        for (var commandClassId in commandClasses) {
-            if( commandClasses.hasOwnProperty(commandClassId) && !isNaN(commandClassId) ) {
-                var sub = PhysicalDevices.getSubDevices(commandClassId, commandClasses);
-                if (sub && sub.length) {
-                    result.sub = result.sub.concat(sub)
-                }
-            }
-        }
-        return result;
-    };
-
-
-    PhysicalDevices.getSubDevices = function (commandClassId, commandClasses) {
-        var result = [];
         var commandClass = commandClasses[commandClassId];
-        if (!commandClass || !commandClass.data) {
-            return result;
+        var typeName = commandClass.name;
+
+        var result = {
+            scale: scale,
+            command_class_name: typeName,
+            command_class_id:commandClassId
+        };
+
+        if(scale && commandClass.data[scale]){
+            result.scale_info = PhysicalDevices.scaleInfo(commandClass.data[scale])
         }
-        var type_name = commandClass.name;
-        for (var id in commandClass.data){
-            if(commandClass.data.hasOwnProperty(id) && !isNaN(id)) {
-                var sub = PhysicalDevices.getSubDevice(id, commandClass.data, commandClassId, type_name);
-                if (sub) {
-                    result.push(sub)
-                }
-            }
-        }
-        return result;
+        return result
     };
 
-
-    PhysicalDevices.getSubDevice = function(id, data, commandClassId, type_name) {
-        var sub = data[id];
-        if (!sub){
-            return null
+    PhysicalDevices.scaleInfo = function (rawScaleInfo) {
+        var result = {};
+        for(var field in rawScaleInfo){
+            if(rawScaleInfo[field] && rawScaleInfo[field].type && rawScaleInfo[field].type == "string"){
+                result[field] =  rawScaleInfo[field].value;
+            }
         }
-        return {
-            id: id,
-            command_class_id: commandClassId,
-            type_name: type_name,
-            info: sub
-        }
+        return result
     };
 
     return PhysicalDevices

@@ -28,10 +28,10 @@
 
     ],
     "visibility":true,
-    "updateTime":1575366028
+    "updateTime":1575878761
   },
   {
-    "creationTime":1575366003,
+    "creationTime":1575649646,
     "creatorId":5,
     "customIcons":{
 
@@ -58,10 +58,10 @@
 
     ],
     "visibility":true,
-    "updateTime":1575366003
+    "updateTime":1575649646
   },
   {
-    "creationTime":1575366003,
+    "creationTime":1575649646,
     "creatorId":10,
     "customIcons":{
 
@@ -88,7 +88,7 @@
 
     ],
     "visibility":true,
-    "updateTime":1575366003
+    "updateTime":1575649646
   },
   {
     "creationTime":1574779190,
@@ -119,7 +119,7 @@
 
     ],
     "visibility":true,
-    "updateTime":1575366003
+    "updateTime":1575649647
   },
   {
     "creationTime":1574779362,
@@ -136,7 +136,7 @@
     "metrics":{
       "probeTitle":"Temperature",
       "scaleTitle":"°C",
-      "level":22.8,
+      "level":22.77,
       "icon":"temperature",
       "title":"Thermostat Temperature (#43)",
       "isFailed":false
@@ -153,7 +153,7 @@
 
     ],
     "visibility":true,
-    "updateTime":1575366028
+    "updateTime":1575878762
   },
   {
     "creationTime":1574779362,
@@ -188,7 +188,7 @@
 
     ],
     "visibility":true,
-    "updateTime":1575366028
+    "updateTime":1575878762
   },
   {
     "creationTime":1574779361,
@@ -222,7 +222,7 @@
 
     ],
     "visibility":true,
-    "updateTime":1575366028
+    "updateTime":1575878761
   },
   {
     "creationTime":1574779398,
@@ -239,7 +239,7 @@
     "metrics":{
       "probeTitle":"Temperature",
       "scaleTitle":"°C",
-      "level":22.91,
+      "level":23.02,
       "icon":"temperature",
       "title":"Thermostat Temperature (#44)",
       "isFailed":false
@@ -256,7 +256,7 @@
 
     ],
     "visibility":true,
-    "updateTime":1575366004
+    "updateTime":1575878226
   },
   {
     "creationTime":1574779397,
@@ -291,7 +291,7 @@
 
     ],
     "visibility":true,
-    "updateTime":1575366004
+    "updateTime":1575878226
   },
   {
     "creationTime":1574779397,
@@ -325,6 +325,38 @@
 
     ],
     "visibility":true,
-    "updateTime":1575366004
+    "updateTime":1575878226
+  },
+  {
+    "creationTime":1575384969,
+    "creatorId":1,
+    "customIcons":{
+
+    },
+    "deviceType":"switchMultilevel",
+    "h":1073562543,
+    "hasHistory":false,
+    "id":"ZWayVDev_zway_45-0-38",
+    "location":0,
+    "locationName":"globalRoom",
+    "metrics":{
+      "icon":"multilevel",
+      "title":"Dimmer (#45)",
+      "isFailed":false,
+      "level":0
+    },
+    "nodeId":45,
+    "order":{
+      "rooms":0,
+      "elements":0,
+      "dashboard":0
+    },
+    "permanently_hidden":false,
+    "probeType":"multilevel",
+    "tags":[
+
+    ],
+    "visibility":true,
+    "updateTime":1575649647
   }
 ]

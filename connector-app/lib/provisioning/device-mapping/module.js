@@ -3,10 +3,19 @@ Modules.registerModule("provisioning/device-mapping", function (module) {
     //some documentation at https://zwayhomeautomation.docs.apiary.io/#reference/devices/virtual-device
 
     return {
-        init: function (controller) {
-            var result = {
+        init: function (controller, physicalDevices) {
+            var mapping = {
                 uuid: null,
                 typemap: null,
+
+                //in: "ZWayVDev_zway_19-0-113-7-3-A", out: {device: "19", instance: "0" command_class: "113", scale: "7", rest: "3-A", controller_address: "113-7-3-A"}
+                //in: "ZWayVDev_zway_19-0-113", out: {device: "19", instance: "0" command_class: "113", scale: null, rest: null, controller_address: "113"}
+                parseVDevId: function(id){
+                    var parts = id.split("_");
+                    var idParts = parts[parts.length-1].split("-");
+                    var controllerAddress = idParts.slice(2).join("-");
+                    return {device: idParts[0], instance:idParts[1], command_class:idParts[2], scale: idParts[3]||null, rest: idParts.slice(4).join("-")||null, controller_address:controllerAddress}
+                },
 
                 /*
                     localDeviceId = localPrefix + "-" + id
@@ -40,8 +49,8 @@ Modules.registerModule("provisioning/device-mapping", function (module) {
                 // commando = "exact"
                 // returns {localDeviceId: "uuid-19", localServiceId: "exact:113-7-3-A"}
                 getLocalIds: function(virtualDevice, commando){
-                    var temp = result.getLocalIdControllerPart(virtualDevice.id);
-                    var localServiceId = result.getLocalServiceId(temp.controllerAddress, commando);
+                    var temp = mapping.getLocalIdControllerPart(virtualDevice.id);
+                    var localServiceId = mapping.getLocalServiceId(temp.controllerAddress, commando);
                     return {localDeviceId: temp.localDeviceId, localServiceId: localServiceId}
                 },
 
@@ -49,7 +58,7 @@ Modules.registerModule("provisioning/device-mapping", function (module) {
                     var parts = virtualDeviceId.split("_");
                     var idParts = parts[parts.length-1].split("-");
                     var nodeId = idParts[0];
-                    var localDeviceId = result.getLocalDeviceId(nodeId);
+                    var localDeviceId = mapping.getLocalDeviceId(nodeId);
                     var controllerAddress = idParts.slice(2).join("-");
                     return {localDeviceId: localDeviceId, controllerAddress: controllerAddress}
                 },
@@ -59,7 +68,7 @@ Modules.registerModule("provisioning/device-mapping", function (module) {
                 },
 
                 getLocalDeviceId: function(nodeId){
-                    return result.getLocalPrefix() + "-" + nodeId
+                    return mapping.getLocalPrefix() + "-" + nodeId
                 },
 
                 /*
@@ -74,8 +83,8 @@ Modules.registerModule("provisioning/device-mapping", function (module) {
                     }
                  */
                 getDeviceTypeId: function(deviceInfo){
-                    var ref = result.getDeviceTypeIdMappingRef(deviceInfo);
-                    return result.getDeviceTypeIdByMappingRef(ref)
+                    var ref = mapping.getDeviceTypeIdMappingRef(deviceInfo);
+                    return mapping.getDeviceTypeIdByMappingRef(ref)
                 },
 
                 /*
@@ -95,10 +104,10 @@ Modules.registerModule("provisioning/device-mapping", function (module) {
 
                 //ref = getDeviceTypeIdMappingRef()
                 getDeviceTypeIdByMappingRef: function(ref){
-                    if(!result.typemap){
-                        result.typemap = Modules.loadJson("typemapping.json")
+                    if(!mapping.typemap){
+                        mapping.typemap = Modules.loadJson("typemapping.json")
                     }
-                    return result.typemap[ref] || null
+                    return mapping.typemap[ref] || null
                 },
 
                 getVirtualDevices: function(){
@@ -106,23 +115,14 @@ Modules.registerModule("provisioning/device-mapping", function (module) {
                 },
 
                 /*
-                     physicalDevice = {
-                        id: "38",
-                        name: "MCO Home CO2 Monitor",
-                        info: {
-                            givenName: {value: "Devolo Radiator Thermostat", type: "string", invalidateTime: 1574779354,…}
-                            manufacturerId: {value: 2, type: "int", invalidateTime: 1574779354, updateTime: 1574779357}
-                            manufacturerProductId: {value: 373, type: "int", invalidateTime: 1574779354, updateTime: 1574779357}
-                            manufacturerProductType: {value: 5, type: "int", invalidateTime: 1574779354, updateTime: 1574779357}
-                            genericType: {value: 8, type: "int", invalidateTime: 1574779354, updateTime: 1574845736}
-                            specificType: {value: 4, type: "int", invalidateTime: 1574779354, updateTime: 1574845736}
-                            vendorString: {value: "Danfoss", type: "string", invalidateTime: 1574779354, updateTime: 1574779357}
-                        },
-                        sub: [
+                     [
                             {
-                                id: "5",
-                                type_name: "SensorMultilevel",
-                                command_class_id:49,
+                                type: "",
+                                v_dev_id
+                                localId: "",
+                                comment: "",
+                                inputExample: {type: "string|integer|float|object", example:42, comment: ""},
+                                outputExample: {type: "string|integer|float|object", example:42, comment: ""},
                                 info: {
                                     deviceScale: {value: 0, type: "int", invalidateTime: 1567169818, updateTime: 1574846430},
                                     deviceScaleString: {value: "°C", type: "string", invalidateTime: 1567169818, updateTime: 1574846430},
@@ -137,168 +137,150 @@ Modules.registerModule("provisioning/device-mapping", function (module) {
                                 }
                             }
                         ]
-                    }
-
-                    returns {
-                        name: "",
-                        localId: "",
-                        deviceTypeMappingRef: "",
-                        deviceTypeId: "",
-                        services: [
-                            {
-                                localId: "",
-                                comment: "",
-                                inputExample: {type: "string|integer|float|object", example:42, comment: ""},
-                                outputExample: {type: "string|integer|float|object", example:42, comment: ""},
-                                info: physicalDevice.sub.info
-                            }
-                        ]
-                    }
-
                  */
-                getDeviceDescription: function(physicalDevice, virtualDevices){
-                    var mappingRef = result.getDeviceTypeIdMappingRef(physicalDevice.info);
-                    var deviceDescription = {
-                        localId: result.getLocalDeviceId(physicalDevice.id),
-                        name: physicalDevice.name,
-                        deviceTypeMappingRef: mappingRef,
-                        deviceTypeId: result.getDeviceTypeIdByMappingRef(mappingRef),
-                        services:[],
-                    };
-                    physicalDevice.sub.forEach(function (sub) {
-                        virtualDevices.forEach(function (vDev) {
-                            var parts = vDev.id.split("_");
-                            var idParts = parts[parts.length-1].split("-");
-                            var nodeId = idParts[0];
-                            var commandClassLocation = idParts.slice(2).join("-");  //e.g. "113-7-3-A"
-                            var expectedCommandClassLocationPrefix = sub.command_class_id+"-"+sub.id;
-                            if(nodeId == physicalDevice.id && commandClassLocation.startsWith(expectedCommandClassLocationPrefix)){
-                                var localIdInfo = result.getLocalIdControllerPart(vDev.id);
-                                switch(sub.type_name.toLowerCase()){
-                                    case "battery".toLowerCase():
-                                        var getLevel = result.getLocalServiceId(localIdInfo.controllerAddress, "get_level");
-                                        deviceDescription.services.push({localId: getLevel, info: sub.info, outputExample:{level: 42, updateTime:"date and time as string"}});
-                                        break;
-                                    case "doorlock".toLowerCase():
-                                        var getLevel = result.getLocalServiceId(localIdInfo.controllerAddress, "get_level");
-                                        deviceDescription.services.push({localId: getLevel, info: sub.info, outputExample:{level: "unknown-type", updateTime:"date and time as string"}});
-                                        var open = result.getLocalServiceId(localIdInfo.controllerAddress, "open");
-                                        deviceDescription.services.push({localId: open, info: sub.info});
-                                        var close = result.getLocalServiceId(localIdInfo.controllerAddress, "close");
-                                        deviceDescription.services.push({localId: close, info: sub.info});
-                                        break;
-                                    case "thermostat".toLowerCase():
-                                        var getLevel = result.getLocalServiceId(localIdInfo.controllerAddress, "get_level");
-                                        deviceDescription.services.push({localId: getLevel, info: sub.info, outputExample:{level: 42.2, updateTime:"date and time as string"}});
-                                        var exact = result.getLocalServiceId(localIdInfo.controllerAddress, "exact");
-                                        deviceDescription.services.push({localId: exact, info: sub.info, inputExample:{level: 42.2}});
-                                        break;
-                                    case "toggleButton".toLowerCase():
-                                        var getLevel = result.getLocalServiceId(localIdInfo.controllerAddress, "get_level");
-                                        deviceDescription.services.push({localId: getLevel, info: sub.info, outputExample:{level: "on|off", updateTime:"date and time as string"}});
-                                        var on = result.getLocalServiceId(localIdInfo.controllerAddress, "on");
-                                        deviceDescription.services.push({localId: on, info: sub.info});
-                                        break;
-                                    case "switchBinary".toLowerCase():
-                                        var getLevel = result.getLocalServiceId(localIdInfo.controllerAddress, "get_level");
-                                        deviceDescription.services.push({localId: getLevel, info: sub.info, outputExample:{level: "on|off", updateTime:"date and time as string"}});
-                                        var on = result.getLocalServiceId(localIdInfo.controllerAddress, "on");
-                                        deviceDescription.services.push({localId: on, info: sub.info});
-                                        var off = result.getLocalServiceId(localIdInfo.controllerAddress, "off");
-                                        deviceDescription.services.push({localId: off, info: sub.info});
-                                        var update = result.getLocalServiceId(localIdInfo.controllerAddress, "update");
-                                        deviceDescription.services.push({localId: update, info: sub.info});
-                                        break;
-                                    case "sensorBinary".toLowerCase():
-                                        var getLevel = result.getLocalServiceId(localIdInfo.controllerAddress, "get_level");
-                                        deviceDescription.services.push({localId: getLevel, info: sub.info, outputExample:{level: "on|off", updateTime:"date and time as string"}});
-                                        var update = result.getLocalServiceId(localIdInfo.controllerAddress, "update");
-                                        deviceDescription.services.push({localId: update, info: sub.info});
-                                        break;
-                                    case "switchMultilevel".toLowerCase():
-                                        var getLevel = result.getLocalServiceId(localIdInfo.controllerAddress, "get_level");
-                                        deviceDescription.services.push({localId: getLevel, info: sub.info, outputExample:{level: 42, updateTime:"date and time as string"}});
-                                        var exact = result.getLocalServiceId(localIdInfo.controllerAddress, "exact");
-                                        deviceDescription.services.push({localId: exact, info: sub.info, inputExample:{level: 42}});
-                                        var on = result.getLocalServiceId(localIdInfo.controllerAddress, "on");
-                                        deviceDescription.services.push({localId: on, info: sub.info});
-                                        var off = result.getLocalServiceId(localIdInfo.controllerAddress, "off");
-                                        deviceDescription.services.push({localId: off, info: sub.info});
-                                        var update = result.getLocalServiceId(localIdInfo.controllerAddress, "update");
-                                        deviceDescription.services.push({localId: update, info: sub.info});
-                                        break;
-                                    case "sensorMultilevel".toLowerCase():
-                                        var getLevel = result.getLocalServiceId(localIdInfo.controllerAddress, "get_level");
-                                        deviceDescription.services.push({localId: getLevel, info: sub.info, outputExample:{level: 42, updateTime:"date and time as string"}});
-                                        var update = result.getLocalServiceId(localIdInfo.controllerAddress, "update");
-                                        deviceDescription.services.push({localId: update, info: sub.info});
-                                        break;
-                                    case "switchControl".toLowerCase():
-                                        var getLevel = result.getLocalServiceId(localIdInfo.controllerAddress, "get_level");
-                                        deviceDescription.services.push({localId: getLevel, info: sub.info, outputExample:{level: 42, updateTime:"date and time as string"}});
-                                        var on = result.getLocalServiceId(localIdInfo.controllerAddress, "on");
-                                        deviceDescription.services.push({localId: on, info: sub.info});
-                                        var off = result.getLocalServiceId(localIdInfo.controllerAddress, "off");
-                                        deviceDescription.services.push({localId: off, info: sub.info});
-                                        var upstart = result.getLocalServiceId(localIdInfo.controllerAddress, "upstart");
-                                        deviceDescription.services.push({localId: upstart, info: sub.info});
-                                        var upstop = result.getLocalServiceId(localIdInfo.controllerAddress, "upstop");
-                                        deviceDescription.services.push({localId: upstop, info: sub.info});
-                                        var downstart = result.getLocalServiceId(localIdInfo.controllerAddress, "downstart");
-                                        deviceDescription.services.push({localId: downstart, info: sub.info});
-                                        var downstop = result.getLocalServiceId(localIdInfo.controllerAddress, "downstop");
-                                        deviceDescription.services.push({localId: downstop, info: sub.info});
-                                        var exact = result.getLocalServiceId(localIdInfo.controllerAddress, "exact");
-                                        deviceDescription.services.push({localId: exact, info: sub.info, inputExample:{level: 42}});
-                                        break;
-                                    case "switchRGB".toLowerCase():
-                                        var getLevel = result.getLocalServiceId(localIdInfo.controllerAddress, "get_level");
-                                        deviceDescription.services.push({localId: getLevel, info: sub.info, outputExample:{level: "unknown-type", updateTime:"date and time as string"}});
-                                        var getColor = result.getLocalServiceId(localIdInfo.controllerAddress, "get_color");
-                                        deviceDescription.services.push({localId: getColor, info: sub.info, outputExample:{color: {r:255, g:255, b:255}, updateTime:"date and time as string"}});
-                                        var exact = result.getLocalServiceId(localIdInfo.controllerAddress, "exact");
-                                        deviceDescription.services.push({localId: exact, info: sub.info, inputExample:{red:255, green:255, blue:255}});
-                                        var on = result.getLocalServiceId(localIdInfo.controllerAddress, "on");
-                                        deviceDescription.services.push({localId: on, info: sub.info});
-                                        var off = result.getLocalServiceId(localIdInfo.controllerAddress, "off");
-                                        deviceDescription.services.push({localId: off, info: sub.info});
-                                        break;
-                                    default:
-                                        console.log("WARNING unknown command class", sub.type_name,  JSON.stringify(sub.info));
-                                }
-                            }
-                        });
-                    });
-                    return deviceDescription;
+                getServiceDescriptions: function(rawDevices, vDev){
+                    var vDevInfo = mapping.parseVDevId(vDev.id);
+                    var result = [];
+                    var service = physicalDevices.getService(rawDevices, vDevInfo.device, vDevInfo.command_class, vDevInfo.scale);
+                    switch(vDev.deviceType.toLowerCase()){
+                        case "battery".toLowerCase():
+                            var getLevel = mapping.getLocalServiceId(vDevInfo.controller_address, "get_level");
+                            result.push({type: vDev.deviceType, vDevId: vDev.id, commandClass: service.command_class_name, localId: getLevel, info: service.scale_info, outputExample:{level: 42, updateTime:"date and time as string"}});
+                            break;
+                        case "doorlock".toLowerCase():
+                            var getLevel = mapping.getLocalServiceId(vDevInfo.controller_address, "get_level");
+                            result.push({type: vDev.deviceType, vDevId: vDev.id, commandClass: service.command_class_name, localId: getLevel, info: service.scale_info, outputExample:{level: "unknown-type", updateTime:"date and time as string"}});
+                            var open = mapping.getLocalServiceId(vDevInfo.controller_address, "open");
+                            result.push({type: vDev.deviceType, vDevId: vDev.id, commandClass: service.command_class_name, localId: open, info: service.scale_info});
+                            var close = mapping.getLocalServiceId(vDevInfo.controller_address, "close");
+                            result.push({type: vDev.deviceType, vDevId: vDev.id, commandClass: service.command_class_name, localId: close, info: service.scale_info});
+                            break;
+                        case "thermostat".toLowerCase():
+                            var getLevel = mapping.getLocalServiceId(vDevInfo.controller_address, "get_level");
+                            result.push({type: vDev.deviceType, vDevId: vDev.id, commandClass: service.command_class_name, localId: getLevel, info: service.scale_info, outputExample:{level: 42.2, updateTime:"date and time as string"}});
+                            var exact = mapping.getLocalServiceId(vDevInfo.controller_address, "exact");
+                            result.push({type: vDev.deviceType, vDevId: vDev.id, commandClass: service.command_class_name, localId: exact, info: service.scale_info, inputExample:{level: 42.2}});
+                            break;
+                        case "toggleButton".toLowerCase():
+                            var getLevel = mapping.getLocalServiceId(vDevInfo.controller_address, "get_level");
+                            result.push({type: vDev.deviceType, vDevId: vDev.id, commandClass: service.command_class_name, localId: getLevel, info: service.scale_info, outputExample:{level: "on|off", updateTime:"date and time as string"}});
+                            var on = mapping.getLocalServiceId(vDevInfo.controller_address, "on");
+                            result.push({type: vDev.deviceType, vDevId: vDev.id, commandClass: service.command_class_name, localId: on, info: service.scale_info});
+                            break;
+                        case "switchBinary".toLowerCase():
+                            var getLevel = mapping.getLocalServiceId(vDevInfo.controller_address, "get_level");
+                            result.push({type: vDev.deviceType, vDevId: vDev.id, commandClass: service.command_class_name, localId: getLevel, info: service.scale_info, outputExample:{level: "on|off", updateTime:"date and time as string"}});
+                            var on = mapping.getLocalServiceId(vDevInfo.controller_address, "on");
+                            result.push({type: vDev.deviceType, vDevId: vDev.id, commandClass: service.command_class_name, localId: on, info: service.scale_info});
+                            var off = mapping.getLocalServiceId(vDevInfo.controller_address, "off");
+                            result.push({type: vDev.deviceType, vDevId: vDev.id, commandClass: service.command_class_name, localId: off, info: service.scale_info});
+                            var update = mapping.getLocalServiceId(vDevInfo.controller_address, "update");
+                            result.push({type: vDev.deviceType, vDevId: vDev.id, commandClass: service.command_class_name, localId: update, info: service.scale_info});
+                            break;
+                        case "sensorBinary".toLowerCase():
+                            var getLevel = mapping.getLocalServiceId(vDevInfo.controller_address, "get_level");
+                            result.push({type: vDev.deviceType, vDevId: vDev.id, commandClass: service.command_class_name, localId: getLevel, info: service.scale_info, outputExample:{level: "on|off", updateTime:"date and time as string"}});
+                            var update = mapping.getLocalServiceId(vDevInfo.controller_address, "update");
+                            result.push({type: vDev.deviceType, vDevId: vDev.id, commandClass: service.command_class_name, localId: update, info: service.scale_info});
+                            break;
+                        case "switchMultilevel".toLowerCase():
+                            var getLevel = mapping.getLocalServiceId(vDevInfo.controller_address, "get_level");
+                            result.push({type: vDev.deviceType, vDevId: vDev.id, commandClass: service.command_class_name, localId: getLevel, info: service.scale_info, outputExample:{level: 42, updateTime:"date and time as string"}});
+                            var exact = mapping.getLocalServiceId(vDevInfo.controller_address, "exact");
+                            result.push({type: vDev.deviceType, vDevId: vDev.id, commandClass: service.command_class_name, localId: exact, info: service.scale_info, inputExample:{level: 42}});
+                            var on = mapping.getLocalServiceId(vDevInfo.controller_address, "on");
+                            result.push({type: vDev.deviceType, vDevId: vDev.id, commandClass: service.command_class_name, localId: on, info: service.scale_info});
+                            var off = mapping.getLocalServiceId(vDevInfo.controller_address, "off");
+                            result.push({type: vDev.deviceType, vDevId: vDev.id, commandClass: service.command_class_name, localId: off, info: service.scale_info});
+                            var update = mapping.getLocalServiceId(vDevInfo.controller_address, "update");
+                            result.push({type: vDev.deviceType, vDevId: vDev.id, commandClass: service.command_class_name, localId: update, info: service.scale_info});
+                            break;
+                        case "sensorMultilevel".toLowerCase():
+                            var getLevel = mapping.getLocalServiceId(vDevInfo.controller_address, "get_level");
+                            result.push({type: vDev.deviceType, vDevId: vDev.id, commandClass: service.command_class_name, localId: getLevel, info: service.scale_info, outputExample:{level: 42, updateTime:"date and time as string"}});
+                            var update = mapping.getLocalServiceId(vDevInfo.controller_address, "update");
+                            result.push({type: vDev.deviceType, vDevId: vDev.id, commandClass: service.command_class_name, localId: update, info: service.scale_info});
+                            break;
+                        case "switchControl".toLowerCase():
+                            var getLevel = mapping.getLocalServiceId(vDevInfo.controller_address, "get_level");
+                            result.push({type: vDev.deviceType, vDevId: vDev.id, commandClass: service.command_class_name, localId: getLevel, info: service.scale_info, outputExample:{level: 42, updateTime:"date and time as string"}});
+                            var on = mapping.getLocalServiceId(vDevInfo.controller_address, "on");
+                            result.push({type: vDev.deviceType, vDevId: vDev.id, commandClass: service.command_class_name, localId: on, info: service.scale_info});
+                            var off = mapping.getLocalServiceId(vDevInfo.controller_address, "off");
+                            result.push({type: vDev.deviceType, vDevId: vDev.id, commandClass: service.command_class_name, localId: off, info: service.scale_info});
+                            var upstart = mapping.getLocalServiceId(vDevInfo.controller_address, "upstart");
+                            result.push({type: vDev.deviceType, vDevId: vDev.id, commandClass: service.command_class_name, localId: upstart, info: service.scale_info});
+                            var upstop = mapping.getLocalServiceId(vDevInfo.controller_address, "upstop");
+                            result.push({type: vDev.deviceType, vDevId: vDev.id, commandClass: service.command_class_name, localId: upstop, info: service.scale_info});
+                            var downstart = mapping.getLocalServiceId(vDevInfo.controller_address, "downstart");
+                            result.push({type: vDev.deviceType, vDevId: vDev.id, commandClass: service.command_class_name, localId: downstart, info: service.scale_info});
+                            var downstop = mapping.getLocalServiceId(vDevInfo.controller_address, "downstop");
+                            result.push({type: vDev.deviceType, vDevId: vDev.id, commandClass: service.command_class_name, localId: downstop, info: service.scale_info});
+                            var exact = mapping.getLocalServiceId(vDevInfo.controller_address, "exact");
+                            result.push({type: vDev.deviceType, vDevId: vDev.id, commandClass: service.command_class_name, localId: exact, info: service.scale_info, inputExample:{level: 42}});
+                            break;
+                        case "switchRGB".toLowerCase():
+                            var getLevel = mapping.getLocalServiceId(vDevInfo.controller_address, "get_level");
+                            result.push({type: vDev.deviceType, vDevId: vDev.id, commandClass: service.command_class_name, localId: getLevel, info: service.scale_info, outputExample:{level: "unknown-type", updateTime:"date and time as string"}});
+                            var getColor = mapping.getLocalServiceId(vDevInfo.controller_address, "get_color");
+                            result.push({type: vDev.deviceType, vDevId: vDev.id, commandClass: service.command_class_name, localId: getColor, info: service.scale_info, outputExample:{color: {r:255, g:255, b:255}, updateTime:"date and time as string"}});
+                            var exact = mapping.getLocalServiceId(vDevInfo.controller_address, "exact");
+                            result.push({type: vDev.deviceType, vDevId: vDev.id, commandClass: service.command_class_name, localId: exact, info: service.scale_info, inputExample:{red:255, green:255, blue:255}});
+                            var on = mapping.getLocalServiceId(vDevInfo.controller_address, "on");
+                            result.push({type: vDev.deviceType, vDevId: vDev.id, commandClass: service.command_class_name, localId: on, info: service.scale_info});
+                            var off = mapping.getLocalServiceId(vDevInfo.controller_address, "off");
+                            result.push({type: vDev.deviceType, vDevId: vDev.id, commandClass: service.command_class_name, localId: off, info: service.scale_info});
+                            break;
+                        default:
+                            console.log("WARNING unknown command class", vDev.deviceType,  JSON.stringify(service));
+                    }
+                    return result;
                 },
 
-                getDeviceDescriptions: function(physicalDevices, vDevs /*optional*/){
-                    if(!vDevs){
-                        vDevs = result.getVirtualDevices();
-                    }
-                    return physicalDevices.map(function (device) {
-                        return result.getDeviceDescription(device, vDevs)
-                    })
+                getDeviceDescriptions: function(){
+                    var deviceIndex = {};
+                    var result = [];
+                    var rawDevices = physicalDevices.getRaw();
+                    mapping.getVirtualDevices().forEach(function (vDev) {
+                        var info = mapping.parseVDevId(vDev.id);
+                        if(!deviceIndex[info.device]){
+                            var physicalDevice = physicalDevices.getDevice(rawDevices, info.device);
+                            if(!physicalDevice){
+                                return
+                            }
+                            var mappingRef = mapping.getDeviceTypeIdMappingRef(physicalDevice.info);
+                            deviceIndex[info.device] = {
+                                localId: mapping.getLocalDeviceId(physicalDevice.id),
+                                name: physicalDevice.name,
+                                deviceTypeMappingRef: mappingRef,
+                                deviceTypeId: mapping.getDeviceTypeIdByMappingRef(mappingRef),
+                                services:[],
+                            };
+                            result.push(deviceIndex[info.device]);
+                        }
+                        deviceIndex[info.device].services = deviceIndex[info.device].services.concat(mapping.getServiceDescriptions(rawDevices, vDev))
+                    });
+                    return result
                 },
 
                 getLocalPrefix: function(){
                     if(controller.uuid){
                         return controller.uuid;
                     }
-                    if(!result.uuid){
+                    if(!mapping.uuid){
                         try{
                             if(global.ZWave && global.ZWave[ZWAY_MODULE_NAME]){
-                                result.uuid = JSON.parse(global.ZWave[ZWAY_MODULE_NAME].Data("").body).controller.data.uuid.value;
+                                mapping.uuid = JSON.parse(global.ZWave[ZWAY_MODULE_NAME].Data("").body).controller.data.uuid.value;
                             }
                         }catch (e) {
                             console.log("ERROR:", e);
                             return null
                         }
                     }
-                    return result.uuid
+                    return mapping.uuid
                 }
             };
-            return result
+            return mapping
         }
     };
 });
