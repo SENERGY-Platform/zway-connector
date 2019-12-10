@@ -55,6 +55,7 @@
         result.send = function (topic, msg) {
             if(this.mqtt && this.mqtt.publish && this.mqtt.connected){
                 try{
+                    console.log("DEBUG: publish on mqtt:", topic, msg);
                     this.mqtt.publish(topic, msg.trim(), {qos_level: 0, retain: false});
                 }catch (e) {
                     console.log("ERROR: unable to send tcp message", e, e.message, JSON.stringify(e), topic, msg);
