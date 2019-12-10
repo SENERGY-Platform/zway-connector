@@ -117,7 +117,7 @@ SenergyConnector.prototype.initConnectionHandler = function () {
 
                 //add command handler
                 that.connection.registerCommand(localDevice, localService, function (deviceLocalId, serviceLocalId, payload) {
-                    that.handleCommand(deviceLocalId, serviceLocalId, payload);
+                    return that.handleCommand(deviceLocalId, serviceLocalId, payload);
                 })
             });
         });
@@ -131,7 +131,7 @@ SenergyConnector.prototype.handleCommand = function(deviceLocalId, serviceLocalI
     var command = that.provisioning.mapping.getCommandName(serviceLocalId);
     if(vDev){
         if(command == "get_level"){
-            return JSON.stringify({level: vDev.get("metrics").level, updateTime: new Date(vDev.get("updateTime")*1000).toISOString()})
+            return {level: vDev.get("metrics").level, updateTime: new Date(vDev.get("updateTime")*1000).toISOString()}
         }else{
             if(payload){
                 vDev.performCommand(command, payload);
