@@ -91,7 +91,11 @@ Modules.registerModule("connector", function (module) {
                         console.log("command not registered:", deviceLocalId, serviceLocalId);
                         return
                     }
-                    var response = result._commandHandlers[deviceLocalId][serviceLocalId](deviceLocalId, serviceLocalId, JSON.parse(request.payload.data));
+                    var data = null;
+                    if(request.payload.data){
+                        data = JSON.parse(request.payload.data)
+                    }
+                    var response = result._commandHandlers[deviceLocalId][serviceLocalId](deviceLocalId, serviceLocalId, data);
                     result._respond(deviceLocalId, serviceLocalId, request, response);
                 }catch (e) {
                     console.log("ERROR: unable to handle command", e, e.message, JSON.stringify(e), topic, payload)

@@ -133,7 +133,11 @@ SenergyConnector.prototype.handleCommand = function(deviceLocalId, serviceLocalI
         if(command == "get_level"){
             return JSON.stringify({level: vDev.get("metrics").level, updateTime: new Date(vDev.get("updateTime")*1000).toISOString()})
         }else{
-            vDev.performCommand(command, payload);
+            if(payload){
+                vDev.performCommand(command, payload);
+            }else{
+                vDev.performCommand(command);
+            }
         }
     }
     return null;
