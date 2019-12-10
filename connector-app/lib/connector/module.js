@@ -105,10 +105,13 @@ Modules.registerModule("connector", function (module) {
                 password,
                 true,
                 function (connection, err) {
+                    console.log("CONNECTOR DISCONNECTED");
                     error()
                 }, function (connection) {
+                    console.log("CONNECTOR CONNECTED");
                     then();
                 }, function (connection, err) {
+                    console.log("CONNECTOR ERROR");
                     error();
                 }, function(connection, topic, payload){
                     result._handleCommand(topic, payload);

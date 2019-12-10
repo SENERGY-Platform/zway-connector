@@ -34,6 +34,7 @@
 
         result.disconnect = function () {
             try{
+                console.log("MQTT DISCONNECT CALL");
                 result.mqtt.onDisconnect(function () {console.log("DEBUG: close inception")});
                 result.mqtt.close();
             }catch (e) {
@@ -43,6 +44,7 @@
 
         result.subscribe = function(topic, qos){
             try{
+                console.log("MQTT SUBSCRIBE", topic);
                 result.mqtt.subscribe(topic,  {qos: qos});
                 return {}
             }catch (e) {
