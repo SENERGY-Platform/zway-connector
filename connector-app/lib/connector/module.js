@@ -54,7 +54,7 @@ Modules.registerModule("connector", function (module) {
             result._respond = function(deviceLocalId, serviceLocalId, request, response){
                 try{
                     //{"correlation_id":"","payload":{"segment":"string"}}
-                    var err = result._connection.send("response/"+deviceLocalId+"/"+serviceLocalId, JSON.stringify({correlation_id:request.correlation_id, payload:response}));
+                    var err = result._connection.send("response/"+deviceLocalId+"/"+serviceLocalId, JSON.stringify({correlation_id:request.correlation_id, payload:{data: JSON.stringify(response)}}));
                     if(err.err){
                         console.log("ERROR: while sending response", err.err, err.err.message, JSON.stringify(err.err), deviceLocalId, serviceLocalId);
                     }
@@ -67,7 +67,7 @@ Modules.registerModule("connector", function (module) {
             result.sendEvent = function(deviceLocalId, serviceLocalId, message){
                 try{
                     //{"correlation_id":"","payload":{"segment":"string"}}
-                    console.log("send event: ", deviceLocalId, serviceLocalId, JSON.stringify(message));
+                    console.log("send event: ", deviceLocalId, serviceLocalId, JSON.stringify({data: JSON.stringify(message)}));
                     var err = result._connection.send("event/"+deviceLocalId+"/"+serviceLocalId, JSON.stringify(message));
                     if(err.err){
                         console.log("ERROR: while sending event", err.err, err.err.message, JSON.stringify(err.err), deviceLocalId, serviceLocalId);
@@ -91,7 +91,7 @@ Modules.registerModule("connector", function (module) {
                         console.log("command not registered:", deviceLocalId, serviceLocalId);
                         return
                     }
-                    var response = result._commandHandlers[deviceLocalId][serviceLocalId](deviceLocalId, serviceLocalId, request.payload);
+                    var response = result._commandHandlers[deviceLocalId][serviceLocalId](deviceLocalId, serviceLocalId, JSON.parse(request.payload.data));
                     result._respond(deviceLocalId, serviceLocalId, request, response);
                 }catch (e) {
                     console.log("ERROR: unable to handle command", e, e.message, JSON.stringify(e), topic, payload)
