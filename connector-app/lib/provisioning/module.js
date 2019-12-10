@@ -47,9 +47,9 @@ Modules.registerModule("provisioning", function (module) {
 
                 run: function(done){
                     var descriptions = mapping.getDeviceDescriptions();
-                    console.log("provisioning descriptions size ", descriptions.length);
+                    console.log("DEBUG provisioning descriptions size ", descriptions.length);
                     descriptions = provisioning.filterDescriptions(descriptions);
-                    console.log("provisioning descriptions filtered size ", descriptions.length);
+                    console.log("DEBUG provisioning descriptions filtered size ", descriptions.length);
                     var hash = provisioning.getHash(descriptions);
                     if(hash === provisioning.hash){
                         done(false, descriptions);
@@ -187,6 +187,8 @@ Modules.registerModule("provisioning", function (module) {
                             }else{
                                 result.push(descriptions[i])
                             }
+                        }else{
+                            console.log("MISSING SERVICES: ", JSON.stringify(descriptions[i]))
                         }
                     }
                     return result

@@ -245,7 +245,7 @@ Modules.registerModule("provisioning/device-mapping", function (module) {
                     var result = [];
                     var rawDevices = physicalDevices.getRaw();
                     var virtualDevices = mapping.getVirtualDevices();
-                    console.log("virtual devices size ", virtualDevices.length);
+                    console.log("DEBUG virtual devices size ", virtualDevices.length);
                     virtualDevices.forEach(function (vDev) {
                         var info = mapping.parseVDevId(vDev.id);
                         if(!deviceIndex[info.device]){
@@ -265,6 +265,7 @@ Modules.registerModule("provisioning/device-mapping", function (module) {
                         }
                         deviceIndex[info.device].services = deviceIndex[info.device].services.concat(mapping.getServiceDescriptions(rawDevices, vDev))
                     });
+                    console.log("DEBUG deviceIndex ", JSON.stringify(deviceIndex));
                     return result
                 },
 
