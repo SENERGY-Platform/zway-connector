@@ -146,7 +146,6 @@ Modules.registerModule("provisioning/device-mapping", function (module) {
                     var deviceType = vDev.deviceType || "";
                     switch(deviceType.toLowerCase()){
                         case "":
-                            console.log("DEBUG empty vDev.deviceType", JSON.stringify(vDev));
                             break;
                         case "battery".toLowerCase():
                             var getLevel = mapping.getLocalServiceId(vDevInfo.controller_address, "get_level");
@@ -265,7 +264,6 @@ Modules.registerModule("provisioning/device-mapping", function (module) {
                             result.push(deviceIndex[info.device]);
                         }
                         var services = mapping.getServiceDescriptions(rawDevices, vDev);
-                        console.log("DEBUG add services ", vDev.id, JSON.stringify(info), JSON.stringify(services));
                         deviceIndex[info.device].services = deviceIndex[info.device].services.concat(services)
                     });
                     return result
