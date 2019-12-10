@@ -47,7 +47,9 @@ Modules.registerModule("provisioning", function (module) {
 
                 run: function(done){
                     var descriptions = mapping.getDeviceDescriptions();
+                    console.log("provisioning descriptions size ", descriptions.length);
                     descriptions = provisioning.filterDescriptions(descriptions);
+                    console.log("provisioning descriptions filtered size ", descriptions.length);
                     var hash = provisioning.getHash(descriptions);
                     if(hash === provisioning.hash){
                         done(false, descriptions);

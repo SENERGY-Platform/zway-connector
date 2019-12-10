@@ -244,7 +244,9 @@ Modules.registerModule("provisioning/device-mapping", function (module) {
                     var deviceIndex = {};
                     var result = [];
                     var rawDevices = physicalDevices.getRaw();
-                    mapping.getVirtualDevices().forEach(function (vDev) {
+                    var virtualDevices = mapping.getVirtualDevices();
+                    console.log("virtual devices size ", virtualDevices.length);
+                    virtualDevices.forEach(function (vDev) {
                         var info = mapping.parseVDevId(vDev.id);
                         if(!deviceIndex[info.device]){
                             var physicalDevice = physicalDevices.getDevice(rawDevices, info.device);
