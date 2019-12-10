@@ -138,7 +138,8 @@ Modules.registerModule("provisioning/device-mapping", function (module) {
                             }
                         ]
                  */
-                getServiceDescriptions: function(rawDevices, vDev){
+                getServiceDescriptions: function(rawDevices, vDevOrig){
+                    var vDev = JSON.parse(JSON.stringify(vDevOrig));
                     var vDevInfo = mapping.parseVDevId(vDev.id);
                     var result = [];
                     var service = physicalDevices.getService(rawDevices, vDevInfo.device, vDevInfo.command_class, vDevInfo.scale);
