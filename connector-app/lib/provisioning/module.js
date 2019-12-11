@@ -193,7 +193,9 @@ Modules.registerModule("provisioning", function (module) {
                 },
 
                 logMissingDeviceType: function (description) {
-                    console.log("MISSING DEVICE-TYPE: ", JSON.stringify(description))
+                    saveObject("device_type_description_"+description.deviceTypeMappingRef, description);
+                    console.log("MISSING DEVICE-TYPE:", description.deviceTypeMappingRef, description.name);
+                    //console.log("MISSING DEVICE-TYPE: ", JSON.stringify(description))
                 }
             };
 
