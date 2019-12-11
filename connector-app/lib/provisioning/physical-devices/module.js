@@ -75,10 +75,13 @@ Modules.registerModule("provisioning/physical-devices", function (module) {
     PhysicalDevices.getService = function(raw, deviceId, commandClassId, scale){
         var device = raw[deviceId];
         if (!device.instances || !device.instances["0"]) {
-            return null;
+            return {};
         }
         var commandClasses = device.instances["0"].commandClasses;
         var commandClass = commandClasses[commandClassId];
+        if(!commandClass){
+            return {};
+        }
         var typeName = commandClass.name;
 
         var result = {
