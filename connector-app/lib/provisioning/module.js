@@ -63,7 +63,7 @@ Modules.registerModule("provisioning", function (module) {
 
                     var err = provisioning.updateDevices(login, descriptions);
                     if(err){
-                        console.log("ERROR: provisioning::run::updateDevices()", err);
+                        console.log("ERROR: provisioning::run::updateDevices()", JSON.stringify(err));
                         done(false);
                         return
                     }
@@ -110,7 +110,7 @@ Modules.registerModule("provisioning", function (module) {
                     for(var i=0; i<descriptions.length; i++){
                         var err = provisioning.updateDevice(login, descriptions[i]);
                         if(err){
-                            console.log("ERROR: provisioning::updateDevices()::updateDevice()", err);
+                            console.log("ERROR: provisioning::updateDevices()::updateDevice()", JSON.stringify(err));
                             return err
                         }
                     }
