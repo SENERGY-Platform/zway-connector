@@ -111,7 +111,7 @@ SenergyConnector.prototype.initConnectionHandler = function () {
                 //add event handler
                 var vDev = that.provisioning.mapping.getVirtualDevice(localDevice, localService);
                 var command = that.provisioning.mapping.getCommandName(localService);
-                if(command == ""){
+                if(command == "get_level"){
                     that.addEventHandler(vDev);
                 }
 
