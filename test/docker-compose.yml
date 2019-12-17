@@ -1,0 +1,72 @@
+version: "3"
+services:
+  z-way:
+    container_name: z-way
+    image: fgseitsrancher.wifa.intern.uni-leipzig.de:5000/z-way:dev
+    expose:
+      - 8083
+    ports:
+      - 8083:8083
+    volumes:
+      - ../connector-app/:/opt/z-way-server/automation/userModules/SenergyConnector
+      - /usr/bin/qemu-arm-static:/usr/bin/qemu-arm-static
+    networks:
+      sepl:
+        aliases:
+          - z-way
+  z-way-config:
+    container_name: z-way-conf
+    restart: on-failure
+    build: config
+    depends_on:
+      - z-way
+      - debugger
+    env_file:
+      - test.env
+    networks:
+      sepl:
+        aliases:
+          - z-way-conf
+  debugger:
+    container_name: debugger
+    restart: on-failure
+    ports:
+      - 8080:8080/tcp
+    build: mqtt-debugger
+    networks:
+      sepl:
+        aliases:
+          - debugger
+  vernemq:
+    container_name: vernemq
+    environment:
+      - DOCKER_VERNEMQ_LOG__CONSOLE__LEVEL=debug
+      - DOCKER_VERNEMQ_SHARED_SUBSCRIPTION_POLICY=random
+      - DOCKER_VERNEMQ_PLUGINS__VMQ_WEBHOOKS=on
+      - DOCKER_VERNEMQ_VMQ_WEBHOOKS__SEPLSUBSCRIBE__HOOK=auth_on_subscribe
+      - DOCKER_VERNEMQ_VMQ_WEBHOOKS__SEPLSUBSCRIBE__ENDPOINT=http://debugger:8080/subscribe
+      - DOCKER_VERNEMQ_VMQ_WEBHOOKS__SEPLPUBLISH__HOOK=auth_on_publish
+      - DOCKER_VERNEMQ_VMQ_WEBHOOKS__SEPLPUBLISH__ENDPOINT=http://debugger:8080/publish
+      - DOCKER_VERNEMQ_VMQ_WEBHOOKS__SEPLREG__HOOK=auth_on_register
+      - DOCKER_VERNEMQ_VMQ_WEBHOOKS__SEPLREG__ENDPOINT=http://debugger:8080/login
+      - DOCKER_VERNEMQ_PLUGINS__VMQ_PASSWD=off
+      - DOCKER_VERNEMQ_PLUGINS__VMQ_ACL=off
+      - DOCKER_VERNEMQ_KUBERNETES_NAMESPACE=default
+      - DOCKER_VERNEMQ_KUBERNETES_APP_LABEL=vernemq
+    image: erlio/docker-vernemq:latest
+    ipc: shareable
+    networks:
+      sepl:
+        aliases:
+          - vernemq
+    ports:
+      - 18083:18083/tcp
+      - 1883:1883/tcp
+      - 18080:8080/tcp
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
+    depends_on:
+      - debugger
+networks:
+  sepl:

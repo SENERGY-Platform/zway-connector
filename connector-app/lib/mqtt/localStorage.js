@@ -14,4 +14,4 @@ var localStorage = {
     removeItem: function (key) {
         delete localStorageMap[key]
     }
-}
+};

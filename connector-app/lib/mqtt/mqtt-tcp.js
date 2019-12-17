@@ -4,9 +4,6 @@
 
  *****************************************************************************/
 
-'use strict';
-
-executeFile("userModules/SenergyConnector/mqtt/buffer.js");
 
 /**
  * MQTTClient constructor

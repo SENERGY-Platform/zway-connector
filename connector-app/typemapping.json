@@ -1,9 +1,7 @@
 {
-  "switchBinary": "iot#7075b34a-23b5-49ba-9723-867613205e0c",
-  "switchMultilevel": "iot#80550847-a151-4de4-806a-50503b2fdf62",
-  "switchControl": "iot#75b4e123-caab-40bd-aeb0-1731e9aa3e2d",
-  "battery": "iot#1e970838-b72b-4ec0-aebe-15f14d728f3f",
-  "thermostat": "iot#821f4400-fb8d-4ad3-a2de-e0d2e26eb78d",
-  "sensorBinary": "iot#e3484450-1ee2-4a42-8289-d97858158971",
-  "sensorMultilevel": "iot#9095fd3b-2a8f-4f46-bd1c-dfa3d5bace88"
+  "ref": "remote_id",
+  "2-5-373": "urn:infai:ses:device-type:9ae1f9eb-ebd6-4fb5-ae1f-a03d40c500ed",
+  "1027-3-2": "",
+  "373-1-18": "urn:infai:ses:device-type:1c200f02-67ac-42e1-8c6c-748bdc091764",
+  "600-3-4226": "urn:infai:ses:device-type:052d6e99-32f4-483f-967e-16341127ff89"
 }
