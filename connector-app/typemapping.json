@@ -1,9 +1,7 @@
 {
   "ref": "remote_id",
   "2-5-373": "urn:infai:ses:device-type:9ae1f9eb-ebd6-4fb5-ae1f-a03d40c500ed",
-  "1027-3-2": "",
   "373-1-18": "urn:infai:ses:device-type:1c200f02-67ac-42e1-8c6c-748bdc091764",
-  "600-3-4226": "urn:infai:ses:characteristic:7621686a-56bc-402d-b4cc-5b266d39736f",
 
   "2-5-4": "urn:infai:ses:device-type:662d9c9f-949d-4577-9485-9cb7255f547f",
   "134-4-80": "urn:infai:ses:device-type:6c05a263-7318-47bf-a4af-a0d13cc95008",
@@ -13,5 +11,6 @@
   "265-8225-8449": "urn:infai:ses:device-type:3cc09a10-1feb-4f8b-9390-8d08bf3ba22d",
   "271-1538-4097": "urn:infai:ses:device-type:51aa4611-d2d2-4516-8555-4bd3f620b3bb",
   "271-2049-4097": "urn:infai:ses:device-type:1f6ba259-2fc3-4537-93e4-2c97b6521c09",
-  "271-3841-4096": "urn:infai:ses:device-type:218f1705-fd74-4570-a8f0-dddd28e25cbb"
+  "271-3841-4096": "urn:infai:ses:device-type:218f1705-fd74-4570-a8f0-dddd28e25cbb",
+  "600-3-4226": "urn:infai:ses:device-type:052d6e99-32f4-483f-967e-16341127ff89"
 }
