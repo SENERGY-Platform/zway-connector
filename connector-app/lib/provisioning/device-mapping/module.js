@@ -38,6 +38,10 @@ Modules.registerModule("provisioning/device-mapping", function (module) {
                     return device
                 },
 
+                getVirtualDeviceById: function (id) {
+                    return controller.devices.get(id)
+                },
+
                 //localServiceId = "exact:113-7-3-A"
                 //returns "exact"
                 getCommandName: function(localServiceId){

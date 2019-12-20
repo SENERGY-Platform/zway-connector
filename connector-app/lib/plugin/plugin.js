@@ -111,14 +111,18 @@ SenergyConnector.prototype.initConnectionHandler = function () {
                 //add event handler
                 var vDev = that.provisioning.mapping.getVirtualDevice(localDevice, localService);
                 var command = that.provisioning.mapping.getCommandName(localService);
-                if(command == "get_level"){
-                    that.addEventHandler(vDev);
-                }
+                if(!vDev){
+                    console.log("WARNING: unable to find device for", localDevice, localService)
+                }else{
+                    if(command == "get_level"){
+                        that.addEventHandler(vDev);
+                    }
 
-                //add command handler
-                that.connection.registerCommand(localDevice, localService, function (deviceLocalId, serviceLocalId, payload) {
-                    return that.handleCommand(deviceLocalId, serviceLocalId, payload);
-                })
+                    //add command handler
+                    that.connection.registerCommand(localDevice, localService, function (deviceLocalId, serviceLocalId, payload) {
+                        return that.handleCommand(deviceLocalId, serviceLocalId, payload);
+                    })
+                }
             });
         });
     }
