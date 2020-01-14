@@ -31,7 +31,7 @@ function MQTTClient(host, port, options) {
     };
 
     if (typeof options.ping_timeout != 'undefined')
-        options.ping_interval = parseInt(this.options.ping_timeout * 0.6 * 1000);
+        options.ping_interval = parseInt(options.ping_timeout * 0.6 * 1000);
 
     // Options validation
     if (typeof options.username == 'string' && options.username.length > 12)

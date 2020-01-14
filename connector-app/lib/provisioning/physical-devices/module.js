@@ -30,6 +30,9 @@ Modules.registerModule("provisioning/physical-devices", function (module) {
             }
         }
         */
+        if (!raw || !id) {
+            return null;
+        }
 
         var device = raw[id];
         if (!device || !device.instances || !device.instances["0"]) {
