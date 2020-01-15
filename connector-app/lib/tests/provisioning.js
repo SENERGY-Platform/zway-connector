@@ -1,5 +1,5 @@
 Tests["provisioning"]=function (ctx) {
-    //return SKIP;
+    return SKIP;
 
     var deviceManagerUrl = ctx.config.iot_repo_url;
     var authUrl = ctx.config.auth_url;

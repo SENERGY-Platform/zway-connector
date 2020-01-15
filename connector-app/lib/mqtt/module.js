@@ -45,7 +45,13 @@
         result.subscribe = function(topic, qos){
             try{
                 console.log("MQTT SUBSCRIBE", topic);
-                result.mqtt.subscribe(topic,  {qos: qos});
+                result.mqtt.subscribe(topic,  {qos: qos}, function (topic, payload) {
+                    try{
+                        onMessage(result, topic.toString(), payload);
+                    }catch (e) {
+                        console.log("ERROR: unable to handle mqtt-tcp message", e, e.message, JSON.stringify(e))
+                    }
+                });
                 return {}
             }catch (e) {
                 return {err: e}
@@ -77,14 +83,7 @@
             ping_timeout: 60,
             connect_timeout: 60,
             clean_session: cleanSession,
-            infoLogEnabled: false,
-            onMessageArrived: function (topic, message) {
-                try{
-                    onMessage(result, topic, message);
-                }catch (e) {
-                    console.log("ERROR: unable to handle mqtt-tcp message", e, e.message, JSON.stringify(e))
-                }
-            }
+            infoLogEnabled: false
         };
 
         result.mqtt = new MQTTClient(host, port, options);

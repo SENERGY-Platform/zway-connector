@@ -1,14 +1,16 @@
 Tests["device-mapping.getLocalPrefix()"] = function (ctx) {
-   var prefix = Modules.include("provisioning/device-mapping").init(ctx.controller).getLocalPrefix();
-   console.log("LOG device-mapping.getLocalPrefix():", prefix);
-   if(prefix){
+    return SKIP;
+    var prefix = Modules.include("provisioning/device-mapping").init(ctx.controller).getLocalPrefix();
+    console.log("LOG device-mapping.getLocalPrefix():", prefix);
+    if(prefix){
        return null
-   }else{
+    }else{
        return "prefix not found"
-   }
+    }
 };
 
 Tests["device-mapping.getVirtualDevices()"] = function (ctx) {
+    return SKIP;
     var vDevs = Modules.include("provisioning/device-mapping").init(ctx.controller).getVirtualDevices();
     if(vDevs){
         return null
@@ -18,6 +20,7 @@ Tests["device-mapping.getVirtualDevices()"] = function (ctx) {
 };
 
 Tests["device-mapping.getDeviceDescriptions"] = function (ctx) {
+    return SKIP;
     var devicesModule = Modules.include("provisioning/physical-devices");
 
     var physicalDevices = Modules.loadJson("lib/tests/resources/physical-devices-raw.json");

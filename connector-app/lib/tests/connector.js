@@ -4,33 +4,26 @@ Tests["connector"]=function (ctx) {
     var Connector = Modules.include("connector");
 
     //url, hubId, user, password, then, error
-    var mqttConnection = Connector.connect(
+    Connector.connect(
         ctx.config.mqtt_url,
         "test-client",
         ctx.config.user,
         ctx.config.password,
         function (connection) {
-            console.log("CONNECT");
-            var err = mqttConnection.registerCommand("device", "service", function (device, service, message) {
+            console.log("TEST-CONNECT");
+            var err = connection.registerCommand("device", "service", function (device, service, message) {
                 console.log("TEST-HANDLE-COMMAND", message, JSON.stringify(message));
                 //echo
                 return message
             });
+            console.log("TEST-REGISTER-COMMAND:", JSON.stringify(err));
             setInterval(function(){
-                mqttConnection.sendEvent("device", "service", JSON.stringify({"body":"eventFooBar"}));
-                mqttConnection._connection.send("command/device/service", JSON.stringify({"correlation_id":42,"payload":{"body":"foobar"},"timestamp":0,"completion_strategy":"none"}));
+                connection.sendEvent("device", "service", JSON.stringify({"body":"eventFooBar"}));
+                connection._connection.send("command/device/service", JSON.stringify({"correlation_id":42,"payload":{"body":"foobar"},"timestamp":0,"completion_strategy":"none"}));
             }, 15000);
         }, function (connection, err) {
             console.log("ERROR: ", JSON.stringify(err))
         }
     );
-
-    if(!mqttConnection){
-        mqttConnection = {err: "mqttConnection = null"}
-    }
-    if(mqttConnection.err){
-        console.log("ERROR: unable to connect: ", mqttConnection.err);
-        return mqttConnection.err
-    }
     return null;
 };

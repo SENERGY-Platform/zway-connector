@@ -80,6 +80,7 @@ Modules.registerModule("connector", function (module) {
 
             //payload = {"correlation_id":"","payload":{"segment":"string"},"timestamp":0,"completion_strategy":""}
             result._handleCommand = function(topic, payload){
+                console.log("DEBUG: _handleCommand = ",topic, payload);
                 try {
                     var topicParts = topic.split("/");
                     var deviceLocalId = topicParts[1];
@@ -92,6 +93,8 @@ Modules.registerModule("connector", function (module) {
                     var data = null;
                     if(request.payload.data){
                         data = JSON.parse(request.payload.data)
+                    }else{
+                        data = request;
                     }
                     var response = result._commandHandlers[deviceLocalId][serviceLocalId](deviceLocalId, serviceLocalId, data);
                     result._respond(deviceLocalId, serviceLocalId, request, response);
@@ -108,24 +111,22 @@ Modules.registerModule("connector", function (module) {
                 true,
                 function (connection, err) {
                     console.log("CONNECTOR DISCONNECTED", err);
-                    error()
+                    error(result)
                 }, function (connection) {
                     console.log("CONNECTOR CONNECTED");
-                    then();
+                    then(result);
                 }, function (connection, err) {
                     console.log("CONNECTOR ERROR", err);
-                    error();
+                    error(result);
                 }, function(connection, topic, payload){
                     result._handleCommand(topic, payload);
                 }
             );
             if(result._connection.err){
                 console.log("ERROR: unable to connect", result._connection.err);
-                error();
+                error(result);
                 return {err: result._connection.err}
             }
-
-            return result;
         }
     };
 

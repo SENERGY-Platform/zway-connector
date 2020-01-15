@@ -79,21 +79,15 @@ SenergyConnector.prototype.updateConnection = function (config) {
         that.connection = null;
     }
 
-    var connection = that.connector.connect(url, hubId, user, password, function () {
+    that.connector.connect(url, hubId, user, password, function (connection) {
+        that.connection = connection;
         that.initConnectionHandler();
-    }, function () {
+    }, function (connection) {
         connection.disconnect();
         that.removeEventHandler();
         that.connection = null;
         that.connectionError = true;
     });
-
-    if(connection.err){
-        that.removeEventHandler();
-        connection.disconnect();
-        that.connectionError = true;
-    }
-    that.connection = connection
 };
 
 SenergyConnector.prototype.initConnectionHandler = function () {
