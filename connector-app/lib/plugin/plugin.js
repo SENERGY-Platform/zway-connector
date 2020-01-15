@@ -164,14 +164,18 @@ SenergyConnector.prototype.getSendEventHandler = function () {
     return function (vDev) {
         try{
             var info = that.provisioning.mapping.getLocalIds(vDev, "get_level");
-            that.connection.sendEvent(
-                info.localDeviceId,
-                info.localServiceId,
-                {
-                    level: vDev.get("metrics").level,
-                    updateTime: new Date(vDev.get("updateTime")*1000).toISOString()
-                }
-            );
+            if(that.connection){
+                that.connection.sendEvent(
+                    info.localDeviceId,
+                    info.localServiceId,
+                    {
+                        level: vDev.get("metrics").level,
+                        updateTime: new Date(vDev.get("updateTime")*1000).toISOString()
+                    }
+                );
+            }else{
+                console.log("unable to send event: disconnected")
+            }
         }catch (e) {
             console.log("ERROR: ", e.message, e.stack);
         }
