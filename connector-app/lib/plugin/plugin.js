@@ -146,6 +146,7 @@ SenergyConnector.prototype.handleCommand = function(deviceLocalId, serviceLocalI
 
 SenergyConnector.prototype.addEventHandler = function (vDev) {
     var that = this;
+    console.log("DEBUG: listen to ", vDev.id);
     vDev.on("change:metrics:level", that.sendEvent);
 };
 
@@ -154,6 +155,7 @@ SenergyConnector.prototype.removeEventHandler = function () {
     if(that.sendEvent){
         that.controller.devices.forEach(function (vDev) {
             try{
+                console.log("DEBUG: stop listening to ", vDev.id);
                 vDev.off("change:metrics:level", that.sendEvent);
             }catch(e){
                 console.log("unable to remove change:metrics:level:", e.message, e.stack);
