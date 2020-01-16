@@ -29,9 +29,9 @@ Modules.registerModule("provisioning/device-mapping", function (module) {
                     var nodeId = localDeviceIdParts[localDeviceIdParts.length - 1];
                     var localServiceIdParts = localServiceId.split(":");
                     var commandClassLocation = localServiceIdParts[localServiceIdParts.length - 1];
-                    var suffix = [nodeId, "0", commandClassLocation].join("-");
+                    var suffix = [nodeId, "0", commandClassLocation].join("-"); //
                     controller.devices.forEach(function (vDev) {
-                        if(vDev.id.endsWith(suffix)){
+                        if(vDev.id.endsWith("_"+suffix)){
                             device = vDev;
                         }
                     });
