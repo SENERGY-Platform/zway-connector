@@ -34,12 +34,13 @@ function MQTTClient(host, port, options) {
         options.ping_interval = parseInt(options.ping_timeout * 0.6 * 1000);
 
     // Options validation
+    /*
     if (typeof options.username == 'string' && options.username.length > 12)
         throw Error('user names are kept to 12 characters or fewer');
 
     if (typeof options.password == 'string' && options.password.length > 12)
         throw Error('passwords are kept to 12 characters or fewer');
-
+    */
     if (options.will_flag && (typeof options.will_topic != 'string' || typeof options.will_message != 'string'))
         throw Error('missing will_topic or will_message when will_flag is set');
 
