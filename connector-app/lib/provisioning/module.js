@@ -19,7 +19,7 @@ Modules.registerModule("provisioning", function (module) {
                 if(hubId != ""){
                     var login = platformDevices.login(user, password);
                     if(login.err){
-                        console.log("ERROR: provisioning.getInitHash() platformDevices.login()", login.err);
+                        console.log("ERROR: provisioning.getInitHash() platformDevices.login()", JSON.stringify(login.err));
                         return hash
                     }
                     var resp = platformDevices.getHub(login.token, hubId);
