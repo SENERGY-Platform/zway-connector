@@ -245,11 +245,10 @@ Modules.registerModule("provisioning/device-mapping", function (module) {
                     return result;
                 },
 
-                getDeviceDescriptions: function(){
+                getDeviceDescriptions: function(virtualDevices){
                     var deviceIndex = {};
                     var result = [];
                     var rawDevices = physicalDevices.getRaw();
-                    var virtualDevices = mapping.getVirtualDevices();
                     virtualDevices.forEach(function (vDev) {
                         var info = mapping.parseVDevId(vDev.id);
                         if(!deviceIndex[info.device]){

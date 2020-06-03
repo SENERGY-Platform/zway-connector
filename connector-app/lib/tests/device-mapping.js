@@ -51,7 +51,7 @@ Tests["device-mapping.getDeviceDescriptions"] = function (ctx) {
     };
 
     //run tested function
-    var descriptions = mapping.getDeviceDescriptions();
+    var descriptions = mapping.getDeviceDescriptions(mapping.getVirtualDevices());
 
     //remove prefix mock
     mapping.getLocalPrefix = prefixFunctionImpl;
