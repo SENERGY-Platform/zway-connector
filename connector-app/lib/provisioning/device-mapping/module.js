@@ -66,7 +66,8 @@ Modules.registerModule("provisioning/device-mapping", function (module) {
                 // returns {localDeviceId: "uuid-19", localServiceId: "exact:113-7-3-A"}
                 getLocalIds: function(virtualDevice, commando){
                     var temp = mapping.getLocalIdControllerPart(virtualDevice.id);
-                    var localServiceId = mapping.getLocalServiceId(vDevInfo.instance,temp.controllerAddress, commando);
+                    var vDevInfo = mapping.parseVDevId(virtualDevice.id);
+                    var localServiceId = mapping.getLocalServiceId(vDevInfo.instance, temp.controllerAddress, commando);
                     return {localDeviceId: temp.localDeviceId, localServiceId: localServiceId}
                 },
 
