@@ -53,7 +53,7 @@ Modules.registerModule("connector", function (module) {
             //response = {"segment":"string"}
             result._respond = function(deviceLocalId, serviceLocalId, request, response, trace){
                 try{
-                    var err = result._connection.send("response/"+deviceLocalId+"/"+serviceLocalId, JSON.stringify({correlation_id:request.correlation_id, payload:{data: JSON.stringify(response)}, trace: JSON.stringify(trace)}));
+                    var err = result._connection.send("response/"+deviceLocalId+"/"+serviceLocalId, JSON.stringify({correlation_id:request.correlation_id, payload:{data: JSON.stringify(response)}, trace: trace}));
                     if(err.err){
                         console.log("ERROR: while sending response", err.err, err.err.message, JSON.stringify(err.err), deviceLocalId, serviceLocalId);
                     }
