@@ -51,9 +51,9 @@ Modules.registerModule("connector", function (module) {
 
             //request = {"correlation_id":"","payload":{"segment":"string"},"timestamp":0,"completion_strategy":""}
             //response = {"segment":"string"}
-            result._respond = function(deviceLocalId, serviceLocalId, request, response){
+            result._respond = function(deviceLocalId, serviceLocalId, request, response, trace){
                 try{
-                    var err = result._connection.send("response/"+deviceLocalId+"/"+serviceLocalId, JSON.stringify({correlation_id:request.correlation_id, payload:{data: JSON.stringify(response)}}));
+                    var err = result._connection.send("response/"+deviceLocalId+"/"+serviceLocalId, JSON.stringify({correlation_id:request.correlation_id, payload:{data: JSON.stringify(response)}, trace: JSON.stringify(trace)}));
                     if(err.err){
                         console.log("ERROR: while sending response", err.err, err.err.message, JSON.stringify(err.err), deviceLocalId, serviceLocalId);
                     }
@@ -96,8 +96,11 @@ Modules.registerModule("connector", function (module) {
                     }else{
                         data = request;
                     }
+                    var trace = []
+                    trace.push({time_unit: 'unix_ms', timestamp: new Date().getTime(), location: 'github.com/SENERGY-Platform/zway-connector command received'})
                     var response = result._commandHandlers[deviceLocalId][serviceLocalId](deviceLocalId, serviceLocalId, data);
-                    result._respond(deviceLocalId, serviceLocalId, request, response);
+                    trace.push({time_unit: 'unix_ms', timestamp: new Date().getTime(), location: 'github.com/SENERGY-Platform/zway-connector command finished, answering'})
+                    result._respond(deviceLocalId, serviceLocalId, request, response, trace);
                 }catch (e) {
                     console.log("ERROR: unable to handle command", e, e.message, JSON.stringify(e), topic, payload)
                 }
