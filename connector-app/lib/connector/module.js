@@ -102,7 +102,7 @@ Modules.registerModule("connector", function (module) {
                     var response = result._commandHandlers[deviceLocalId][serviceLocalId](deviceLocalId, serviceLocalId, data);
                     trace.push({time_unit: 'unix_ms', timestamp: new Date().getTime(), location: 'github.com/SENERGY-Platform/zway-connector command finished, answering'})
                     result._respond(deviceLocalId, serviceLocalId, request, response, trace);
-                    console.log('DEBUG: original publish time/traces:\n', request.timestamp, '\n', trace.join('\n'));
+                    console.log('DEBUG: original publish time/traces:\n', request.timestamp, '\n', JSON.stringify(trace));
                 }catch (e) {
                     console.log("ERROR: unable to handle command", e, e.message, JSON.stringify(e), topic, payload)
                 }
