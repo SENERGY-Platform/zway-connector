@@ -645,6 +645,7 @@ MQTTClient.messageHandlers[MQTTClient.messageTypes.PINGRESP] = function (self, f
 };
 
 MQTTClient.messageHandlers[MQTTClient.messageTypes.PUBLISH] = function (self, fixed_header, chunk) {
+    console.log('DEBUG received message of type PUBLISH');
     if (self._data_not_enough) {
         if (self._data_offset + chunk.length >= self._data_length) {
             self._data_not_enough = false;
