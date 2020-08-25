@@ -166,6 +166,7 @@ MQTTClient.prototype.connect = function () {
     // Setup socket
     this._connection = new sockets.tcp();
     this._connection.onrecv = function (chunk) {
+        console.log('DEBUG MQTT Client: new data at socket');
         self._onData(new Buffer(new Uint8Array(chunk)));
     };
 
