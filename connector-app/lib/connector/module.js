@@ -82,6 +82,8 @@ Modules.registerModule("connector", function (module) {
             result._handleCommand = function(topic, payload){
                 console.log("DEBUG: _handleCommand = ",topic, payload);
                 try {
+                    var trace = []
+                    trace.push({time_unit: 'unix_ms', timestamp: new Date().getTime(), location: 'github.com/SENERGY-Platform/zway-connector command received'})
                     var topicParts = topic.split("/");
                     var deviceLocalId = topicParts[1];
                     var serviceLocalId = topicParts[2];
@@ -96,8 +98,7 @@ Modules.registerModule("connector", function (module) {
                     }else{
                         data = request;
                     }
-                    var trace = []
-                    trace.push({time_unit: 'unix_ms', timestamp: new Date().getTime(), location: 'github.com/SENERGY-Platform/zway-connector command received'})
+                    trace.push({time_unit: 'unix_ms', timestamp: new Date().getTime(), location: 'github.com/SENERGY-Platform/zway-connector command parsed'})
                     var response = result._commandHandlers[deviceLocalId][serviceLocalId](deviceLocalId, serviceLocalId, data);
                     trace.push({time_unit: 'unix_ms', timestamp: new Date().getTime(), location: 'github.com/SENERGY-Platform/zway-connector command finished, answering'})
                     result._respond(deviceLocalId, serviceLocalId, request, response, trace);
