@@ -40,6 +40,8 @@ SenergyConnector.prototype.run = function (config) {
         var authUrl = config.auth_url;
         var user = config.user;
         var password = config.password;
+        that.handleCommands = config.handle_commands
+        console.log("Command handling enabled?", that.handleCommands)
 
         that.connectionError = true; //initial connection without provisioning update
 
@@ -115,10 +117,12 @@ SenergyConnector.prototype.initConnectionHandler = function () {
                         that.addEventHandler(vDev);
                     }
 
-                    //add command handler
-                    that.connection.registerCommand(localDevice, localService, function (deviceLocalId, serviceLocalId, payload) {
-                        return that.handleCommand(deviceLocalId, serviceLocalId, payload);
-                    })
+                    //add command handler if needed
+                    if (that.handleCommands) {
+                        that.connection.registerCommand(localDevice, localService, function (deviceLocalId, serviceLocalId, payload) {
+                            return that.handleCommand(deviceLocalId, serviceLocalId, payload);
+                        })
+                    }
                 }
             });
         });
