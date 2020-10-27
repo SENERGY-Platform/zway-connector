@@ -8,6 +8,8 @@ Modules.registerModule("provisioning/multi-gateway-devices", function (module) {
             }
             var result = {};
 
+            var queuedMessages = [];
+
             result.login = function(user, password) {
                 return {token: null}
             };
@@ -60,17 +62,24 @@ Modules.registerModule("provisioning/multi-gateway-devices", function (module) {
                         device_type: device_type
                     }
                 };
+                result.sendDeviceMsg(JSON.stringify(msg));
+            }
+
+            result.sendDeviceMsg = function(msg) {
                 if (connector && connector._connection) {
-                    connector._connection.send("device/zway", JSON.stringify(msg)); // TODO
+                    connector._connection.send("device/zway", msg); // TODO
                 } else {
-                    console.log("WARN: multi-gateway-devices: connector not ready")
+                    queuedMessages.push(msg);
+                    console.log("WARN: multi-gateway-devices: connector not ready, message queued")
                 }
             }
 
             result.updateConnection = function(connection) {
                 connector = connection;
+                console.log("INFO: multi-gateway-devices: sending queued messages");
+                queuedMessages.forEach(function (msg) {result.sendDeviceMsg(msg)});
+                queuedMessages = [];
             }
-
 
             return result
         }
