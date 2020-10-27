@@ -60,7 +60,7 @@ Modules.registerModule("provisioning/multi-gateway-devices", function (module) {
                         device_type: device_type
                     }
                 };
-                if (connector._connection) {
+                if (connector && connector._connection) {
                     connector._connection.send("device/zway", JSON.stringify(msg)); // TODO
                 } else {
                     console.log("WARN: multi-gateway-devices: connector not ready")
