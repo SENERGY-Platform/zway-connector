@@ -14,11 +14,13 @@ Modules.registerModule("provisioning/multi-gateway-devices", function (module) {
             result.createDevice = function(token, localId, name, deviceTypeId){
                 result.setDevice(method.set, localId, name, deviceTypeId)
                 console.log("create device called in multiGatewayMode: TODO"); // TODO
+                return {device: {name: name}}
             };
 
             result.updateDevice = function(token, remoteId, localId, name, deviceTypeId){
                 result.setDevice(method.set, localId, name, deviceTypeId)
                 console.log("update device called in multiGatewayMode: TODO"); // TODO
+                return {device: {name: name}}
             };
 
             result.deleteDevice = function(token, localId){
@@ -28,6 +30,7 @@ Modules.registerModule("provisioning/multi-gateway-devices", function (module) {
 
             result.getDevice = function(token, localId){
                 console.log("get device called in multiGatewayMode: TODO"); // TODO
+                return {unknown: true}
             };
 
 
