@@ -1,6 +1,7 @@
 Modules.registerModule("provisioning/multi-gateway-devices", function (module) {
     return {
-        init: function (connector) {
+        init: function () {
+            var connector;
             const method = {
                 set: "set",
                 delete: "delete"
@@ -59,7 +60,15 @@ Modules.registerModule("provisioning/multi-gateway-devices", function (module) {
                         device_type: device_type
                     }
                 };
-                connector._connection.send("device/zway", msg); // TODO
+                if (connector._connection) {
+                    connector._connection.send("device/zway", JSON.stringify(msg)); // TODO
+                } else {
+                    console.log("WARN: multi-gateway-devices: connector not ready")
+                }
+            }
+
+            result.updateConnection = function(connection) {
+                connector = connection;
             }
 
 

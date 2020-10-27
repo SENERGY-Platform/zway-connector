@@ -173,6 +173,10 @@ Modules.registerModule("provisioning/platform-devices", function (module) {
                 return {hub: resp.data}
             };
 
+            result.updateConnection = function(connection) {
+                // NOP
+            }
+
             return result
         }
     };

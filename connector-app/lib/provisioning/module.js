@@ -3,10 +3,10 @@ Modules.registerModule("provisioning", function (module) {
     const senergyClientId = "client-connector-lib";
 
     var provisioningModule = {
-        init: function (controller, deviceManagerUrl, authUrl, user, password, multiGatewayMode, connector){
+        init: function (controller, deviceManagerUrl, authUrl, user, password, multiGatewayMode){
             var platformDevices;
             if (multiGatewayMode) {
-                platformDevices = module.include("multi-gateway-devices").init(connector);
+                platformDevices = module.include("multi-gateway-devices").init();
             } else {
                 platformDevices = module.include("platform-devices").init(deviceManagerUrl, authUrl, senergyClientId);
             }
@@ -235,6 +235,10 @@ Modules.registerModule("provisioning", function (module) {
                     saveObject("device_type_description_"+description.deviceTypeMappingRef, description);
                     console.log("MISSING DEVICE-TYPE:", description.deviceTypeMappingRef, description.name);
                     //console.log("MISSING DEVICE-TYPE: ", JSON.stringify(description))
+                },
+
+                updateConnection: function (connection) {
+                    platformDevices.updateConnection(connection)
                 }
             };
 

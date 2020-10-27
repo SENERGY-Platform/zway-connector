@@ -47,7 +47,7 @@ SenergyConnector.prototype.run = function (config) {
         that.connectionError = true; //initial connection without provisioning update
 
         that.connector = Modules.include("connector");
-        that.provisioning = Modules.include("provisioning").init(that.controller, deviceManagerUrl, authUrl, user, password, config.multi_gateway, that.connector);
+        that.provisioning = Modules.include("provisioning").init(that.controller, deviceManagerUrl, authUrl, user, password, config.multi_gateway);
         that.sendEvent = that.getSendEventHandler();
 
         that.interval = setInterval(function(){
@@ -98,6 +98,7 @@ SenergyConnector.prototype.updateConnection = function (config) {
 
 SenergyConnector.prototype.initConnectionHandler = function () {
     var that = this;
+    that.provisioning.updateConnection(this.connection)
     if(that.descriptions){
         that.descriptions.forEach(function (desc) {
             var localDevice = desc.localId;
