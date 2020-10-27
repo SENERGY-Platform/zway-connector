@@ -399,7 +399,7 @@ MQTTClient.prototype._startSession = function () {
 
     // Payload
     // MQTTClient Identifier
-    var client_id = new Buffer(this.options.client_id);
+    var client_id = new Buffer(this.options.client_id || 'a' + new Date().getTime() + parseInt(Math.random() * 1000));
     var client_id_length = new Buffer(2);
     client_id_length[0] = client_id.length >> 8;
     client_id_length[1] = client_id.length & 0xFF;

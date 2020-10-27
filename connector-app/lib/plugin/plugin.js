@@ -42,11 +42,12 @@ SenergyConnector.prototype.run = function (config) {
         var password = config.password;
         that.handleCommands = config.handle_commands
         console.log("Command handling enabled?", that.handleCommands)
+        console.log("Multi gateway mode?",  config.multi_gateway)
 
         that.connectionError = true; //initial connection without provisioning update
 
-        that.provisioning = Modules.include("provisioning").init(that.controller, deviceManagerUrl, authUrl, user, password);
         that.connector = Modules.include("connector");
+        that.provisioning = Modules.include("provisioning").init(that.controller, deviceManagerUrl, authUrl, user, password, config.multi_gateway, that.connector);
         that.sendEvent = that.getSendEventHandler();
 
         that.interval = setInterval(function(){

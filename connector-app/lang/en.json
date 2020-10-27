@@ -14,5 +14,7 @@
     "l_startupdelay": "Startup-Delay",
     "h_startupdelay": "delays startup of connector, to give zway-server time to initialize all devices before",
     "l_handle_commands": "Handle commands",
-    "h_handle_commands": "Register and handle commands of the SENERGY-Platform"
+    "h_handle_commands": "Register and handle commands of the SENERGY-Platform",
+    "l_multi_gateway": "Multi Gateway Mode",
+    "h_multi_gateway": "Use plugin in multi gateway mode"
 }

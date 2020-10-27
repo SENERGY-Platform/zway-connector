@@ -14,7 +14,8 @@
         "mqtt_url":"tcp://connector:1883",
         "iot_repo_url": "https://api.sepl.infai.org/iot-device-repo",
         "auth_url": "https://auth.sepl.infai.org",
-        "handle_commands": true
+        "handle_commands": true,
+        "multi_gateway": false
     },
     "schema": {
         "type": "object",
@@ -40,6 +41,10 @@
                 "required": false
             },
             "handle_commands": {
+                "type": "boolean",
+                "required": true
+            },
+            "multi_gateway": {
                 "type": "boolean",
                 "required": true
             }
@@ -70,6 +75,10 @@
             "handle_commands": {
                 "label": "__l_handle_commands__",
                 "helper": "__h_handle_commands__"
+            },
+            "multi_gateway": {
+                "label": "__l_multi_gateway__",
+                "helper": "__h_multi_gateway__"
             }
         }
     }
