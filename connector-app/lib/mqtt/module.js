@@ -91,8 +91,13 @@
         };
 
         if (multiGatewayMode) {
+            var controllerId = global.ZWave && global.ZWave[ZWAY_MODULE_NAME] ? JSON.parse(global.ZWave[ZWAY_MODULE_NAME].Data("").body).controller.data.uuid.value : undefined;
+             if (controllerId === undefined) {
+                 console.log("WARN: No controller uuid set. Using unknown-zway");
+                 controllerId = "unknown-zway";
+             }
             options.will_flag = true;
-            options.will_topic = "device/" + clientId + "/lw";
+            options.will_topic = "device/" +  controllerId  + "/lw";
             options.will_message = "0";
         }
 

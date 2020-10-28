@@ -7,8 +7,7 @@ Modules.registerModule("provisioning/multi-gateway-devices", function (module) {
                 delete: "delete"
             }
             var result = {};
-            var module_id = "";
-            var lwtSent = false;
+            const controllerId = global.ZWave && global.ZWave[ZWAY_MODULE_NAME] ? JSON.parse(global.ZWave[ZWAY_MODULE_NAME].Data("").body).controller.data.uuid.value : "unknown-zway";
 
             var queuedMessages = [];
 
@@ -49,9 +48,6 @@ Modules.registerModule("provisioning/multi-gateway-devices", function (module) {
             };
 
             result.setDevice = function(method, device_id, device_name, device_type) {
-                if (module_id === "") {
-                    module_id = device_id.split('-')[0]; // first part of id is module id
-                }
                 const msg = {
                     method: method,
                     device_id: device_id,
@@ -69,10 +65,7 @@ Modules.registerModule("provisioning/multi-gateway-devices", function (module) {
 
             result.sendDeviceMsg = function(msg) {
                 if (connector && connector._connection) {
-                    if (!lwtSent) {
-                        result.sendLWT(); // By sending at beginning, all devices will be reset
-                    }
-                    return connector._connection.send("device/" + module_id, msg);
+                    return connector._connection.send("device/" + controllerId, msg);
                 } else {
                     return {err: "connector not ready"};
                 }
@@ -80,7 +73,7 @@ Modules.registerModule("provisioning/multi-gateway-devices", function (module) {
 
             result.updateConnection = function(connection) {
                 connector = connection;
-                lwtSent = false;
+                result.sendLWT();
                 if (queuedMessages.length > 0) {
                     console.log("INFO: multi-gateway-devices: sending queued messages");
                     for (var i = queuedMessages.length - 1; i >= 0; i--) {
@@ -94,8 +87,7 @@ Modules.registerModule("provisioning/multi-gateway-devices", function (module) {
             }
 
             result.sendLWT = function () {
-                connector._connection.send("device/" + module_id + "/lw", 1);
-                lwtSent = true;
+                connector._connection.send("device/" + controllerId + "/lw", "1");
             }
 
             return result
