@@ -16,5 +16,7 @@
     "l_handle_commands": "Handle commands",
     "h_handle_commands": "Register and handle commands of the SENERGY-Platform",
     "l_multi_gateway": "Multi Gateway Mode",
-    "h_multi_gateway": "Use plugin in multi gateway mode"
+    "h_multi_gateway": "Use plugin in multi gateway mode",
+    "l_multi_gateway_device_management": "Multi Gateway Device Manager URL",
+    "h_multi_gateway_device_management": "URL of the multi gateway device manager (only used when multi gateway is enabled)"
 }

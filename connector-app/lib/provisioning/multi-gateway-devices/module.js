@@ -1,6 +1,6 @@
 Modules.registerModule("provisioning/multi-gateway-devices", function (module) {
     return {
-        init: function () {
+        init: function (multiGatewayDeviceManagement) {
             var connector;
             const method = {
                 set: "set",
@@ -30,8 +30,27 @@ Modules.registerModule("provisioning/multi-gateway-devices", function (module) {
             };
 
             result.getDevice = function(token, localId){
-                console.log("get device called in multiGatewayMode: TODO"); // TODO
-                return {unknown: true}
+                if (!multiGatewayDeviceManagement || multiGatewayDeviceManagement === "") {
+                    console.log("WARN: Multi Gateway Mode enabled, but no Device Management URL defined");
+                    return {unknown: true};
+                }
+                const localDeviceRequest =  http.request({
+                    url: multiGatewayDeviceManagement + '/devices/' + localId
+                });
+
+                if(localDeviceRequest.status === 404){
+                    return {unknown: true};
+                }
+
+                if(localDeviceRequest.status !== 200){
+                    if(localDeviceRequest.status !== 404){
+                        console.log("ERROR: could not get device from multi gateway device management", localDeviceRequest.status);
+                    }
+                    return {unknown: true};
+                }
+
+                const localDevice = localDeviceRequest.data;
+                return {device: {id: "", name: localDevice.name, device_type_id: localDevice.device_type}}; // transform model
             };
 
 

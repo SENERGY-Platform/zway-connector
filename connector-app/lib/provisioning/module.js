@@ -3,10 +3,10 @@ Modules.registerModule("provisioning", function (module) {
     const senergyClientId = "client-connector-lib";
 
     var provisioningModule = {
-        init: function (controller, deviceManagerUrl, authUrl, user, password, multiGatewayMode){
+        init: function (controller, deviceManagerUrl, authUrl, user, password, multiGatewayMode, multiGatewayDeviceManagement){
             var platformDevices;
             if (multiGatewayMode) {
-                platformDevices = module.include("multi-gateway-devices").init();
+                platformDevices = module.include("multi-gateway-devices").init(multiGatewayDeviceManagement);
             } else {
                 platformDevices = module.include("platform-devices").init(deviceManagerUrl, authUrl, senergyClientId);
             }
