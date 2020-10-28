@@ -48,7 +48,7 @@ Modules.registerModule("provisioning/multi-gateway-devices", function (module) {
             };
 
             result.setDevice = function(method, device_id, device_name, device_type) {
-                const msg = {
+                var msg = {
                     method: method,
                     device_id: device_id,
                     data: {
@@ -57,7 +57,8 @@ Modules.registerModule("provisioning/multi-gateway-devices", function (module) {
                         device_type: device_type
                     }
                 };
-                if (result.sendDeviceMsg(JSON.stringify(msg)).err !== undefined) {
+                msg = JSON.stringify(msg);
+                if (result.sendDeviceMsg(msg).err !== undefined) {
                     queuedMessages.push(msg);
                     console.log("WARN: multi-gateway-devices: connector not ready, message queued")
                 }
