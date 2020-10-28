@@ -67,18 +67,24 @@ Modules.registerModule("provisioning/multi-gateway-devices", function (module) {
 
             result.sendDeviceMsg = function(msg) {
                 if (connector && connector._connection) {
-                    connector._connection.send("device/zway", msg); // TODO
+                    return connector._connection.send("device/zway", msg); // TODO
                 } else {
                     queuedMessages.push(msg);
                     console.log("WARN: multi-gateway-devices: connector not ready, message queued")
+                    return {err: "connector not ready"}
                 }
             }
 
             result.updateConnection = function(connection) {
                 connector = connection;
                 console.log("INFO: multi-gateway-devices: sending queued messages");
-                queuedMessages.forEach(function (msg) {result.sendDeviceMsg(msg)});
-                queuedMessages = [];
+                for (var i = queuedMessages.length - 1; i >= 0; i--) {
+                    if (result.sendDeviceMsg(queuedMessages[i]).err === undefined) {
+                        queuedMessages.splice(i, 1);
+                    } else {
+                        console.log("WARN: multi-gateway-devices: connector still not ready, message requeued")
+                    }
+                }
             }
 
             return result
