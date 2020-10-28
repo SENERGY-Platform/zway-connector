@@ -53,6 +53,7 @@ Modules.registerModule("provisioning/multi-gateway-devices", function (module) {
             };
 
             result.setDevice = function(method, device_id, device_name, device_type) {
+                var topic = "device/" + device_id.split('-')[0]; // first part of id is module id
                 const msg = {
                     method: method,
                     device_id: device_id,
@@ -62,14 +63,14 @@ Modules.registerModule("provisioning/multi-gateway-devices", function (module) {
                         device_type: device_type
                     }
                 };
-                result.sendDeviceMsg(JSON.stringify(msg));
+                result.sendDeviceMsg(topic, JSON.stringify(msg));
             }
 
-            result.sendDeviceMsg = function(msg) {
+            result.sendDeviceMsg = function(topic, msg) {
                 if (connector && connector._connection) {
-                    return connector._connection.send("device/zway", msg); // TODO
+                    return connector._connection.send(topic, msg);
                 } else {
-                    queuedMessages.push(msg);
+                    queuedMessages.push({topic: topic, msg: msg});
                     console.log("WARN: multi-gateway-devices: connector not ready, message queued")
                     return {err: "connector not ready"}
                 }
@@ -80,7 +81,7 @@ Modules.registerModule("provisioning/multi-gateway-devices", function (module) {
                 if (queuedMessages.length > 0) {
                     console.log("INFO: multi-gateway-devices: sending queued messages");
                     for (var i = queuedMessages.length - 1; i >= 0; i--) {
-                        if (result.sendDeviceMsg(queuedMessages[i]).err === undefined) {
+                        if (result.sendDeviceMsg(queuedMessages[i].topic, queuedMessages[i].msg).err === undefined) {
                             queuedMessages.splice(i, 1);
                         } else {
                             console.log("WARN: multi-gateway-devices: connector still not ready, message requeued")
