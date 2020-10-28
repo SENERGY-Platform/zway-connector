@@ -6,7 +6,11 @@
         onError: function(connection object, err any)
         onMessage: function(connection object, topic string, payload string)
     */
-    function connectTcp(mqttUrl, clientId, username, password, cleanSession, onDisconnect, onConnect, onError, onMessage){
+    function connectTcp(mqttUrl, clientId, username, password, cleanSession, onDisconnect, onConnect, onError, onMessage, multiGatewayMode){
+        if (!clientId || clientId === "") {
+            clientId = "unknown-zway";
+            console.log("WARN: No client id set. Using unknown-zway");
+        }
         if(!sockets){
             return {err: "runtime-environment misses sockets"}
         }
@@ -86,6 +90,12 @@
             infoLogEnabled: false
         };
 
+        if (multiGatewayMode) {
+            options.will_flag = true;
+            options.will_topic = "device/" + clientId + "/lw";
+            options.will_message = "0";
+        }
+
         result.mqtt = new MQTTClient(host, port, options);
         result.mqtt.onLog(function (msg) { console.log("DEBUG: ", msg.toString()); });
         result.mqtt.onError(function (error) { onError(result, error.toString());});
@@ -103,7 +113,7 @@
         module.add("mqtt-tcp");
 
         return {
-            connect: function (url, clientId, username, password, cleanSession, onDisconnect, onConnect, onError, onMessage) {
+            connect: function (url, clientId, username, password, cleanSession, onDisconnect, onConnect, onError, onMessage, multiGatewayMode) {
                 var urlObj = parseMqttUrl(url);
                 if(!urlObj){
                     return {err: "unable to parse mqtt address"}
@@ -111,7 +121,7 @@
                 if(urlObj.protocol == "ws:" || urlObj.protocol == "wss:"){
                     return {err: "unable to handle mqtt by websocket"}
                 }else if(urlObj.protocol == "tcp:") {
-                    return connectTcp(url, clientId, username, password, cleanSession, onDisconnect, onConnect, onError, onMessage);
+                    return connectTcp(url, clientId, username, password, cleanSession, onDisconnect, onConnect, onError, onMessage, multiGatewayMode);
                 }else{
                     return {err: "unknown protocol: "+urlObj.protocol}
                 }

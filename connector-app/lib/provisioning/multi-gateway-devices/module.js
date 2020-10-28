@@ -7,6 +7,8 @@ Modules.registerModule("provisioning/multi-gateway-devices", function (module) {
                 delete: "delete"
             }
             var result = {};
+            var module_id = "";
+            var lwtSent = false;
 
             var queuedMessages = [];
 
@@ -53,7 +55,12 @@ Modules.registerModule("provisioning/multi-gateway-devices", function (module) {
             };
 
             result.setDevice = function(method, device_id, device_name, device_type) {
-                var topic = "device/" + device_id.split('-')[0]; // first part of id is module id
+                if (module_id === "") {
+                    module_id = device_id.split('-')[0]; // first part of id is module id
+                }
+                if (!lwtSent) {
+                    result.sendLWT(); // By sending at beginning, all devices will be reset
+                }
                 const msg = {
                     method: method,
                     device_id: device_id,
@@ -63,14 +70,14 @@ Modules.registerModule("provisioning/multi-gateway-devices", function (module) {
                         device_type: device_type
                     }
                 };
-                result.sendDeviceMsg(topic, JSON.stringify(msg));
+                result.sendDeviceMsg(JSON.stringify(msg));
             }
 
-            result.sendDeviceMsg = function(topic, msg) {
+            result.sendDeviceMsg = function(msg) {
                 if (connector && connector._connection) {
-                    return connector._connection.send(topic, msg);
+                    return connector._connection.send("device/" + module_id, msg);
                 } else {
-                    queuedMessages.push({topic: topic, msg: msg});
+                    queuedMessages.push(msg);
                     console.log("WARN: multi-gateway-devices: connector not ready, message queued")
                     return {err: "connector not ready"}
                 }
@@ -78,16 +85,22 @@ Modules.registerModule("provisioning/multi-gateway-devices", function (module) {
 
             result.updateConnection = function(connection) {
                 connector = connection;
+                lwtSent = false;
                 if (queuedMessages.length > 0) {
                     console.log("INFO: multi-gateway-devices: sending queued messages");
                     for (var i = queuedMessages.length - 1; i >= 0; i--) {
-                        if (result.sendDeviceMsg(queuedMessages[i].topic, queuedMessages[i].msg).err === undefined) {
+                        if (result.sendDeviceMsg(queuedMessages[i]).err === undefined) {
                             queuedMessages.splice(i, 1);
                         } else {
                             console.log("WARN: multi-gateway-devices: connector still not ready, message requeued")
                         }
                     }
                 }
+            }
+
+            result.sendLWT = function () {
+                connector._connection.send("device/" + module_id + "/lw", 1);
+                lwtSent = true;
             }
 
             return result

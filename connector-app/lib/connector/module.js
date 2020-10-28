@@ -136,7 +136,8 @@ Modules.registerModule("connector", function (module) {
                     error(result);
                 }, function(connection, topic, payload){
                     result._handleCommand(topic, payload);
-                }
+                },
+                multiGatewayMode
             );
             if(result._connection.err){
                 console.log("ERROR: unable to connect", result._connection.err);
