@@ -61,7 +61,10 @@ Modules.registerModule("provisioning/multi-gateway-devices", function (module) {
                         device_type: device_type
                     }
                 };
-                result.sendDeviceMsg(JSON.stringify(msg));
+                if (result.sendDeviceMsg(JSON.stringify(msg)).err !== undefined) {
+                    queuedMessages.push(msg);
+                    console.log("WARN: multi-gateway-devices: connector not ready, message queued")
+                }
             }
 
             result.sendDeviceMsg = function(msg) {
@@ -71,9 +74,7 @@ Modules.registerModule("provisioning/multi-gateway-devices", function (module) {
                     }
                     return connector._connection.send("device/" + module_id, msg);
                 } else {
-                    queuedMessages.push(msg);
-                    console.log("WARN: multi-gateway-devices: connector not ready, message queued")
-                    return {err: "connector not ready"}
+                    return {err: "connector not ready"};
                 }
             }
 
