@@ -91,7 +91,7 @@ SenergyConnector.prototype.updateConnection = function (config) {
             that.connectionError = true;
             that.removeEventHandler();
             connection.disconnect();
-        });
+        }, config.multi_gateway);
     }, 5000)
 
 };

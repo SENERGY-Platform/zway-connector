@@ -77,12 +77,14 @@ Modules.registerModule("provisioning/multi-gateway-devices", function (module) {
 
             result.updateConnection = function(connection) {
                 connector = connection;
-                console.log("INFO: multi-gateway-devices: sending queued messages");
-                for (var i = queuedMessages.length - 1; i >= 0; i--) {
-                    if (result.sendDeviceMsg(queuedMessages[i]).err === undefined) {
-                        queuedMessages.splice(i, 1);
-                    } else {
-                        console.log("WARN: multi-gateway-devices: connector still not ready, message requeued")
+                if (queuedMessages.length > 0) {
+                    console.log("INFO: multi-gateway-devices: sending queued messages");
+                    for (var i = queuedMessages.length - 1; i >= 0; i--) {
+                        if (result.sendDeviceMsg(queuedMessages[i]).err === undefined) {
+                            queuedMessages.splice(i, 1);
+                        } else {
+                            console.log("WARN: multi-gateway-devices: connector still not ready, message requeued")
+                        }
                     }
                 }
             }

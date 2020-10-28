@@ -2,7 +2,7 @@ Modules.include("mqtt");
 
 Modules.registerModule("connector", function (module) {
     return {
-        connect: function (url, hubId, user, password, then, error) {
+        connect: function (url, hubId, user, password, then, error, multiGatewayMode) {
             var result = {
                 _connection: null,
                 _commandHandlers: {},
@@ -53,7 +53,14 @@ Modules.registerModule("connector", function (module) {
             //response = {"segment":"string"}
             result._respond = function(deviceLocalId, serviceLocalId, request, response, trace){
                 try{
-                    var err = result._connection.send("response/"+deviceLocalId+"/"+serviceLocalId, JSON.stringify({correlation_id:request.correlation_id, payload:{data: JSON.stringify(response)}, trace: trace}));
+                    var payload = {};
+                    if (multiGatewayMode) {
+                        payload = {command_id: request.command_id, data: JSON.stringify(response)};
+                    } else {
+                        payload = {correlation_id: request.correlation_id, payload:{data: JSON.stringify(response)}, trace: trace};
+
+                    }
+                    var err = result._connection.send("response/"+deviceLocalId+"/"+serviceLocalId, JSON.stringify(payload));
                     if(err.err){
                         console.log("ERROR: while sending response", err.err, err.err.message, JSON.stringify(err.err), deviceLocalId, serviceLocalId);
                     }
@@ -93,10 +100,14 @@ Modules.registerModule("connector", function (module) {
                         return
                     }
                     var data = null;
-                    if(request.payload.data){
-                        data = JSON.parse(request.payload.data)
-                    }else{
-                        data = request;
+                    if (multiGatewayMode) {
+                        data = request.data;
+                    } else {
+                        if (request.payload.data) {
+                            data = JSON.parse(request.payload.data)
+                        } else {
+                            data = request;
+                        }
                     }
                     trace.push({time_unit: 'unix_ms', timestamp: new Date().getTime(), location: 'github.com/SENERGY-Platform/zway-connector command parsed'})
                     var response = result._commandHandlers[deviceLocalId][serviceLocalId](deviceLocalId, serviceLocalId, data);
