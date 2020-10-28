@@ -15,8 +15,7 @@
         "iot_repo_url": "https://api.sepl.infai.org/iot-device-repo",
         "auth_url": "https://auth.sepl.infai.org",
         "handle_commands": true,
-        "multi_gateway": false,
-        "multi_gateway_device_management": ""
+        "multi_gateway": false
     },
     "schema": {
         "type": "object",
@@ -48,10 +47,6 @@
             "multi_gateway": {
                 "type": "boolean",
                 "required": true
-            },
-            "multi_gateway_device_management": {
-                "type": "string",
-                "required": false
             }
         }
     },
@@ -84,10 +79,6 @@
             "multi_gateway": {
                 "label": "__l_multi_gateway__",
                 "helper": "__h_multi_gateway__"
-            },
-            "multi_gateway_device_management": {
-                "label": "__l_multi_gateway_device_management__",
-                "helper": "__h_multi_gateway_device_management__"
             }
         }
     }
