@@ -52,9 +52,6 @@ Modules.registerModule("provisioning/multi-gateway-devices", function (module) {
                 if (module_id === "") {
                     module_id = device_id.split('-')[0]; // first part of id is module id
                 }
-                if (!lwtSent) {
-                    result.sendLWT(); // By sending at beginning, all devices will be reset
-                }
                 const msg = {
                     method: method,
                     device_id: device_id,
@@ -69,6 +66,9 @@ Modules.registerModule("provisioning/multi-gateway-devices", function (module) {
 
             result.sendDeviceMsg = function(msg) {
                 if (connector && connector._connection) {
+                    if (!lwtSent) {
+                        result.sendLWT(); // By sending at beginning, all devices will be reset
+                    }
                     return connector._connection.send("device/" + module_id, msg);
                 } else {
                     queuedMessages.push(msg);
