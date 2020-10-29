@@ -85,7 +85,7 @@ SenergyConnector.prototype.updateConnection = function (config) {
     setTimeout(function () {
         that.connector.connect(url, hubId, user, password, function (connection) {
             that.connection = connection;
-            that.initConnectionHandler();
+            that.initConnectionHandler(config);
         }, function (connection) {
             that.connection = null;
             that.connectionError = true;
@@ -96,10 +96,13 @@ SenergyConnector.prototype.updateConnection = function (config) {
 
 };
 
-SenergyConnector.prototype.initConnectionHandler = function () {
+SenergyConnector.prototype.initConnectionHandler = function (config) {
     var that = this;
     that.provisioning.updateConnection(this.connection)
     if(that.descriptions){
+        if (config.multi_gateway) {
+            that.provisioning.updateDevices({token: null}, that.descriptions)
+        }
         that.descriptions.forEach(function (desc) {
             var localDevice = desc.localId;
             desc.services.forEach(function (serviceDesc) {
