@@ -84,9 +84,11 @@ SenergyConnector.prototype.updateConnection = function (config) {
 
     setTimeout(function () {
         that.connector.connect(url, hubId, user, password, function (connection) {
+            console.log("SENERGY-CONNECTOR: updateConnection() plugin connect");
             that.connection = connection;
             that.initConnectionHandler(config);
         }, function (connection) {
+            console.log("SENERGY-CONNECTOR: updateConnection() plugin disconnect");
             that.connection = null;
             that.connectionError = true;
             that.removeEventHandler();
