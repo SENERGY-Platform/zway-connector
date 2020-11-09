@@ -55,6 +55,7 @@ Modules.registerModule("connector", function (module) {
                 try{
                     var payload = {};
                     if (multiGatewayMode) {
+                        console.log("DEBUG: Response is: ", response)
                         payload = {command_id: request.command_id, data: JSON.stringify(response)};
                     } else {
                         payload = {correlation_id: request.correlation_id, payload:{data: JSON.stringify(response)}, trace: trace};
