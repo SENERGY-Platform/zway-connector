@@ -187,7 +187,8 @@ SenergyConnector.prototype.getSendEventHandler = function () {
                     {
                         level: vDev.get("metrics").level,
                         updateTime: new Date(vDev.get("updateTime")*1000).toISOString()
-                    }
+                    },
+                    config.multi_gateway
                 );
             }else{
                 console.log("unable to send event: disconnected")

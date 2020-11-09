@@ -13,7 +13,7 @@ Modules.registerModule("connector", function (module) {
                 registerCommand: function (deviceLocalId, serviceLocalId, handler) {
                     throw "not implemented"
                 },
-                sendEvent: function (deviceLocalId, serviceLocalId, message) {
+                sendEvent: function (deviceLocalId, serviceLocalId, message, multiGatewayMode) {
                     throw "not implemented"
                 }
             };
@@ -71,9 +71,15 @@ Modules.registerModule("connector", function (module) {
             };
 
             //message = {"segment":"string"}
-            result.sendEvent = function(deviceLocalId, serviceLocalId, message){
+            result.sendEvent = function(deviceLocalId, serviceLocalId, message, multiGatewayMode){
                 try{
-                    console.log("send event: ", deviceLocalId, serviceLocalId, JSON.stringify({data: JSON.stringify(message)}));
+                    payload = {}
+                    if (multiGatewayMode) {
+                        payload = JSON.stringify(message)
+                    } else {
+                        payload = {data: JSON.stringify(message)}
+                    }
+                    console.log("send event: ", deviceLocalId, serviceLocalId, JSON.stringify(payload));
                     var err = result._connection.send("event/"+deviceLocalId+"/"+serviceLocalId, JSON.stringify({data: JSON.stringify(message)}));
                     if(err.err){
                         console.log("ERROR: while sending event", err.err, err.err.message, JSON.stringify(err.err), deviceLocalId, serviceLocalId);
