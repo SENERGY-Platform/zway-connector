@@ -109,7 +109,7 @@ Modules.registerModule("connector", function (module) {
                     var data = {};
                     if (multiGatewayMode && request && request.data && request.data.length > 0) {
                         data = JSON.parse(request.data);
-                    } else {
+                    } else if (!multiGatewayMode) {
                         if (request.payload.data) {
                             data = JSON.parse(request.payload.data)
                         } else {
