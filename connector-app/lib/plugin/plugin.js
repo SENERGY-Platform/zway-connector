@@ -48,7 +48,7 @@ SenergyConnector.prototype.run = function (config) {
 
         that.connector = Modules.include("connector");
         that.provisioning = Modules.include("provisioning").init(that.controller, deviceManagerUrl, authUrl, user, password, config.multi_gateway);
-        that.sendEvent = that.getSendEventHandler();
+        that.sendEvent = that.getSendEventHandler(config);
 
         that.interval = setInterval(function(){
             try{
@@ -175,7 +175,7 @@ SenergyConnector.prototype.removeEventHandler = function () {
     }
 };
 
-SenergyConnector.prototype.getSendEventHandler = function () {
+SenergyConnector.prototype.getSendEventHandler = function (config) {
     var that = this;
     return function (vDev) {
         try{

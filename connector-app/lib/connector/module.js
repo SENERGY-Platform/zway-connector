@@ -73,7 +73,7 @@ Modules.registerModule("connector", function (module) {
             //message = {"segment":"string"}
             result.sendEvent = function(deviceLocalId, serviceLocalId, message, multiGatewayMode){
                 try{
-                    payload = {}
+                    payload = null
                     if (multiGatewayMode) {
                         payload = JSON.stringify(message)
                     } else {
