@@ -106,8 +106,8 @@ Modules.registerModule("connector", function (module) {
                         console.log("command not registered:", deviceLocalId, serviceLocalId);
                         return
                     }
-                    var data = null;
-                    if (multiGatewayMode) {
+                    var data = {};
+                    if (multiGatewayMode && request.data.length > 0) {
                         data = JSON.parse(request.data);
                     } else {
                         if (request.payload.data) {
@@ -116,6 +116,7 @@ Modules.registerModule("connector", function (module) {
                             data = request;
                         }
                     }
+                    console.log("DEBUG data is ", JSON.stringify(data))
                     trace.push({time_unit: 'unix_ms', timestamp: new Date().getTime(), location: 'github.com/SENERGY-Platform/zway-connector command parsed'})
                     var response = result._commandHandlers[deviceLocalId][serviceLocalId](deviceLocalId, serviceLocalId, data);
                     trace.push({time_unit: 'unix_ms', timestamp: new Date().getTime(), location: 'github.com/SENERGY-Platform/zway-connector command finished, answering'})
