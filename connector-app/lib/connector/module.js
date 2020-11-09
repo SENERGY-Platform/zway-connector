@@ -75,7 +75,7 @@ Modules.registerModule("connector", function (module) {
                 try{
                     payload = null
                     if (multiGatewayMode) {
-                        payload = JSON.stringify(message)
+                        payload = message
                     } else {
                         payload = {data: JSON.stringify(message)}
                     }
