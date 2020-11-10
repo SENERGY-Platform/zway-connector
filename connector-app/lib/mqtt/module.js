@@ -100,7 +100,7 @@
             options.will_topic = "device/" +  controllerId  + "/lw";
             options.will_message = "0";
             options.connect_timeout = 5;
-            options.ping_interval = -1; // Disables ping. Ping Timeouts cause the connector to reconnect, but a timeout doesn't indicate a lost connection
+            options.ping_timeout = 300; // Test
         }
 
         result.mqtt = new MQTTClient(host, port, options);
