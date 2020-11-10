@@ -508,6 +508,7 @@ MQTTClient.prototype._ping = function () {
 
     // Do not send another ping if still awaiting a response, new ping will be setup by PING message handler
     if (this._ping_timeout_timer) {
+        console.log("DEBUG: MQTT-TCP: Still waiting for another ping response")
         return;
     }
 
@@ -524,6 +525,7 @@ MQTTClient.prototype._ping = function () {
     }, this.options.ping_timeout * 1000);
 
     // Send ping request
+    console.log("DEBUG: MQTT-TCP: Send PINGREQ")
     this._send(buffer);
 };
 
@@ -640,6 +642,7 @@ MQTTClient.messageHandlers[MQTTClient.messageTypes.PINGRESP] = function (self, f
     } else {
         // Kill ping timeout
         self._clearPingTimeoutTimer();
+        console.log("DEBUG: MQTT-TCP Got PINGRESP")
 
         // Setup next ping request
         self._ping_timer = setTimeout(function () {
