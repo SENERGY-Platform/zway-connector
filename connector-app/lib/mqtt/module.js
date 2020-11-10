@@ -99,6 +99,8 @@
             options.will_flag = true;
             options.will_topic = "device/" +  controllerId  + "/lw";
             options.will_message = "0";
+            options.connect_timeout = 5;
+            options.ping_timeout = 300; // Test
         }
 
         result.mqtt = new MQTTClient(host, port, options);
