@@ -183,6 +183,7 @@ MQTTClient.prototype.connect = function () {
 
 // Do not call from within class
 MQTTClient.prototype.close = function () {
+    consoel.log("DEBUG: MQTT Client close() called")
     var self = this;
 
     if (this.connected === true)
