@@ -101,6 +101,7 @@
             options.will_message = "0";
             options.connect_timeout = 5;
             options.ping_timeout = 300; // Test
+            option.ping_interval = 2000;
         }
 
         result.mqtt = new MQTTClient(host, port, options);
