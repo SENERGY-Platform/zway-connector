@@ -471,6 +471,7 @@ MQTTClient.prototype._startSession = function () {
     // Setup connect timeout
     this._connect_timeout_timer = setTimeout(function() {
         self._connect_timeout_timer = null;
+        console.log("ERROR: MQTT-TCP Connect Timeout")
         self._onTimeout();
     }, this.options.connect_timeout * 1000);
 
@@ -518,6 +519,7 @@ MQTTClient.prototype._ping = function () {
     // Setup ping timeout
     this._ping_timeout_timer = setTimeout(function() {
         self._ping_timeout_timer = null;
+        console.log("ERROR: MQTT-TCP Ping Timeout")
         self._onTimeout();
     }, this.options.ping_timeout * 1000);
 
