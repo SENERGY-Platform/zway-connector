@@ -544,10 +544,14 @@ MQTTClient.messageHandlers[MQTTClient.messageTypes.CONNACK] = function (self, fi
             self.connected = true;
             self._last_message_id = 0;
 
-            self._ping_timer = setTimeout(function () {
-                    self._ping();
-                },
-                self.options.ping_interval);
+            if (self.options.ping_interval !== -1) {
+                self._ping_timer = setTimeout(function () {
+                        self._ping();
+                    },
+                    self.options.ping_interval);
+            } else {
+                console.log("WARN: MQTT-TCP Pings are disabled")
+            }
 
             self._onConnect();
         } else if (code > 0 && code < 6) {
