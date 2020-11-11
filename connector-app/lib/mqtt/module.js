@@ -99,7 +99,6 @@
             options.will_flag = true;
             options.will_topic = "device/" +  controllerId  + "/lw";
             options.will_message = "0";
-            options.connect_timeout = 5;
             options.ping_timeout = 300; // Test
             options.ping_interval = 2000;
         }
