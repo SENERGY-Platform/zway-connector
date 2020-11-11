@@ -475,6 +475,7 @@ MQTTClient.prototype._startSession = function () {
         self._onTimeout();
     }, this.options.connect_timeout * 1000);
 
+    console.log("DEBUG: MQTT-TCP: SEND CNCT")
     this._send(buffer);
 };
 
