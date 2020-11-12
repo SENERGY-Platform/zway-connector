@@ -80,16 +80,22 @@ Modules.registerModule("provisioning/multi-gateway-devices", function (module) {
                 console.log("DEBUG: Multi-gateway-devices Queue length: ", queuedMessages.length)
                 if (queuedMessages.length > 0) {
                     console.log("INFO: multi-gateway-devices: sending queued messages");
-                    for (var i = 0; i < queuedMessages.length; i++) {
-                        if (result.sendDeviceMsg(queuedMessages[0]).err === undefined) {
-                            queuedMessages.shift();
-                        } else {
-                            console.log("WARN: multi-gateway-devices: connector still not ready, message requeued. No further attempts until new connection");
-                            break;
-                        }
-                    }
-                    console.log("DEBUG: Multi-gateway-devices Queue length: ", queuedMessages.length)
+                    result.sendQueuedMessages();
                 }
+            }
+
+            result.sendQueuedMessages = function() {
+                setTimeout(function () {
+                    console.log("DEBUG: Multi-gateway-devices Queue length: ", queuedMessages.length)
+                    if (result.sendDeviceMsg(queuedMessages[0]).err === undefined) {
+                        queuedMessages.shift();
+                        if (queuedMessages.length > 0) {
+                            result.sendQueuedMessages();
+                        }
+                    } else {
+                        console.log("WARN: multi-gateway-devices: connector still not ready, message requeued. No further attempts until new connection");
+                    }
+                }, 300)
             }
 
             return result
