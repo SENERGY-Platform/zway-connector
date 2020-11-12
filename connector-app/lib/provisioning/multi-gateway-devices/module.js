@@ -97,13 +97,6 @@ Modules.registerModule("provisioning/multi-gateway-devices", function (module) {
                 connector._connection.send("device/" + controllerId + "/lw", "1");
             }
 
-            result.createDevice(null, "testjw", "testjw", "testjw")
-            result.createDevice(null, "testjw", "testjw2", "testjw")
-            result.createDevice(null, "testjw", "testjw", "testjw")
-            result.createDevice(null, "testjw", "testjw3", "testjw")
-            result.createDevice(null, "testjw", "testjw", "testjw")
-
-
             return result
         }
     };
