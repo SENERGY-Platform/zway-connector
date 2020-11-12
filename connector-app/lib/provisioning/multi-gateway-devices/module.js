@@ -18,12 +18,12 @@ Modules.registerModule("provisioning/multi-gateway-devices", function (module) {
 
             result.createDevice = function(token, localId, name, deviceTypeId){
                 result.setDevice(methods.set, localId, name, deviceTypeId)
-                return {device: knownDevices.localId}
+                return {device: knownDevices[localId]}
             };
 
             result.updateDevice = function(token, remoteId, localId, name, deviceTypeId){
                 result.setDevice(methods.set, localId, name, deviceTypeId)
-                return {device: knownDevices.localId}
+                return {device: knownDevices[localId]}
             };
 
             result.deleteDevice = function(token, localId){
