@@ -99,6 +99,7 @@
             options.will_flag = true;
             options.will_topic = "device/" +  controllerId  + "/lw";
             options.will_message = "0";
+            options.client_id = clientId + new Date().getTime() + parseInt(Math.random() * 1000);
         }
 
         result.mqtt = new MQTTClient(host, port, options);
