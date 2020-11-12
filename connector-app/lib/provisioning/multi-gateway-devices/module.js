@@ -2,7 +2,7 @@ Modules.registerModule("provisioning/multi-gateway-devices", function (module) {
     return {
         init: function () {
             var connector;
-            const methods = {
+            const method = {
                 set: "set",
                 delete: "delete"
             }
@@ -10,30 +10,26 @@ Modules.registerModule("provisioning/multi-gateway-devices", function (module) {
             const controllerId = global.ZWave && global.ZWave[ZWAY_MODULE_NAME] ? JSON.parse(global.ZWave[ZWAY_MODULE_NAME].Data("").body).controller.data.uuid.value : "unknown-zway";
 
             var queuedMessages = [];
-            var knownDevices = {};
 
             result.login = function(user, password) {
                 return {token: null}
             };
 
             result.createDevice = function(token, localId, name, deviceTypeId){
-                result.setDevice(methods.set, localId, name, deviceTypeId)
-                return {device: knownDevices[localId]}
+                result.setDevice(method.set, localId, name, deviceTypeId)
+                return {device: {name: name}}
             };
 
             result.updateDevice = function(token, remoteId, localId, name, deviceTypeId){
-                result.setDevice(methods.set, localId, name, deviceTypeId)
-                return {device: knownDevices[localId]}
+                result.setDevice(method.set, localId, name, deviceTypeId)
+                return {device: {name: name}}
             };
 
             result.deleteDevice = function(token, localId){
-                result.setDevice(methods.delete, localId, name, deviceTypeId)
+                result.setDevice(method.delete, localId, name, deviceTypeId)
             };
 
             result.getDevice = function(token, localId){
-                if (knownDevices[localId] !== undefined) {
-                    return {device: knownDevices[localId]};
-                }
                 return {unknown: true}
             };
 
@@ -51,11 +47,6 @@ Modules.registerModule("provisioning/multi-gateway-devices", function (module) {
             };
 
             result.setDevice = function(method, device_id, device_name, device_type) {
-                if (method === methods.set) {
-                    knownDevices[device_id] = {name: device_name}
-                } else if (method === methods.delete) {
-                    knownDevices[device_id] = undefined;
-                }
                 var msg = {
                     method: method,
                     device_id: device_id,
