@@ -77,7 +77,6 @@ Modules.registerModule("provisioning/multi-gateway-devices", function (module) {
 
             result.updateConnection = function(connection) {
                 connector = connection;
-                result.sendLWT();
                 console.log("DEBUG: Multi-gateway-devices Queue length: ", queuedMessages.length)
                 if (queuedMessages.length > 0) {
                     console.log("INFO: multi-gateway-devices: sending queued messages");
@@ -91,10 +90,6 @@ Modules.registerModule("provisioning/multi-gateway-devices", function (module) {
                     }
                     console.log("DEBUG: Multi-gateway-devices Queue length: ", queuedMessages.length)
                 }
-            }
-
-            result.sendLWT = function () {
-                connector._connection.send("device/" + controllerId + "/lw", "1");
             }
 
             return result
