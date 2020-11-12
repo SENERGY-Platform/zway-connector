@@ -32,7 +32,7 @@ Modules.registerModule("provisioning/multi-gateway-devices", function (module) {
 
             result.getDevice = function(token, localId){
                 if (knownDevices.localId !== undefined) {
-                    return knownDevices.localId;
+                    return {device: knownDevices.localId};
                 }
                 return {unknown: true}
             };
