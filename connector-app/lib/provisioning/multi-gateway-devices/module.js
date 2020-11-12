@@ -31,8 +31,8 @@ Modules.registerModule("provisioning/multi-gateway-devices", function (module) {
             };
 
             result.getDevice = function(token, localId){
-                if (knownDevices.localId !== undefined) {
-                    return {device: knownDevices.localId};
+                if (knownDevices[localId] !== undefined) {
+                    return {device: knownDevices[localId]};
                 }
                 return {unknown: true}
             };
@@ -52,9 +52,9 @@ Modules.registerModule("provisioning/multi-gateway-devices", function (module) {
 
             result.setDevice = function(method, device_id, device_name, device_type) {
                 if (method === methods.set) {
-                    knownDevices.device_id = {name: device_name}
+                    knownDevices[device_id] = {name: device_name}
                 } else if (method === methods.delete) {
-                    knownDevices.device_id = undefined;
+                    knownDevices[device_id] = undefined;
                 }
                 var msg = {
                     method: method,
