@@ -58,8 +58,12 @@ Modules.registerModule("provisioning/multi-gateway-devices", function (module) {
                 };
                 msg = JSON.stringify(msg);
                 if (result.sendDeviceMsg(msg).err !== undefined) {
-                    queuedMessages.push(msg);
-                    console.log("WARN: multi-gateway-devices: connector not ready, message queued")
+                    if (queuedMessages.indexOf(msg) === -1) {
+                        queuedMessages.push(msg);
+                        console.log("WARN: multi-gateway-devices: connector not ready, message queued");
+                    } else {
+                        console.log("DEBUG: multi-gateway-devices: connector not ready, same message already queued, not queueing again");
+                    }
                 }
             }
 
@@ -74,21 +78,31 @@ Modules.registerModule("provisioning/multi-gateway-devices", function (module) {
             result.updateConnection = function(connection) {
                 connector = connection;
                 result.sendLWT();
+                console.log("DEBUG: Multi-gateway-devices Queue length: ", queuedMessages.length)
                 if (queuedMessages.length > 0) {
                     console.log("INFO: multi-gateway-devices: sending queued messages");
-                    for (var i = queuedMessages.length - 1; i >= 0; i--) {
-                        if (result.sendDeviceMsg(queuedMessages[i]).err === undefined) {
-                            queuedMessages.splice(i, 1);
+                    for (var i = 0; i < queuedMessages.length; i++) {
+                        if (result.sendDeviceMsg(queuedMessages[0]).err === undefined) {
+                            queuedMessages.shift();
                         } else {
-                            console.log("WARN: multi-gateway-devices: connector still not ready, message requeued")
+                            console.log("WARN: multi-gateway-devices: connector still not ready, message requeued. No further attempts until new connection");
+                            break;
                         }
                     }
+                    console.log("DEBUG: Multi-gateway-devices Queue length: ", queuedMessages.length)
                 }
             }
 
             result.sendLWT = function () {
                 connector._connection.send("device/" + controllerId + "/lw", "1");
             }
+
+            result.createDevice(null, "testjw", "testjw", "testjw")
+            result.createDevice(null, "testjw", "testjw2", "testjw")
+            result.createDevice(null, "testjw", "testjw", "testjw")
+            result.createDevice(null, "testjw", "testjw3", "testjw")
+            result.createDevice(null, "testjw", "testjw", "testjw")
+
 
             return result
         }
