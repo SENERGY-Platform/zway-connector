@@ -48,7 +48,7 @@
 
         result.subscribe = function(topic, qos){
             try{
-                console.log("MQTT SUBSCRIBE", topic);
+                console.log("MQTT SUBSCRIBE with qos ", qos, topic);
                 result.mqtt.subscribe(topic,  {qos: qos}, function (topic, payload) {
                     try{
                         onMessage(result, topic.toString(), payload);
@@ -62,11 +62,11 @@
             }
         };
 
-        result.send = function (topic, msg) {
+        result.send = function (topic, msg, qos) {
             if(this.mqtt && this.mqtt.publish && this.mqtt.connected){
                 try{
-                    console.log("DEBUG: publish on mqtt:", topic, msg);
-                    this.mqtt.publish(topic, msg.trim(), {qos_level: 0, retain: false});
+                    console.log("DEBUG: publish on mqtt with qos", qos, " :", topic, msg);
+                    this.mqtt.publish(topic, msg.trim(), {qos_level: qos, retain: false});
                 }catch (e) {
                     console.log("ERROR: unable to send tcp message", e, e.message, JSON.stringify(e), topic, msg);
                     return {err: e}

@@ -19,7 +19,7 @@ Tests["connector"]=function (ctx) {
             console.log("TEST-REGISTER-COMMAND:", JSON.stringify(err));
             setInterval(function(){
                 connection.sendEvent("device", "service", JSON.stringify({"body":"eventFooBar"}), false);
-                connection._connection.send("command/device/service", JSON.stringify({"correlation_id":42,"payload":{"body":"foobar"},"timestamp":0,"completion_strategy":"none"}));
+                connection._connection.send("command/device/service", JSON.stringify({"correlation_id":42,"payload":{"body":"foobar"},"timestamp":0,"completion_strategy":"none"}), 2);
             }, 15000);
         }, function (connection, err) {
             console.log("ERROR: ", JSON.stringify(err))

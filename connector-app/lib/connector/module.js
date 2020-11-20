@@ -37,7 +37,7 @@ Modules.registerModule("connector", function (module) {
                         result._commandHandlers[deviceLocalId] = {};
                     }
                     result._commandHandlers[deviceLocalId][serviceLocalId] = handler;
-                    var err = result._connection.subscribe("command/"+deviceLocalId+"/"+serviceLocalId);
+                    var err = result._connection.subscribe("command/"+deviceLocalId+"/"+serviceLocalId, 2);
                     if(err.err){
                         console.log("ERROR: unable to subscribe to command", e, e.message, JSON.stringify(e), deviceLocalId, serviceLocalId);
                         return {err: err.err}
@@ -61,7 +61,7 @@ Modules.registerModule("connector", function (module) {
                         payload = {correlation_id: request.correlation_id, payload:{data: JSON.stringify(response)}, trace: trace};
 
                     }
-                    var err = result._connection.send("response/"+deviceLocalId+"/"+serviceLocalId, JSON.stringify(payload));
+                    var err = result._connection.send("response/"+deviceLocalId+"/"+serviceLocalId, JSON.stringify(payload), 2);
                     if(err.err){
                         console.log("ERROR: while sending response", err.err, err.err.message, JSON.stringify(err.err), deviceLocalId, serviceLocalId);
                     }
@@ -80,7 +80,7 @@ Modules.registerModule("connector", function (module) {
                         payload = {data: JSON.stringify(message)}
                     }
                     console.log("send event: ", deviceLocalId, serviceLocalId, JSON.stringify(payload));
-                    var err = result._connection.send("event/"+deviceLocalId+"/"+serviceLocalId, JSON.stringify(payload));
+                    var err = result._connection.send("event/"+deviceLocalId+"/"+serviceLocalId, JSON.stringify(payload), 0);
                     if(err.err){
                         console.log("ERROR: while sending event", err.err, err.err.message, JSON.stringify(err.err), deviceLocalId, serviceLocalId);
                         return {err: err.err}

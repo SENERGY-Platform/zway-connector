@@ -69,7 +69,7 @@ Modules.registerModule("provisioning/multi-gateway-devices", function (module) {
 
             result.sendDeviceMsg = function(msg) {
                 if (connector && connector._connection) {
-                    return connector._connection.send("device/" + controllerId, msg);
+                    return connector._connection.send("device/" + controllerId, msg, 1);
                 } else {
                     return {err: "connector not ready"};
                 }
