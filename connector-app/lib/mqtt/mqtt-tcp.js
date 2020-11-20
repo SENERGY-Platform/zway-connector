@@ -589,7 +589,7 @@ MQTTClient.messageHandlers[MQTTClient.messageTypes.PUBREC] = function (self, fix
     else {
         var pubrel = chunk.slice(0, 4);
         pubrel[0] = 0x62;
-        self._connection.write(pubrel);
+        self._connection.send(pubrel);
     }
 };
 
