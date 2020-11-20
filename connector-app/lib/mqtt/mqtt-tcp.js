@@ -166,7 +166,6 @@ MQTTClient.prototype.connect = function () {
     // Setup socket
     this._connection = new sockets.tcp();
     this._connection.onrecv = function (chunk) {
-        console.log('DEBUG MQTT Client: new data at socket');
         self._onData(new Buffer(new Uint8Array(chunk)));
     };
 
@@ -321,6 +320,7 @@ MQTTClient.prototype._onData = function (chunk) {
             if (this.options.infoLogEnabled === true)
                 this._onLog("IN: " + fixed_header.message_type + ": " + chunk.toString('hex'));
 
+            console.log('DEBUG MQTT Client: GOT', fixed_header.message_type);
             var handler = MQTTClient.messageHandlers[fixed_header.message_type];
             if (typeof handler != 'function')
                 this._onError(Error('Message type error: ' + fixed_header.message_type));
@@ -589,7 +589,8 @@ MQTTClient.messageHandlers[MQTTClient.messageTypes.PUBREC] = function (self, fix
     else {
         var pubrel = chunk.slice(0, 4);
         pubrel[0] = 0x62;
-        self._connection.send(pubrel);
+        console.log("SENDING PUBREL")
+        self._send(pubrel);
     }
 };
 
