@@ -2,7 +2,7 @@ Modules.include("mqtt");
 
 Modules.registerModule("connector", function (module) {
     return {
-        connect: function (url, hubId, user, password, then, error, multiGatewayMode) {
+        connect: function (url, hubId, user, password, then, error, multiGatewayMode, dmRefreshCallback) {
             var result = {
                 _connection: null,
                 _commandHandlers: {},
@@ -143,6 +143,9 @@ Modules.registerModule("connector", function (module) {
                     console.log("CONNECTOR ERROR", err);
                     error(result);
                 }, function(connection, topic, payload){
+                    if (topic === "device-manager/refresh") {
+                        dmRefreshCallback()
+                    }
                     result._handleCommand(topic, payload);
                 },
                 multiGatewayMode

@@ -77,6 +77,7 @@ Modules.registerModule("provisioning/multi-gateway-devices", function (module) {
 
             result.updateConnection = function(connection) {
                 connector = connection;
+                connection._connection.subscribe("device-manager/refresh", 2)
                 console.log("DEBUG: Multi-gateway-devices Queue length: ", queuedMessages.length)
                 if (queuedMessages.length > 0) {
                     console.log("INFO: multi-gateway-devices: sending queued messages");

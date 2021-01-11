@@ -93,7 +93,11 @@ SenergyConnector.prototype.updateConnection = function (config) {
             that.connectionError = true;
             that.removeEventHandler();
             connection.disconnect();
-        }, config.multi_gateway);
+        }, config.multi_gateway,
+        function () {
+            console.log("DM REFRESH REQUESTED!")
+            that.provisioning.updateDevices({token: null}, that.descriptions); // only happens in mgw mode
+        });
     }, 5000)
 
 };
