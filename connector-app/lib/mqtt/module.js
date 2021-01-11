@@ -97,7 +97,7 @@
                  controllerId = "unknown-zway";
              }
             options.will_flag = true;
-            options.will_topic = "device/" +  controllerId  + "/lw";
+            options.will_topic = "device-manager/device/" +  controllerId  + "/lw";
             options.will_message = "0";
             options.client_id = clientId + new Date().getTime() + parseInt(Math.random() * 1000);
             options.ping_timeout = 300;
